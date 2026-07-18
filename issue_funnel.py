@@ -1513,7 +1513,7 @@ def run_funnel():
     # Phase 4: Rank by payoff (quantitative remediation ROI)
     all_issues.sort(key=lambda x: x["payoff"], reverse=True)
 
-    # Phase 4: Display — only show meaningful issues
+    # Phase 4: Display — sub-issues with plain language, no jargon
     print()
     print("=" * 100)
     print(f"  FULL-SPECTRUM ISSUE FUNNEL")
@@ -1521,19 +1521,14 @@ def run_funnel():
     print("=" * 100)
 
     displayed = 0
-    for i, issue in enumerate(all_issues):
+    for issue in all_issues:
         domain = issue["domain"]
         tier = issue["tier"]
         rec = issue["recommendation"]
-        conf = issue["confidence"]
-        score = issue["score"]
         payoff = issue["payoff"]
-        goal = issue["goal"]
+        subs = issue.get("sub_patterns", [])
         richness = issue["signal_richness"]["total_signal_facts"]
-        subs = issue["sub_patterns"]
-        eng_dep = issue["engine_dep"]
 
-        # Payoff-based priority
         if payoff > 8:
             prio = "P1"
         elif payoff > 4:
@@ -1543,140 +1538,180 @@ def run_funnel():
         else:
             prio = "P4"
 
-        # Skip unclassified with trivial signal
         if tier == "unclassified" and richness < 100 and prio == "P4":
             continue
 
         displayed += 1
 
+        # ── Plain-language intent description ──
+        intent_desc_parts = []
+        if intent.is_divested(domain):
+            intent_desc_parts.append("you decided to move away from this")
+        if intent.is_deprecated(domain):
+            target = intent.is_deprecated(domain) or "a replacement"
+            intent_desc_parts.append(f"migrating to {target}")
+        if intent.is_invested(domain):
+            intent_desc_parts.append("actively invested in this area")
+        if intent.is_deprioritized(domain):
+            intent_desc_parts.append("errors are worked around, never fixed")
+        if intent.is_external_fix(domain):
+            intent_desc_parts.append("fixes happen outside Factory")
+        trend_val = issue.get("trend", "")
+        if trend_val == "rising":
+            intent_desc_parts.append("errors are increasing")
+        elif trend_val == "falling":
+            intent_desc_parts.append("errors are declining")
+
+        fc = issue.get("fix_cost", float('inf'))
+        fix_cost_str = ""
+        if fc != float('inf') and fc > 0:
+            if fc < 5:
+                fix_cost_str = f"cheap to fix ({fc:.0f}:1)"
+            elif fc < 15:
+                fix_cost_str = f"moderate effort to fix ({fc:.0f}:1)"
+            else:
+                fix_cost_str = f"expensive to fix ({fc:.0f}:1 — many sessions per resolution)"
+        elif not intent.is_external_fix(domain) and not intent.is_divested(domain):
+            fix_cost_str = "never successfully resolved"
+
+        # ── Issue header ──
+        # Derive a short title from the top sub-pattern
+        title = domain
+        if subs:
+            title = _short_title(domain, subs[0][0])
+
         print()
         print("-" * 100)
-        flags = []
-        is_dep = intent.is_deprecated(domain) is not None
-        if not is_dep and subs:
-            all_text = " ".join(pat for pat, _ in subs)
-            al = all_text.lower()
-            for deprecated, replacement in intent.deprecated_services.items():
-                deprecated_norm = intent._normalize_service(deprecated)
-                if deprecated_norm in al or deprecated in al:
-                    is_dep = True
-                    break
-                if deprecated_norm == "netlify" and re.search(r'\bnf\b', al):
-                    is_dep = True
-                    break
-        dep_target = intent.is_deprecated(domain) if intent.is_deprecated(domain) else None
-        if not dep_target and is_dep:
-            dep_target = "resend"  # default for NF
-        if eng_dep:
-            flags.append("E-DEP")
-        if is_dep:
-            flags.append(f"MIGRATE->{dep_target or '?'}")
-        if issue.get("intent_divested"):
-            flags.append("DIVEST")
-        if issue.get("intent_external_fix"):
-            flags.append("EXT-FIX")
-        if issue.get("intent_deprioritized"):
-            flags.append("DEPRIO")
-        if issue.get("intent_invested"):
-            flags.append("INVEST")
-        if issue.get("intent_held"):
-            flags.append("HELD")
-        trend_val = issue.get("trend", "")
-        if trend_val:
-            flags.append(trend_val.upper())
-        flag_str = f" [{', '.join(flags)}]" if flags else ""
-
-        # Payoff visualization: bar of █ chars
         payoff_bar = "█" * min(int(payoff), 15)
+        print(f"  {prio}  payoff={payoff:4.1f} {payoff_bar}  {rec:<12}  {title[:80]}")
+        print(f"        domain: {domain}  |  tier: {tier}  |  {richness} facts")
+        if intent_desc_parts:
+            print(f"        {'. '.join(intent_desc_parts)}.")
+        if fix_cost_str:
+            print(f"        {fix_cost_str}.")
 
-        print(f"  {prio}  payoff={payoff:4.1f} {payoff_bar:<15}  {rec:<14} {domain:<22}  tier={tier:<12}  conf={conf:<6}  score={score:.0%}{flag_str}")
-
-        # Derived goal: specific outcome, not topic bucket
+        # ── Goal ──
         dg = issue.get("derived_goal", "")
+        goals = GoalInference.tag_issue(domain, tier, rec)
         if dg:
-            print(f"  Goal: {dg[:140]}")
-        elif issue.get("goal"):
-            goal_label = GoalInference.GOALS.get(issue["goal"], {}).get("label", issue["goal"])
-            print(f"  Goal: {goal_label}")
+            print(f"\n    Goal: {dg[:140]}")
+        elif goals:
+            goal_labels = [f"{GoalInference.GOALS.get(g[0], {}).get('label', g[0])} ({g[1]:.2f})" for g in goals[:2]]
+            print(f"\n    Goals: {', '.join(goal_labels)}")
 
-        # Fix cost: how many errors per resolution event
-        fc = issue.get("fix_cost", float('inf'))
-        if fc != float('inf') and fc > 0:
-            label = "cheap" if fc < 5 else ("moderate" if fc < 15 else "expensive")
-            print(f"  Fix cost: {fc:.0f}:1 errors/resolution ({label})")
-        elif not issue.get("intent_external_fix") and not issue.get("intent_divested"):
-            print(f"  Fix cost: never resolved")
-
-        # Sub-patterns with causal chain
+        # ── Sub-issues ──
         if subs:
-            print(f"  Causal chains:")
+            print(f"\n    Why it matters:")
             for pat, cnt in subs[:3]:
-                print(f"    [{cnt}x] {pat[:100]}")
+                print(f"      [{cnt}x] {pat[:120]}")
 
-        # GitHub context
+        # ── Pros/Cons ──
+        if rec == "FIX":
+            _show_pros_cons_fix(domain, tier, goals, intent)
+        elif rec == "REMOVE":
+            _show_pros_cons_remove(domain, tier, goals, intent)
+        elif rec == "MIGRATE" or intent.is_deprecated(domain):
+            _show_pros_cons_migrate(domain, intent.is_deprecated(domain) or "replacement", goals)
+        elif rec == "INVESTIGATE":
+            _show_pros_cons_investigate(domain, tier, goals)
+
+        # GitHub context (collapsed)
         gh = issue.get("github", {})
-        if gh.get("duplicates"):
-            dup_titles = [d["title"][:60] for d in gh["duplicates"][:2]]
-            print(f"  GitHub dup: {', '.join(dup_titles)}")
         ci_fails = gh.get("ci_failures", [])
-        relevant_ci = [cf for cf in ci_fails if domain.lower().replace('-','') in cf['repo'].lower().replace('-','')]
-        if relevant_ci:
-            for cf in relevant_ci[:1]:
-                print(f"  GitHub CI: {cf['repo']} — {cf['name'][:50]} failed ({cf['date']})")
-
-        # Decision
-        if issue["rationale"]:
-            r = issue["rationale"][:140]
-            print(f"  Decision: {r}")
+        if ci_fails:
+            relevant_ci = [cf for cf in ci_fails if domain.lower().replace('-','') in cf['repo'].lower().replace('-','')]
+            if relevant_ci:
+                print(f"\n    GitHub CI failing: {relevant_ci[0]['repo']} — {relevant_ci[0]['name'][:60]}")
 
     # Summary
     print()
     print("=" * 100)
-    print(f"  SUMMARY (displayed {displayed}/{len(all_issues)})")
-    print("=" * 100)
+    print(f"  SUMMARY ({displayed}/{len(all_issues)} displayed)")
 
     fixes = [i for i in all_issues if i["recommendation"] == "FIX"]
     removes = [i for i in all_issues if i["recommendation"] == "REMOVE"]
     consolidates = [i for i in all_issues if i["recommendation"] == "CONSOLIDATE"]
     investigates = [i for i in all_issues if i["recommendation"] == "INVESTIGATE"]
+    print(f"  Actions: {len(fixes)} fix, {len(investigates)} investigate, {len(removes)} remove, {len(consolidates)} consolidate")
 
-    print(f"  FIX:          {len(fixes)}")
-    print(f"  REMOVE:       {len(removes)}")
-    print(f"  CONSOLIDATE:  {len(consolidates)}")
-    print(f"  INVESTIGATE:  {len(investigates)}")
-    print(f"  Engine deps:  {len([i for i in all_issues if i['engine_dep']])}")
-
-    # Payoff distribution
     urgent = [i for i in all_issues if i["payoff"] > 8]
     important = [i for i in all_issues if 4 < i["payoff"] <= 8]
     nice = [i for i in all_issues if i["payoff"] <= 4]
-    print(f"\n  Remediation payoff:")
-    print(f"    Urgent (>8):    {len(urgent)}")
-    print(f"    Important (4-8):{len(important)}")
-    print(f"    Nice-to-have:   {len(nice)}")
+    print(f"  Urgency: {len(urgent)} urgent (>8), {len(important)} important (4-8), {len(nice)} nice-to-have")
 
-    # Goal distribution
     from collections import Counter
     goal_counts = Counter(i["goal"] for i in all_issues)
-    print(f"\n  Goal alignment:")
-    for goal, cnt in goal_counts.most_common():
-        label = GoalInference.GOALS.get(goal, {}).get("label", goal)
-        print(f"    {label}: {cnt}")
+    if goal_counts:
+        print(f"  Macro goals:  ", end="")
+        print(", ".join(f"{GoalInference.GOALS.get(g, {}).get('label', g)}({c})" for g, c in goal_counts.most_common(4)))
 
-    # Metadata source summary
-    print(f"\n  GitHub repos scanned:  {GitHubScanner.repo_count()}")
-    print(f"  GitHub CI failures:    {len(GitHubScanner.global_ci_summary())}")
+    print(f"\n  Sources:  {GitHubScanner.repo_count()} GitHub repos, {len(GitHubScanner.global_ci_summary())} CI failures")
     if otel_summary.get("available"):
-        print(f"  OTEL container health:")
-        print(f"    Containers monitored: {otel_summary['container_count']}")
-        print(f"    Container metrics:    {otel_summary['container_metrics']}")
-        print(f"    Total metrics:        {otel_summary['total_metrics']}")
-        if otel_summary.get("top_cpu"):
-            print(f"    Top CPU (cores):")
-            for name, cpu in otel_summary["top_cpu"]:
-                print(f"      {name}: {cpu:.2f} cores")
+        print(f"            {otel_summary['container_count']} containers, {otel_summary['total_metrics']} OTEL metrics")
     else:
-        print(f"\n  OTEL: unreachable (Grafana not available on 192.168.1.120:3000)")
+        print(f"            OTEL: unreachable")
+
+    print()
+    print("=" * 100)
+
+
+def _short_title(domain: str, pattern: str) -> str:
+    """Derive a short issue title from the domain + best sub-pattern."""
+    p = re.sub(r'^\d+x\s*', '', pattern.strip())
+    p = re.sub(r'^error:\s*', '', p)
+    p = re.sub(r'^\[BLOCKER from \w+\]\s*', '', p)
+    # Take first meaningful sentence fragment
+    if '->' in p:
+        parts = p.split('->', 1)
+        p = parts[-1].strip()
+    p = p[:100].strip()
+    if p:
+        return f"{domain} — {p}"
+    return domain
+
+
+def _show_pros_cons_fix(domain: str, tier: str, goals: list, intent):
+    """Pros/cons of FIX action."""
+    print(f"\n    Action: FIX the root cause")
+    for g in goals[:2]:
+        label = GoalInference.GOALS.get(g[0], {}).get("label", g[0])
+        print(f"    Pro: supports {label} (criticality {g[1]:.2f})")
+    if tier == "core":
+        print(f"    Pro: {domain} is revenue-critical — every hour of downtime costs throughput")
+    elif tier == "infra":
+        print(f"    Pro: {domain} is operational infrastructure — if it fails, visibility degrades")
+    if intent.is_invested(domain):
+        print(f"    Pro: you are actively investing in {domain} — this fix compounds with ongoing work")
+    print(f"    Con of inaction: problem will recur. "
+          f"{'You are already working around it.' if intent.is_deprioritized(domain) else 'Error volume will grow.'}")
+
+
+def _show_pros_cons_remove(domain: str, tier: str, goals: list, intent):
+    """Pros/cons of REMOVE action."""
+    print(f"\n    Action: REMOVE this surface")
+    print(f"    Pro: eliminates {domain} as an ongoing maintenance burden")
+    if tier == "experimental":
+        print(f"    Pro: {domain} is experimental — it was tested, did not stick. Simpler to delete than maintain.")
+    elif intent.is_divested(domain):
+        print(f"    Pro: you already decided to move away from {domain} — complete the divestment")
+    print(f"    Con of inaction: {domain} continues to produce noise and consume attention")
+
+
+def _show_pros_cons_migrate(domain: str, target: str, goals: list):
+    """Pros/cons of MIGRATE action."""
+    print(f"\n    Action: COMPLETE THE MIGRATION to {target}")
+    print(f"    Pro: removes {domain} as a dependency — {target} is already provisioned")
+    print(f"    Pro: migration unblocks revenue-continuity (no more token expiry outages)")
+    print(f"    Con of inaction: {domain} failures will continue to cascade into dependent workflows")
+
+
+def _show_pros_cons_investigate(domain: str, tier: str, goals: list):
+    """Pros/cons of INVESTIGATE action."""
+    print(f"\n    Action: INVESTIGATE before deciding")
+    print(f"    Pro: avoids acting on incomplete signal — gather more data first")
+    if tier == "core":
+        print(f"    Pro: {domain} is core — worth the investigation before committing to a fix direction")
+    print(f"    Con of inaction: unresolved issue may escalate or hide a deeper problem")
 
 
 if __name__ == "__main__":
