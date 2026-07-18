@@ -1098,46 +1098,55 @@ class GoalInference:
 # ═══════════════════════════════════════════════════════════════════
 
 class PayoffScorer:
-    """Payoff = (Impact × Confidence) / Cost. Higher = more urgent to fix.
+    """Compute quantitative remediation payoff: (Impact × Confidence) / Cost.
 
-    Eleven inputs, down from sixteen.
-    Dropped: signal_richness, session_count, error_count, sub_pattern_count.
-    Kept: tier, recommendation, confidence, all intent flags, trend, fix_cost,
-          engine_dep, goal_criticality.
+    Higher = more urgent to fix. All components are numeric, not categorical.
     """
 
     @staticmethod
-    def compute(tier: str, recommendation: str, confidence_score: float,
+    def compute(domain: str, tier: str, recommendation: str,
+                confidence_score: float, signal_richness: int,
+                session_count: int, error_count: int, is_engine_dep: bool,
+                sub_pattern_count: int,
                 is_deprecated: bool = False,
                 is_divested: bool = False,
                 is_deprioritized: bool = False,
                 is_external_fix: bool = False,
                 is_invested: bool = False,
                 trend: str = "",
-                fix_cost: float = float('inf'),
-                engine_dep: bool = False,
-                goal_criticality: float = 0.3) -> float:
-        """Return a payoff score."""
+                fix_cost: float = float('inf')) -> float:
+        """Return a payoff score.
 
-        # --- IMPACT ---
-        impact = {"core": 5.0, "infra": 3.0, "experimental": 1.0,
-                  "unclassified": 1.5, "behavior": 1.0}.get(tier, 1.0)
+        fix_cost = errors per resolution event. inf = never resolved.
+        High fix cost → expensive to fix → lowers payoff.
+        """
+
+        # --- IMPACT (0-10) ---
+        tier_impact = {"core": 5.0, "infra": 3.0, "experimental": 1.0, "unclassified": 1.5}.get(tier, 1.0)
 
         if is_divested:
-            impact = 0.5
+            tier_impact = 0.5
         elif is_deprecated:
-            impact = 2.0
+            tier_impact = 2.0
         elif is_deprioritized:
-            impact = 1.0
+            tier_impact = 1.0
         elif is_invested:
-            impact = min(6.0, impact * 1.3)
+            tier_impact = min(6.0, tier_impact * 1.3)
 
         if trend == "rising":
-            impact *= 1.2
+            tier_impact *= 1.2
         elif trend == "falling":
-            impact *= 0.7
+            tier_impact *= 0.7
 
-        impact += goal_criticality * 2.0
+        volume_impact = min(3.0, (signal_richness ** 0.4) * 0.3)
+        session_impact = min(2.0, session_count * 0.05)
+        error_impact = min(1.5, error_count * 0.3)
+        goals = GoalInference.tag_issue(domain, tier, recommendation)
+        goal_impact = max((g[1] for g in goals), default=0.3) * 2.0
+        engine_impact = 1.0 if is_engine_dep else 0.0
+
+        impact = min(10.0, tier_impact + volume_impact + session_impact +
+                     error_impact + goal_impact + engine_impact)
 
         confidence = confidence_score
 
@@ -1152,13 +1161,20 @@ class PayoffScorer:
             cost = 0.2
         elif recommendation == "DISMISS":
             cost = 0.1
-        else:
+        elif error_count > 3 and sub_pattern_count > 1:
+            cost = 0.4
+        elif error_count > 0:
             cost = 0.5
+        elif tier == "experimental":
+            cost = 0.6
+        else:
+            cost = 0.7
 
+        # Fix cost adjustment: expensive domains have higher cost
         if fix_cost != float('inf') and fix_cost > 10:
-            cost *= min(2.0, fix_cost / 10)
+            cost *= min(2.0, fix_cost / 10)  # 20:1 fix ratio = 2x cost
 
-        if engine_dep:
+        if is_engine_dep:
             cost *= 0.7
 
         payoff = (impact * confidence) / max(cost, 0.1)
@@ -1351,12 +1367,13 @@ def run_funnel():
                 if deprecated_norm == "netlify" and re.search(r'\bnf\b', al):
                     is_dep = True
                     break
-        goals = GoalInference.tag_issue(domain, tier, effective_rec)
-        goal_crit = max((g[1] for g in goals), default=0.3)
-
         payoff = PayoffScorer.compute(
-            tier=tier, recommendation=effective_rec,
+            domain=domain, tier=tier, recommendation=effective_rec,
             confidence_score=result.get("confidence_score", 0.5),
+            signal_richness=richness["total_signal_facts"],
+            session_count=session_count, error_count=error_count,
+            is_engine_dep=_is_engine_dependency(domain),
+            sub_pattern_count=len(sub_patterns),
             is_deprecated=is_dep,
             is_divested=intent.is_divested(domain),
             is_deprioritized=intent.is_deprioritized(domain),
@@ -1364,8 +1381,6 @@ def run_funnel():
             is_invested=intent.is_invested(domain),
             trend=intent.trend(domain),
             fix_cost=intent.fix_cost(domain),
-            engine_dep=_is_engine_dependency(domain),
-            goal_criticality=goal_crit,
         )
 
         # Production goal alignment — migration-aware
@@ -1445,8 +1460,11 @@ def run_funnel():
                     "confidence": result["confidence"],
                     "score": result.get("confidence_score", 0),
                     "payoff": PayoffScorer.compute(
-                        tier="behavior", recommendation=rec,
+                        domain=probe, tier="behavior", recommendation=rec,
                         confidence_score=result.get("confidence_score", 0.5),
+                        signal_richness=1, session_count=0, error_count=1,
+                        is_engine_dep=False, sub_pattern_count=0,
+                        is_deprecated=False,
                     ),
                     "goal": "behavior-compliance",
                     "goal_criticality": 0.6,
