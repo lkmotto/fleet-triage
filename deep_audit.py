@@ -1246,8 +1246,9 @@ def _decide_action(signal_class: str, tier: str, level: str, score: float,
         "PRI-3 HUMAN — Operator judgment required",
         (f"The evidence does not clearly point to a single action ({tier}-tier, "
          f"{level} confidence, live-state: {ls_status}). Review the audit trail and "
-         f"pro/con analysis above. Per the Minimalist Operations Principle, when in "
-         f"doubt, bias toward subtraction — but the decision requires operator judgment.")
+         f"pro/con analysis above. Default to KEEP unless there is clear evidence of "
+         f"abandonment — removal is irreversible, and thin signal is not proof of no value. "
+         f"This decision requires operator judgment.")
     )
 
 

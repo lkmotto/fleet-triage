@@ -1195,12 +1195,20 @@ class PayoffScorer:
         volume_impact = min(3.0, (signal_richness ** 0.4) * 0.3)
         session_impact = min(2.0, session_count * 0.05)
         error_impact = min(1.5, error_count * 0.3)
+
+        # VALUE impact: what value does this surface produce, independent of errors?
+        bc = _business_case(domain, tier, "")
+        value_map = {"direct": 3.0, "indirect": 2.0, "operational": 1.5, "unknown": 0.5, "none": 0.0}
+        value_impact = value_map.get(bc.get("revenue", "unknown"), 0.5)
+        dep_count = len(bc.get("depends_on", []))
+        value_impact += min(1.0, dep_count * 0.3)
+
         goals = GoalInference.tag_issue(domain, tier, recommendation)
         goal_impact = max((g[1] for g in goals), default=0.3) * 2.0
         engine_impact = 1.0 if is_engine_dep else 0.0
 
         impact = min(10.0, tier_impact + volume_impact + session_impact +
-                     error_impact + goal_impact + engine_impact)
+                     error_impact + value_impact + goal_impact + engine_impact)
 
         confidence = confidence_score
 
@@ -2296,7 +2304,7 @@ def _build_issue_body(issue: dict) -> str:
     elif rec == "REMOVE":
         action_desc = f"verify {domain} is safe to remove, recommend removal or archival"
     elif rec == "INVESTIGATE":
-        action_desc = f"research {domain} surface, determine if it should be kept or removed"
+        action_desc = f"assess {domain} surface — determine what value it provides and how it fits into the capability map"
     elif rec == "MIGRATE":
         target = issue.get("dep_target", "replacement")
         action_desc = f"migrate {domain} to {target}"
@@ -2324,7 +2332,8 @@ def _build_issue_body(issue: dict) -> str:
         lines.append(f"2. Search memory.db for {domain} usage patterns")
         lines.append(f"3. Determine last active session and what {domain} was used for")
         lines.append(f"4. Check AGENTS.md capability surface map for {domain}")
-        lines.append("5. Recommend: REMOVE (dormant/experimental), ARCHIVE (cold, has value), or KEEP (active)")
+        lines.append(f"5. Check business case: what capability does {domain} enable? What revenue does it support?")
+        lines.append("6. Recommend: KEEP (active or potential value), ARCHIVE (cold, has value, revisit later), or REMOVE (no value, no dependencies)")
     elif hclass == "fix":
         lines.append(f"2. Diagnose the root cause of {domain} failures")
         lines.append(f"3. Apply a bounded, reversible fix (prefer config change, probe tweak, or one-line code edit)")
