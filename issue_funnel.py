@@ -15,7 +15,7 @@ Architecture:
 import sqlite3, json, sys, re, os, subprocess
 from pathlib import Path
 from collections import Counter, defaultdict
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 
 FACTORY = Path.home() / ".factory"
 DB_PATH = FACTORY / "memory.db"
@@ -40,7 +40,7 @@ class SignalCollector:
         "permission", "timeout", "path", "credential",
         "sdr-agent", "appraisal", "bidding", "order-monitor",
         "credential-grabber", "sfrep", "openhands", "sharepoint",
-        "workfile", "email-loe",
+        "workfile", "email-loe", "fleet-triage",
     }
 
     # Noise domains: match on too many generic references, not real errors
@@ -1682,7 +1682,53 @@ def run_funnel():
 
     print()
     print("=" * 100)
+
+    # ── Self-report: the system tracks itself ──
+    _emit_self_report(all_issues, themes, collector, intent)
+
     return all_issues
+
+
+def _emit_self_report(all_issues: list, themes: list, collector, intent):
+    """Write a fact to memory.db so fleet-triage can see itself in the next run."""
+    n_issues = len(all_issues)
+    n_themes = len(themes)
+    n_surfaces = len(collector.domains)
+    now = datetime.now(timezone.utc).isoformat()
+
+    # Build a compact self-report
+    recs = Counter(i["recommendation"] for i in all_issues)
+    top_payoff = sorted(all_issues, key=lambda x: x["payoff"], reverse=True)[:3]
+    top_domains = [f"{i['domain']}({i['payoff']:.0f})" for i in top_payoff]
+
+    content = (
+        f"fleet-triage ran {now[:19]}: {n_issues} issues across {n_surfaces} surfaces, "
+        f"{n_themes} strategic themes. "
+        f"Actions: {dict(recs)}. "
+        f"Top domains: {', '.join(top_domains)}. "
+        f"{sum(collector.fact_counts.values())} facts ingested, "
+        f"{len(intent.invested)} surfaces with active investment."
+    )
+
+    import json
+    metadata = json.dumps({
+        "n_issues": n_issues,
+        "n_themes": n_themes,
+        "n_surfaces": n_surfaces,
+        "recommendations": dict(recs),
+        "timestamp": now,
+    })
+
+    try:
+        db = sqlite3.connect(str(DB_PATH))
+        db.execute(
+            "INSERT INTO facts (category, content, status, created_at, metadata) VALUES (?, ?, 'live', ?, ?)",
+            ("topic_fleet_triage", content, now, metadata),
+        )
+        db.commit()
+        db.close()
+    except Exception as e:
+        print(f"\n  (fleet-triage self-report write failed: {e})")
 
 
 def _clean_pattern(pat: str) -> str:
@@ -1958,7 +2004,15 @@ def _probe_surfaces(intent, collector):
             opinions.append(f"cheap to fix ({fc:.0f}:1) — low-hanging fruit")
 
         # Recommendation
-        if divested:
+        if surface == "fleet-triage":
+            # Self-awareness: this is the system asking about itself.
+            # It generates its own facts — it cannot be "dormant" by definition.
+            # The fact count is low because it only writes self-reports, not errors.
+            if facts < 5:
+                opinions.append("this is the system itself — fact count is self-reports, not errors")
+            rec = "self-aware — 0 facts is a self-reporting gap, not a removal signal"
+            direction = "↻ self"
+        elif divested:
             rec = "complete the divestment"
             direction = "⬇ shrink"
         elif deprecated:
