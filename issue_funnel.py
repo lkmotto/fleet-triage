@@ -102,16 +102,22 @@ class SignalCollector:
 # ═══════════════════════════════════════════════════════════════════
 
 class SubPatternExtractor:
-    """Extract distinct error/issue types within a domain from source facts.
+    """Extract distinct issue types within a domain from source facts.
 
     Priority order:
-      1. 'error' facts — specific error messages (most reliable)
+      0. 'topic_*', 'narrative', 'file_narrative' — what work was DONE (positive signal)
+      1. 'error' facts — specific error messages (most reliable for issues)
       2. 'recurring_error' samples — aggregated error types across sessions
       3. 'blocker_narrative' — full causal chain: intent → error → impact → outcome
 
-    For blocker narratives, we extract the COMPLETE causal chain, not just
-    the error sentence. This produces issues with: what was tried, what broke,
-    what was impacted, what was attempted to fix it, and whether it worked.
+    The pre-simplification extractor only mined errors/blockers. This caused
+    email-loe (90 facts, all topic_email_loe) and sharepoint (60 facts, mixed but
+    zero errors) to produce zero sub-patterns. The system literally could not see
+    what these surfaces were doing because it only looked for failures.
+
+    Priority 0 fixes this: non-error facts tell us WHAT work happened, not just
+    what broke. For surfaces that operate without generating errors, this is the
+    ONLY signal channel.
     """
 
     ERROR_INDICATORS = [
@@ -136,7 +142,55 @@ class SubPatternExtractor:
     def extract(domain: str, domain_signal: dict) -> list[tuple[str, int]]:
         patterns = Counter()
 
-        # Priority 1: 'error' facts — wrap in causal chain format
+        # Priority 0: Positive signal — what work was DONE, not just what broke.
+        # topic_*, narrative, file_narrative, session_summary — these tell us what
+        # the surface actually does, which is essential for surfaces that operate
+        # without generating errors (email-loe, sharepoint, credential-grabber).
+        work_categories = {
+            "file_narrative": "work:",
+            "narrative": "goal:",
+            "session_summary": "session:",
+        }
+        for cat, prefix in work_categories.items():
+            for fact in domain_signal.get(cat, []):
+                content = fact["content"]
+                # file_narrative: extract file path
+                if cat == "file_narrative":
+                    m = re.search(r'([A-Za-z]:\\[^\s,]{10,120})', content)
+                    if m:
+                        path = m.group(1)
+                        fname = path.split("\\")[-1]
+                        if len(fname) > 4:
+                            patterns[f"file created/modified: {fname}"] += 1
+                        continue
+                # narrative: extract goal
+                if cat == "narrative":
+                    m = re.search(r'Goal:\s*(.{15,150})', content)
+                    if m and not SubPatternExtractor._is_narrative_noise(m.group(1)):
+                        patterns[f"Goal: {m.group(1).strip()[:120]}"] += 1
+                        continue
+                # session_summary: extract outcome
+                if cat == "session_summary":
+                    m = re.search(r'Outcome:\s*(.{15,150})', content)
+                    if m:
+                        outcome = m.group(1).strip()[:120]
+                        if len(outcome) > 10:
+                            patterns[f"Outcome: {outcome}"] += 1
+                        continue
+
+        # topic_* facts: domain-specific work indicators
+        domain_key = domain.lower().replace("-", "").replace("_", "")
+        for cat, facts_list in domain_signal.items():
+            if cat.startswith("topic_") or f"topic_{domain_key}" in cat:
+                for fact in facts_list:
+                    content = fact["content"]
+                    # Extract what was done — skip system headers
+                    cleaned = re.sub(r'^(Here.{0,20}(is|are|was|were)\s.*?:\s*)', '', content, flags=re.IGNORECASE)
+                    cleaned = re.sub(r'^(Status|Sitrep|Summary|Result):\s*', '', cleaned, flags=re.IGNORECASE)
+                    if len(cleaned) > 20 and not SubPatternExtractor._is_narrative_noise(cleaned):
+                        patterns[f"Work: {cleaned[:120]}"] += 1
+
+        # Priority 1: 'error' facts — specific error messages
         for fact in domain_signal.get("error", []):
             content = fact["content"]
             m = re.search(r'error:?\s*(.{10,200})', content)
@@ -2427,5 +2481,6 @@ if __name__ == "__main__":
         print(f"\nFiled {filed} issues to {args.repo}")
     else:
         run_funnel()
+
 
 
