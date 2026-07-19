@@ -1992,9 +1992,10 @@ def _probe_surfaces(intent, collector):
         elif case["revenue"] == "operational":
             opinions.append(f"operational infrastructure — keeps the fleet running")
 
-        if case["blind_spot"]:
-            opinions.append(f"WARNING: value may be invisible to the system — only {facts} facts in memory.db. "
-                           f"Business case ({case['enables']}) suggests this surface has value the data doesn't show")
+        if case.get("signal_thin"):
+            opinions.append(f"value understood from capability role ({case['enables']}) — "
+                           f"memory.db has only {facts} facts because this surface operates without generating error traces. "
+                           f"Low signal is expected, not a removal signal")
 
         # Signal-based opinions
         if divested:
@@ -2016,7 +2017,7 @@ def _probe_surfaces(intent, collector):
             opinions.append("revenue-critical — every hour of downtime costs pipeline throughput")
         elif tier == "infra" and invested:
             opinions.append("infrastructure backbone with active investment — keep healthy")
-        elif tier == "experimental" and not invested and not case.get("blind_spot"):
+        elif tier == "experimental" and not invested and not case.get("signal_thin"):
             opinions.append("was tested and didn't stick — simpler to remove than maintain")
 
         # Fix cost opinion
@@ -2038,14 +2039,14 @@ def _probe_surfaces(intent, collector):
         elif invested and tier in ("core", "infra"):
             rec = "protect and extend"
             direction = "⬆ grow"
-        elif case.get("blind_spot") and facts < 10:
-            # Has a plausible business case but low signal — investigate, don't remove
-            rec = "investigate value signal gap — business case exists but data is thin"
-            direction = "? blind spot"
-        elif deprioritized and not case.get("blind_spot"):
+        elif case.get("signal_thin") and case.get("revenue") != "none":
+            # Known business case explains thin signal — value is visible through capability role
+            rec = "value known from capability role — thin signal is normal for this surface"
+            direction = "✓ known value"
+        elif deprioritized and not case.get("signal_thin"):
             rec = "stop tracking this surface"
             direction = "⬇ shrink"
-        elif facts < 5 and not case.get("blind_spot"):
+        elif facts < 5 and not case.get("signal_thin"):
             rec = "audit for removal"
             direction = "⬇ shrink"
         else:
@@ -2078,23 +2079,23 @@ def _probe_surfaces(intent, collector):
 def _business_case(surface: str, tier: str, capability: str) -> dict:
     """Build a business case for a surface: what value does it produce, and can the system see it?"""
     KNOWN_CASES = {
-        "stagehand": {"enables": "portal form population — appraisal revenue pipeline", "revenue": "direct", "depends_on": ["credential-grabber", "doppler"], "blind_spot": False},
-        "sfrep": {"enables": "Appraise-It Pro COM integration — UAD report population", "revenue": "direct", "depends_on": ["stagehand"], "blind_spot": False},
-        "hermes": {"enables": "fleet orchestration, agent health, session management", "revenue": "operational", "depends_on": ["doppler", "tailscale", "ssh"], "blind_spot": False},
-        "doppler": {"enables": "secret management for all automations", "revenue": "operational", "depends_on": [], "blind_spot": False},
-        "bitwarden": {"enables": "human-facing credential vault — portal passwords", "revenue": "operational", "depends_on": [], "blind_spot": False},
-        "email-loe": {"enables": "Gmail integration — parsing appraisal addresses", "revenue": "indirect", "depends_on": ["n8n", "hermes"], "blind_spot": True},
-        "sharepoint": {"enables": "SharePoint document retrieval for appraisal workfiles", "revenue": "indirect", "depends_on": [], "blind_spot": True},
-        "neo4j": {"enables": "code knowledge graph — cross-repo search, dependency mapping", "revenue": "operational", "depends_on": ["sourcebot"], "blind_spot": False},
-        "fleet-triage": {"enables": "automated issue detection, filing, and handler dispatch", "revenue": "operational", "depends_on": ["memory.db", "github"], "blind_spot": True},
-        "docker": {"enables": "container runtime for ms01 services", "revenue": "operational", "depends_on": ["ms01"], "blind_spot": False},
-        "ntreis": {"enables": "MLS comp data — appraisal comparable sales", "revenue": "direct", "depends_on": ["stagehand", "trestle"], "blind_spot": False},
-        "taxnet": {"enables": "TaxNetUSA property tax records", "revenue": "direct", "depends_on": ["stagehand", "credential-grabber"], "blind_spot": False},
-        "truetracts": {"enables": "TrueTracts property data — appraisal comparables", "revenue": "direct", "depends_on": ["stagehand"], "blind_spot": False},
-        "windmill": {"enables": "workflow engine — evaluated and abandoned per AGENTS.md", "revenue": "none", "depends_on": [], "blind_spot": False},
-        "n8n": {"enables": "workflow automation — scheduled tasks, email routing", "revenue": "operational", "depends_on": ["doppler"], "blind_spot": False},
+        "stagehand": {"enables": "portal form population — appraisal revenue pipeline", "revenue": "direct", "depends_on": ["credential-grabber", "doppler"], "signal_thin": False},
+        "sfrep": {"enables": "Appraise-It Pro COM integration — UAD report population", "revenue": "direct", "depends_on": ["stagehand"], "signal_thin": False},
+        "hermes": {"enables": "fleet orchestration, agent health, session management", "revenue": "operational", "depends_on": ["doppler", "tailscale", "ssh"], "signal_thin": False},
+        "doppler": {"enables": "secret management for all automations", "revenue": "operational", "depends_on": [], "signal_thin": False},
+        "bitwarden": {"enables": "human-facing credential vault — portal passwords", "revenue": "operational", "depends_on": [], "signal_thin": False},
+        "email-loe": {"enables": "Gmail integration — parsing appraisal addresses", "revenue": "indirect", "depends_on": ["n8n", "hermes"], "signal_thin": True},
+        "sharepoint": {"enables": "SharePoint document retrieval for appraisal workfiles", "revenue": "indirect", "depends_on": [], "signal_thin": True},
+        "neo4j": {"enables": "code knowledge graph — cross-repo search, dependency mapping", "revenue": "operational", "depends_on": ["sourcebot"], "signal_thin": False},
+        "fleet-triage": {"enables": "automated issue detection, filing, and handler dispatch", "revenue": "operational", "depends_on": ["memory.db", "github"], "signal_thin": True},
+        "docker": {"enables": "container runtime for ms01 services", "revenue": "operational", "depends_on": ["ms01"], "signal_thin": False},
+        "ntreis": {"enables": "MLS comp data — appraisal comparable sales", "revenue": "direct", "depends_on": ["stagehand", "trestle"], "signal_thin": False},
+        "taxnet": {"enables": "TaxNetUSA property tax records", "revenue": "direct", "depends_on": ["stagehand", "credential-grabber"], "signal_thin": False},
+        "truetracts": {"enables": "TrueTracts property data — appraisal comparables", "revenue": "direct", "depends_on": ["stagehand"], "signal_thin": False},
+        "windmill": {"enables": "workflow engine — evaluated and abandoned per AGENTS.md", "revenue": "none", "depends_on": [], "signal_thin": False},
+        "n8n": {"enables": "workflow automation — scheduled tasks, email routing", "revenue": "operational", "depends_on": ["doppler"], "signal_thin": False},
     }
-    return KNOWN_CASES.get(surface, {"enables": f"unclassified surface ({capability})", "revenue": "unknown", "depends_on": [], "blind_spot": tier == "unclassified"})
+    return KNOWN_CASES.get(surface, {"enables": f"unclassified surface ({capability})", "revenue": "unknown", "depends_on": [], "signal_thin": tier == "unclassified"})
 
 
 def _is_noise_subpattern(pat: str) -> bool:
@@ -2426,3 +2427,5 @@ if __name__ == "__main__":
         print(f"\nFiled {filed} issues to {args.repo}")
     else:
         run_funnel()
+
+
