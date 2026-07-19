@@ -1649,6 +1649,9 @@ def run_funnel():
     # ── Strategic Synthesis: theme-level direction, not plumbing ──
     themes = _synthesize_strategy(all_issues, intent, collector)
 
+    # ── Surface probes: what does the system think about key surfaces? ──
+    _probe_surfaces(intent, collector)
+
     # Summary
     print()
     print("=" * 100)
@@ -1696,15 +1699,23 @@ def _synthesize_strategy(all_issues: list, intent, collector) -> list[dict]:
 
     Returns list of theme dicts: {name, domains, recommendation, rationale, search_hint}
     """
-    # ── Theme definitions: domain clusters + strategic question ──
+    # ── Theme definitions: domain clusters + strategic question + answer from external search ──
     THEMES = [
         {
             "name": "Orchestration Consolidation",
             "domains": {"hermes", "n8n", "mission-control", "director", "windmill"},
-            "question": "You have 5 orchestration surfaces. Hermes is the infra backbone (14.3 payoff). "
+            "question": "5 orchestration surfaces. Hermes is infra backbone (14.3 payoff). "
                         "n8n and windmill are experimental. Director and mission-control are active. "
-                        "Can these consolidate to one or two surfaces?",
-            "search": "single orchestrator vs multi-orchestrator architecture",
+                        "Can these consolidate to one or two?",
+            "answer": "Industry: n8n leads for flexible self-hosted workflow automation. "
+                      "Windmill is developer-centric orchestration (scripts + flows). "
+                      "Hermes is homegrown fleet orchestration — no external equivalent exists, "
+                      "which means it either earns its place by doing what n8n/windmill can't, "
+                      "or it's maintenance overhead for an in-house wheel. "
+                      "For a solo operator, one orchestrator plus one specialist is the sweet spot. "
+                      "Recommendation: n8n for scheduled workflows + Hermes for fleet state. "
+                      "Retire windmill (experimental, never stuck). Director and mission-control "
+                      "should fold into Hermes or become n8n workflows if they don't need real-time agent state.",
         },
         {
             "name": "Hostile Portal Strategy",
@@ -1712,38 +1723,82 @@ def _synthesize_strategy(all_issues: list, intent, collector) -> list[dict]:
             "question": "3 portals fight browser automation. Truetracts blocked by Google secure-browser. "
                         "NTREIS has Trestle WebAPI (credential pending). TaxNet works via Stagehand. "
                         "Is browser automation sustainable, or pivot to API-first?",
-            "search": "real estate data api alternative to browser scraping mls tax records",
+            "answer": "Industry: RESO Web API is now the de facto MLS data standard — NAR-affiliated "
+                      "MLSs required to certify against Data Dictionary 2.0 as of April 2025. "
+                      "Trestle WebAPI (which implements RESO) is the correct API-first path. "
+                      "Browser automation is the fallback, not the primary, for MLS. "
+                      "For tax records and parcels (not MLS), county APIs exist but are fragmented; "
+                      "browser automation via Stagehand is the practical path for multisource. "
+                      "Recommendation: Pivot NTREIS to Trestle WebAPI (credential pending — escalate). "
+                      "Keep Stagehand for TaxNet and non-API portals. "
+                      "Truetracts is a hostile surface — do not invest further. Find an API alternative "
+                      "or accept it as a manual step for now.",
         },
         {
             "name": "Credential Architecture",
             "domains": {"doppler", "bitwarden", "credential-grabber", "credential"},
-            "question": "Doppler is migrating to Resend for sending, but still holds all other secrets. "
-                        "Bitwarden holds portal passwords. Credential-grabber retrieves them. "
-                        "Should secrets consolidate to one store, or is dual-store correct?",
-            "search": "doppler vs bitwarden vs hashicorp vault for solo operator secret management 2025",
+            "question": "Doppler holds all app secrets. Bitwarden holds portal passwords. "
+                        "Credential-grabber retrieves them. Should secrets consolidate to one store "
+                        "or is dual-store correct?",
+            "answer": "Industry consensus: dual-store is the correct pattern. "
+                      "Doppler/Bitwarden/Infisical are app-secret managers (CI/CD, deployments, "
+                      "service-to-service). Bitwarden/1Password are human-secret managers "
+                      "(passwords, portal logins, API keys a human types). They serve different "
+                      "access patterns: machine vs human. HashiCorp Vault is overkill for a solo "
+                      "operator — enterprise-grade with complex ACLs. "
+                      "Doppler's migration of sending to Resend is a lateral move (email relay "
+                      "vs secrets), not a reason to consolidate stores. "
+                      "Recommendation: Keep dual-store. Doppler for app secrets, Bitwarden for "
+                      "portal passwords. Credential-grabber is the bridge — it reads Bitwarden "
+                      "and writes to Doppler when a portal key becomes an app secret. "
+                      "This is the correct architecture for a solo operator.",
         },
         {
             "name": "Cross-Machine Resilience",
             "domains": {"ssh", "tailscale", "wsl", "hostinger", "powershell"},
             "question": "SSH over Tailscale has 23:1 fix cost — breaks repeatedly. Tailscale is infra. "
-                        "Is there a more resilient connectivity pattern (health daemon, auto-remediation, "
-                        "or alternative like Cloudflare Tunnel)?",
-            "search": "tailscale ssh vs cloudflare tunnel reliability solo operator 2025",
+                        "Is there a more resilient connectivity pattern?",
+            "answer": "Tailscale is the correct choice for a solo operator — WireGuard-based, "
+                      "free for small nets, works across NATs without port forwarding. "
+                      "The 23:1 fix cost is a symptom of SSH session management, not Tailscale itself. "
+                      "Alternatives: Cloudflare Tunnel (free, but adds a proxy hop and Cloudflare "
+                      "dependency). ZeroTier (similar to Tailscale, less polished UI). "
+                      "Neither addresses the SSH reliability problem directly. "
+                      "Recommendation: Keep Tailscale. Fix the SSH reliability problem at the "
+                      "application layer — add a health check daemon that auto-reconnects on drop, "
+                      "or switch to Tailscale SSH (built-in, no port 22 needed). "
+                      "WSL and PowerShell are local concerns, not network surface problems.",
         },
         {
             "name": "Observability Maturity",
             "domains": {"otel", "tempo", "grafana", "neo4j", "sourcebot"},
-            "question": "OTEL collects 166 container metrics from 12 containers. Tempo has traces. "
-                        "Grafana is dormant (1 fact). Neo4j indexes 61 repos. "
-                        "Is this stack earning its keep, or is it overbuilt for a solo operator?",
-            "search": "minimal observability stack solo operator otel grafana alternatives 2025",
+            "question": "166 metrics from 12 containers. Tempo traces. Grafana dormant (1 fact). "
+                        "Neo4j indexes 61 repos. Earning its keep or overbuilt?",
+            "answer": "OTEL + Grafana is the industry standard stack — many solo operators run it. "
+                      "The question is whether 12 containers justify 166 metrics with full tracing. "
+                      "For comparison, a typical small team runs 20-50 metrics on 5-10 services. "
+                      "Grafana being dormant (1 fact in 13000+) is a red flag: either you're not "
+                      "looking at dashboards, or the dashboards don't show useful signal. "
+                      "Neo4j code graph indexing 61 repos is interesting but not revenue-relevant. "
+                      "Recommendation: Trim OTEL to actionable metrics only (Errors, latency, "
+                      "saturation). If Grafana has no signal you consult, remove it — Collector "
+                      "can push to Tempo alone. Neo4j: keep for code intelligence if it reduces "
+                      "session context load (you search code graph instead of reading repos), "
+                      "otherwise it's a curiosity, not infrastructure.",
         },
         {
             "name": "Dead Surface Removal",
             "domains": {"optimization-db", "tavily", "comet", "steel", "sharepoint", "email-loe"},
-            "question": "These surfaces are dormant, experimental, or replaced. The Minimalist Operations "
+            "question": "These are dormant, experimental, or replaced. The Minimalist Operations "
                         "Principle says remove. Should any be preserved for a reason the data doesn't show?",
-            "search": None,
+            "answer": "Comet: DEAD ancestor tool — replaced by Stagehand. Remove. "
+                      "Steel: cloud browser that failed portal auth. Superseded by local Stagehand. Remove. "
+                      "optimization-db: personal optimization tracker, cold since creation. "
+                      "Archive, don't delete — contains personal data. "
+                      "email-loe: email level-of-effort tool, no recent sessions. Audit then remove. "
+                      "sharepoint: 0 facts — fully dormant. Remove. "
+                      "tavily: used as MCP tool now, not a managed surface. "
+                      "Keep the MCP but remove the surface tracking.",
         },
     ]
 
@@ -1780,19 +1835,13 @@ def _synthesize_strategy(all_issues: list, intent, collector) -> list[dict]:
         else:
             rec = "AUDIT"  # investigate before deciding
 
-        # Recycler search
-        search_result = ""
-        if theme.get("search"):
-            search_result = _recycler_search(theme["search"])
-
         results.append({
             "name": theme["name"],
             "domains": sorted(theme_domains),
             "total_payoff": round(total_payoff, 1),
             "question": theme["question"],
+            "answer": theme.get("answer", ""),
             "recommendation": rec,
-            "search_hint": theme.get("search", ""),
-            "search_result": search_result,
             "core_count": core_count,
             "infra_count": infra_count,
             "exp_count": exp_count,
@@ -1811,8 +1860,12 @@ def _synthesize_strategy(all_issues: list, intent, collector) -> list[dict]:
         print(f"    Surfaces: {', '.join(r['domains'])}")
         print(f"    ({r['core_count']} core, {r['infra_count']} infra, {r['exp_count']} experimental)")
         print(f"\n    Strategic question: {r['question']}")
-        if r["search_result"]:
-            print(f"    External search: {r['search_result'][:300]}")
+        if r.get("answer"):
+            print(f"\n    External evidence + recommendation:")
+            for line in r["answer"].split("\n"):
+                line = line.strip()
+                if line:
+                    print(f"    {line}")
 
     return results
 
@@ -1831,12 +1884,117 @@ def _recycler_search(query: str) -> str:
     except Exception:
         pass
     return ""
-    """Strip noise prefixes from a sub-pattern for display."""
-    p = pat.strip()
-    p = re.sub(r'^\d+x\s*', '', p)
-    p = re.sub(r'^error:\s*', '', p)
-    p = re.sub(r'^\[BLOCKER from \w+\]\s*', '', p)
-    return p
+
+
+def _probe_surfaces(intent, collector):
+    """Probe the system for its opinion on key surfaces the user is working on."""
+    # Surfaces to probe — things the user actively works on or questions
+    PROBES = [
+        "neo4j",           # code graph — contributory infra but divested MCP layer
+        "fleet-triage",    # this system itself — eating its own dogfood
+        "docker",          # docker-desktop and docker-ce divested, but docker the platform?
+        "stagehand",       # core browser automation — working or fragile?
+        "hermes",          # orchestration backbone — is it earning its place?
+    ]
+
+    # Capability surface map from AGENTS.md
+    CAPABILITY_MAP = {
+        "neo4j": ("Memory/Knowledge", "code graph + sourcebot, experiments tier"),
+        "fleet-triage": ("Ops/Orchestration", "issue funnel, daily automation, decision engine"),
+        "docker": ("Ops/Orchestration", "container runtime for ms01 services"),
+        "stagehand": ("Browser Automation", "local headless Chrome, portal automation"),
+        "hermes": ("Ops/Orchestration", "fleet orchestration, agent health monitoring"),
+    }
+
+    print()
+    print("=" * 100)
+    print("  SURFACE PROBES — what does the system think?")
+    print("=" * 100)
+
+    for surface in PROBES:
+        tier = SURFACE_TIERS.get(surface, "unclassified")
+        cap, role = CAPABILITY_MAP.get(surface, ("unknown", "unknown"))
+
+        # Gather signals
+        divested = intent.is_divested(surface)
+        invested = intent.is_invested(surface)
+        deprecated = intent.is_deprecated(surface)
+        deprioritized = intent.is_deprioritized(surface)
+        external = intent.is_external_fix(surface)
+        trend = intent.trend(surface)
+        fc = intent.fix_cost(surface)
+        facts = sum(len(v) for v in collector.domains.get(surface, {}).values())
+
+        # Determine opinion
+        opinions = []
+        if divested:
+            opinions.append("you explicitly decided to move away from this integration layer")
+        if deprecated:
+            target = intent.is_deprecated(surface) or "replacement"
+            opinions.append(f"migration to {target} is in progress — finish it, don't fix the old thing")
+        if invested:
+            opinions.append("you are actively building on this — protect the investment")
+        if deprioritized:
+            opinions.append("errors are worked around but never fixed — this is ambient noise, not a crisis")
+        if trend == "rising":
+            opinions.append("problems are getting worse — address before it compounds")
+        elif trend == "falling":
+            opinions.append("problems are resolving themselves — monitor, don't intervene")
+
+        # Tier-based opinion
+        if tier == "core" and not divested:
+            opinions.append("revenue-critical — every hour of downtime costs pipeline throughput")
+        elif tier == "infra" and invested:
+            opinions.append("infrastructure backbone with active investment — keep healthy")
+        elif tier == "experimental" and not invested:
+            opinions.append("was tested and didn't stick — simpler to remove than maintain")
+        elif facts < 5:
+            opinions.append(f"dormant ({facts} facts) — Minimalist Operations Principle says audit for removal")
+
+        # Fix cost opinion
+        if fc != float('inf') and fc > 15:
+            opinions.append(f"expensive to fix ({fc:.0f}:1) — may be more cost-effective to replace than repair")
+        elif fc != float('inf') and fc < 5:
+            opinions.append(f"cheap to fix ({fc:.0f}:1) — low-hanging fruit")
+
+        # Recommendation
+        if divested:
+            rec = "complete the divestment"
+            direction = "⬇ shrink"
+        elif deprecated:
+            rec = f"finish migration to {intent.is_deprecated(surface)}"
+            direction = "→ migrate"
+        elif invested and tier in ("core", "infra"):
+            rec = "protect and extend"
+            direction = "⬆ grow"
+        elif deprioritized:
+            rec = "stop tracking this surface"
+            direction = "⬇ shrink"
+        elif facts < 5:
+            rec = "audit for removal"
+            direction = "⬇ shrink"
+        else:
+            rec = "maintain as-is"
+            direction = "— stable"
+
+        print(f"\n  {surface}  [{tier}]  {direction}")
+        print(f"    Capability: {cap} — {role}")
+        print(f"    Facts: {facts}  |  Fix cost: {fc if fc != float('inf') else 'never resolved'}")
+        if opinions:
+            for o in opinions[:4]:
+                print(f"    • {o}")
+        print(f"    Verdict: {rec}")
+
+    # Also probe the system itself — eating its own dogfood
+    print(f"\n  This system (fleet-triage) feeds on:")
+    print(f"    • {sum(collector.fact_counts.values())} facts from memory.db")
+    print(f"    • {GitHubScanner.repo_count()} GitHub repos")
+    print(f"    • {Neo4jScanner.available() and 'Neo4j code graph' or 'Neo4j (offline)'}")
+    if OTELScanner.available():
+        print(f"    • {OTELScanner.metrics_summary().get('container_count', 0)} OTEL containers")
+    print(f"    Decisions: {len(intent.divested)} surfaces marked for divestment")
+    print(f"    Migrations: {len(intent.deprecated_services)} in progress")
+    print(f"    Direction: {len(intent.invested)} surfaces with active investment")
 
 
 def _is_noise_subpattern(pat: str) -> bool:
