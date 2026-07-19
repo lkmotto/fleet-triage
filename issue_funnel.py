@@ -1841,8 +1841,14 @@ def _synthesize_strategy(all_issues: list, intent, collector) -> list[dict]:
                       "Steel: cloud browser that failed portal auth. Superseded by local Stagehand. Remove. "
                       "optimization-db: personal optimization tracker, cold since creation. "
                       "Archive, don't delete — contains personal data. "
-                      "email-loe: email level-of-effort tool, no recent sessions. Audit then remove. "
-                      "sharepoint: 0 facts — fully dormant. Remove. "
+                      "email-loe: Gmail integration for appraisal address parsing. "
+                      "BUSINESS CASE: enables appraisal pipeline email routing (indirect revenue). "
+                      "Though facts are thin, this surface has a plausible business case — investigate "
+                      "value signal gap rather than remove. "
+                      "sharepoint: SharePoint document retrieval for appraisal workfiles. "
+                      "BUSINESS CASE: enables appraisal document assembly (indirect revenue). "
+                      "Though facts are thin, this surface has a plausible business case — investigate "
+                      "value signal gap rather than remove. "
                       "tavily: used as MCP tool now, not a managed surface. "
                       "Keep the MCP but remove the surface tracking.",
         },
@@ -1941,6 +1947,8 @@ def _probe_surfaces(intent, collector):
         "docker",          # docker-desktop and docker-ce divested, but docker the platform?
         "stagehand",       # core browser automation — working or fragile?
         "hermes",          # orchestration backbone — is it earning its place?
+        "email-loe",       # previously recommended for removal — has a business case?
+        "sharepoint",      # previously recommended for removal — has a business case?
     ]
 
     # Capability surface map from AGENTS.md
@@ -1950,29 +1958,45 @@ def _probe_surfaces(intent, collector):
         "docker": ("Ops/Orchestration", "container runtime for ms01 services"),
         "stagehand": ("Browser Automation", "local headless Chrome, portal automation"),
         "hermes": ("Ops/Orchestration", "fleet orchestration, agent health monitoring"),
+        "email-loe": ("Browser Automation", "Gmail integration, email parsing for appraisal pipeline"),
+        "sharepoint": ("Browser Automation", "SharePoint access for appraisal document retrieval"),
     }
 
     print()
     print("=" * 100)
-    print("  SURFACE PROBES — what does the system think?")
+    print("  SURFACE PROBES — business case + signal + verdict")
     print("=" * 100)
 
     for surface in PROBES:
         tier = SURFACE_TIERS.get(surface, "unclassified")
         cap, role = CAPABILITY_MAP.get(surface, ("unknown", "unknown"))
+        case = _business_case(surface, tier, cap)
+        facts = sum(len(v) for v in collector.domains.get(surface, {}).values())
 
         # Gather signals
         divested = intent.is_divested(surface)
         invested = intent.is_invested(surface)
         deprecated = intent.is_deprecated(surface)
         deprioritized = intent.is_deprioritized(surface)
-        external = intent.is_external_fix(surface)
         trend = intent.trend(surface)
         fc = intent.fix_cost(surface)
-        facts = sum(len(v) for v in collector.domains.get(surface, {}).values())
 
-        # Determine opinion
+        # Determine opinion — start with business case, then add signal context
         opinions = []
+
+        # Business case always comes first
+        if case["revenue"] == "direct":
+            opinions.append(f"revenue-generating surface — every hour of downtime costs throughput")
+        elif case["revenue"] == "indirect":
+            opinions.append(f"enables {case['enables']} — not directly revenue-generating but the pipeline depends on it")
+        elif case["revenue"] == "operational":
+            opinions.append(f"operational infrastructure — keeps the fleet running")
+
+        if case["blind_spot"]:
+            opinions.append(f"WARNING: value may be invisible to the system — only {facts} facts in memory.db. "
+                           f"Business case ({case['enables']}) suggests this surface has value the data doesn't show")
+
+        # Signal-based opinions
         if divested:
             opinions.append("you explicitly decided to move away from this integration layer")
         if deprecated:
@@ -1992,10 +2016,8 @@ def _probe_surfaces(intent, collector):
             opinions.append("revenue-critical — every hour of downtime costs pipeline throughput")
         elif tier == "infra" and invested:
             opinions.append("infrastructure backbone with active investment — keep healthy")
-        elif tier == "experimental" and not invested:
+        elif tier == "experimental" and not invested and not case.get("blind_spot"):
             opinions.append("was tested and didn't stick — simpler to remove than maintain")
-        elif facts < 5:
-            opinions.append(f"dormant ({facts} facts) — Minimalist Operations Principle says audit for removal")
 
         # Fix cost opinion
         if fc != float('inf') and fc > 15:
@@ -2003,13 +2025,8 @@ def _probe_surfaces(intent, collector):
         elif fc != float('inf') and fc < 5:
             opinions.append(f"cheap to fix ({fc:.0f}:1) — low-hanging fruit")
 
-        # Recommendation
+        # Recommendation — business case protects against rash removal
         if surface == "fleet-triage":
-            # Self-awareness: this is the system asking about itself.
-            # It generates its own facts — it cannot be "dormant" by definition.
-            # The fact count is low because it only writes self-reports, not errors.
-            if facts < 5:
-                opinions.append("this is the system itself — fact count is self-reports, not errors")
             rec = "self-aware — 0 facts is a self-reporting gap, not a removal signal"
             direction = "↻ self"
         elif divested:
@@ -2021,10 +2038,14 @@ def _probe_surfaces(intent, collector):
         elif invested and tier in ("core", "infra"):
             rec = "protect and extend"
             direction = "⬆ grow"
-        elif deprioritized:
+        elif case.get("blind_spot") and facts < 10:
+            # Has a plausible business case but low signal — investigate, don't remove
+            rec = "investigate value signal gap — business case exists but data is thin"
+            direction = "? blind spot"
+        elif deprioritized and not case.get("blind_spot"):
             rec = "stop tracking this surface"
             direction = "⬇ shrink"
-        elif facts < 5:
+        elif facts < 5 and not case.get("blind_spot"):
             rec = "audit for removal"
             direction = "⬇ shrink"
         else:
@@ -2033,9 +2054,12 @@ def _probe_surfaces(intent, collector):
 
         print(f"\n  {surface}  [{tier}]  {direction}")
         print(f"    Capability: {cap} — {role}")
+        print(f"    Business case: enables {case['enables']} ({case['revenue']})")
+        if case.get("depends_on"):
+            print(f"    Depends on: {', '.join(case['depends_on'])}")
         print(f"    Facts: {facts}  |  Fix cost: {fc if fc != float('inf') else 'never resolved'}")
         if opinions:
-            for o in opinions[:4]:
+            for o in opinions[:5]:
                 print(f"    • {o}")
         print(f"    Verdict: {rec}")
 
@@ -2049,6 +2073,28 @@ def _probe_surfaces(intent, collector):
     print(f"    Decisions: {len(intent.divested)} surfaces marked for divestment")
     print(f"    Migrations: {len(intent.deprecated_services)} in progress")
     print(f"    Direction: {len(intent.invested)} surfaces with active investment")
+
+
+def _business_case(surface: str, tier: str, capability: str) -> dict:
+    """Build a business case for a surface: what value does it produce, and can the system see it?"""
+    KNOWN_CASES = {
+        "stagehand": {"enables": "portal form population — appraisal revenue pipeline", "revenue": "direct", "depends_on": ["credential-grabber", "doppler"], "blind_spot": False},
+        "sfrep": {"enables": "Appraise-It Pro COM integration — UAD report population", "revenue": "direct", "depends_on": ["stagehand"], "blind_spot": False},
+        "hermes": {"enables": "fleet orchestration, agent health, session management", "revenue": "operational", "depends_on": ["doppler", "tailscale", "ssh"], "blind_spot": False},
+        "doppler": {"enables": "secret management for all automations", "revenue": "operational", "depends_on": [], "blind_spot": False},
+        "bitwarden": {"enables": "human-facing credential vault — portal passwords", "revenue": "operational", "depends_on": [], "blind_spot": False},
+        "email-loe": {"enables": "Gmail integration — parsing appraisal addresses", "revenue": "indirect", "depends_on": ["n8n", "hermes"], "blind_spot": True},
+        "sharepoint": {"enables": "SharePoint document retrieval for appraisal workfiles", "revenue": "indirect", "depends_on": [], "blind_spot": True},
+        "neo4j": {"enables": "code knowledge graph — cross-repo search, dependency mapping", "revenue": "operational", "depends_on": ["sourcebot"], "blind_spot": False},
+        "fleet-triage": {"enables": "automated issue detection, filing, and handler dispatch", "revenue": "operational", "depends_on": ["memory.db", "github"], "blind_spot": True},
+        "docker": {"enables": "container runtime for ms01 services", "revenue": "operational", "depends_on": ["ms01"], "blind_spot": False},
+        "ntreis": {"enables": "MLS comp data — appraisal comparable sales", "revenue": "direct", "depends_on": ["stagehand", "trestle"], "blind_spot": False},
+        "taxnet": {"enables": "TaxNetUSA property tax records", "revenue": "direct", "depends_on": ["stagehand", "credential-grabber"], "blind_spot": False},
+        "truetracts": {"enables": "TrueTracts property data — appraisal comparables", "revenue": "direct", "depends_on": ["stagehand"], "blind_spot": False},
+        "windmill": {"enables": "workflow engine — evaluated and abandoned per AGENTS.md", "revenue": "none", "depends_on": [], "blind_spot": False},
+        "n8n": {"enables": "workflow automation — scheduled tasks, email routing", "revenue": "operational", "depends_on": ["doppler"], "blind_spot": False},
+    }
+    return KNOWN_CASES.get(surface, {"enables": f"unclassified surface ({capability})", "revenue": "unknown", "depends_on": [], "blind_spot": tier == "unclassified"})
 
 
 def _is_noise_subpattern(pat: str) -> bool:
@@ -2090,16 +2136,66 @@ def _short_title(domain: str, pattern: str) -> str:
     return f"{domain} — {p}"
 
 
+def _get_domain_citations(domain: str) -> dict:
+    """Query memory.db for session IDs and sample facts for a domain."""
+    try:
+        db = sqlite3.connect(str(DB_PATH))
+        # Session IDs that mention this domain
+        sessions = db.execute(
+            "SELECT DISTINCT json_extract(metadata, '$.session_id') as sid FROM facts "
+            "WHERE status='live' AND LOWER(content) LIKE ? "
+            "AND json_extract(metadata, '$.session_id') IS NOT NULL "
+            "ORDER BY created_at DESC LIMIT 5",
+            (f"%{domain.lower().replace('-', '').replace('_', '')}%",)
+        ).fetchall()
+        session_ids = [s[0] for s in sessions if s[0]]
+
+        # Sample facts
+        facts = db.execute(
+            "SELECT category, substr(content, 1, 200), created_at FROM facts "
+            "WHERE status='live' AND LOWER(content) LIKE ? "
+            "ORDER BY created_at DESC LIMIT 3",
+            (f"%{domain.lower().replace('-', '').replace('_', '')}%",)
+        ).fetchall()
+
+        db.close()
+        return {
+            "session_ids": session_ids,
+            "sample_facts": [{"category": f[0], "content": f[1], "date": f[2]} for f in facts],
+        }
+    except Exception:
+        return {"session_ids": [], "sample_facts": []}
+
+
+def _handler_class(recommendation: str, tier: str) -> tuple:
+    """Map recommendation + tier to handler class and risk level."""
+    mapping = {
+        "FIX": ("fix", "medium"),
+        "REMOVE": ("remove", "high" if tier == "core" else "medium"),
+        "INVESTIGATE": ("investigate", "low"),
+        "MIGRATE": ("migrate", "medium"),
+        "CONSOLIDATE": ("consolidate", "medium"),
+    }
+    rec_upper = recommendation.upper()
+    for key in mapping:
+        if key in rec_upper:
+            return mapping[key]
+    return ("investigate", "low")
+
+
 def _build_issue_body(issue: dict) -> str:
-    """Build a GitHub issue body from a funnel issue dict."""
+    """Build a handler-ready GitHub issue body with citations, approach, and verification."""
     domain = issue["domain"]
     tier = issue["tier"]
     rec = issue["recommendation"]
     payoff = issue["payoff"]
     subs = issue.get("sub_patterns", [])
 
+    hclass, risk = _handler_class(rec, tier)
+
     lines = []
     lines.append(f"**Domain:** {domain} | **Tier:** {tier} | **Payoff:** {payoff:.1f}")
+    lines.append(f"**Handler class:** {hclass} | **Risk:** {risk} | **Estimated time:** 5-10 min")
     lines.append("")
 
     # Intent
@@ -2115,7 +2211,8 @@ def _build_issue_body(issue: dict) -> str:
     if trend == "rising": intent_parts.append("errors increasing")
     elif trend == "falling": intent_parts.append("errors declining")
     if intent_parts:
-        lines.append(f"**Intent:** {'. '.join(intent_parts)}")
+        lines.append("## Intent")
+        lines.append(". ".join(intent_parts) + ".")
         lines.append("")
 
     # Fix cost
@@ -2124,46 +2221,103 @@ def _build_issue_body(issue: dict) -> str:
         lines.append(f"**Fix cost:** {fc:.0f}:1 errors per resolution")
     elif not issue.get("intent_external_fix") and not issue.get("intent_divested"):
         lines.append("**Fix cost:** never resolved")
-    lines.append("")
 
-    # Sub-issue
+    # Problem
+    lines.append("## Problem")
     if subs:
-        pat, cnt = subs[0]
-        clean = _clean_pattern(pat)
-        lines.append(f"**Sub-issue:** [{cnt}x] {clean}")
-        lines.append("")
+        for pat, cnt in subs[:3]:
+            clean = _clean_pattern(pat)
+            lines.append(f"- [{cnt}x] {clean}")
+    elif issue.get("derived_goal"):
+        lines.append(f"**Goal:** {issue['derived_goal']}")
+    lines.append("")
 
     # Goal
     dg = issue.get("derived_goal", "")
-    if dg:
-        lines.append(f"**Goal:** {dg}")
-        lines.append("")
-
-    # Pros/Cons
-    lines.append("**Action:** " + rec)
+    lines.append("## Action")
+    action_desc = "research this surface"
     if rec == "FIX":
-        lines.append(f"- Pro: {domain} is {tier} tier — fixing this unblocks dependent workflows")
-        if issue.get("intent_invested"):
-            lines.append("- Pro: you are actively investing in this area — fix compounds with ongoing work")
-        lines.append("- Con of inaction: problem will recur and error volume will grow")
+        action_desc = f"apply a bounded, reversible fix for {domain}"
     elif rec == "REMOVE":
-        lines.append(f"- Pro: eliminates {domain} as a maintenance burden")
-        if tier == "experimental":
-            lines.append("- Pro: experimental surface — simpler to delete than maintain")
-        lines.append("- Con of inaction: continues to produce noise and consume attention")
-    elif rec == "MIGRATE" or issue.get("is_deprecated"):
+        action_desc = f"verify {domain} is safe to remove, recommend removal or archival"
+    elif rec == "INVESTIGATE":
+        action_desc = f"research {domain} surface, determine if it should be kept or removed"
+    elif rec == "MIGRATE":
         target = issue.get("dep_target", "replacement")
-        lines.append(f"- Pro: removes {domain} dependency — {target} already provisioned")
-        lines.append("- Con of inaction: failures cascade into dependent workflows")
+        action_desc = f"migrate {domain} to {target}"
+    elif rec == "CONSOLIDATE":
+        action_desc = f"research consolidation options, categorize into keep/remove/merge"
+    lines.append(f"**{rec}** — {action_desc}")
     lines.append("")
 
-    # Source
+    # Citations
+    cit = _get_domain_citations(domain)
+    lines.append("## Citations")
+    if cit["session_ids"]:
+        lines.append(f"**Session IDs:** {', '.join(cit['session_ids'][:5])}")
+    if cit["sample_facts"]:
+        lines.append("**Sample facts:**")
+        for f in cit["sample_facts"][:3]:
+            lines.append(f"- [{f['category']}] {f['content'][:120]}... ({f['date'][:10]})")
+    lines.append(f"**Memory query:** `python C:\\Users\\lkmot\\.factory\\memory\\harvester.py search \"{domain}\"`")
+    lines.append("")
+
+    # Proposed approach
+    lines.append("## Proposed approach")
+    lines.append("1. Verify citations are still fresh: run the memory query above")
+    if hclass == "investigate":
+        lines.append(f"2. Search memory.db for {domain} usage patterns")
+        lines.append(f"3. Determine last active session and what {domain} was used for")
+        lines.append(f"4. Check AGENTS.md capability surface map for {domain}")
+        lines.append("5. Recommend: REMOVE (dormant/experimental), ARCHIVE (cold, has value), or KEEP (active)")
+    elif hclass == "fix":
+        lines.append(f"2. Diagnose the root cause of {domain} failures")
+        lines.append(f"3. Apply a bounded, reversible fix (prefer config change, probe tweak, or one-line code edit)")
+        lines.append("4. Commit to a branch, NOT main. Create a PR.")
+    elif hclass == "consolidate":
+        lines.append(f"2. List all {domain} items that need consolidation")
+        lines.append("3. Categorize each: CLEAN-REMOVE, KEEP, MERGE, UNARCHIVE")
+        lines.append("4. Recommend next steps (do NOT execute destructive actions without approval)")
+    elif hclass == "remove":
+        lines.append(f"2. Verify {domain} has no active dependencies (check AGENTS.md skills, running services)")
+        lines.append("3. Check if any other surface references it")
+        lines.append("4. Recommend removal path (just delete references? archive repo? disable service?)")
+        lines.append("5. Do NOT execute removal — recommendation only at this phase")
+    lines.append("")
+
+    # Verification
+    lines.append("## Verification")
+    if hclass == "investigate":
+        lines.append(f"`python C:\\Users\\lkmot\\.factory\\scripts\\verify-done.py --task-type research --question \"What should be done with {domain}?\" --answer \"<your recommendation>\" --sources \"memory.db\"`")
+    elif hclass in ("fix", "consolidate"):
+        lines.append(f"`python C:\\Users\\lkmot\\.factory\\scripts\\verify-done.py --task-type code --repo-path C:\\Users\\lkmot\\.factory`")
+    else:
+        lines.append(f"`python C:\\Users\\lkmot\\.factory\\scripts\\verify-done.py --task-type file --file C:\\Users\\lkmot\\.factory\\scripts\\issue_funnel.py`")
+    lines.append("")
+
+    # Constraints
+    lines.append("## Constraints")
+    lines.append(f"- Handler class: {hclass}")
+    lines.append(f"- Risk: {risk}")
+    lines.append("- Do NOT touch Safety Rules (bid submission, mass email, production deploy, data deletion, DNS)")
+    if hclass in ("investigate", "consolidate"):
+        lines.append("- **Read-only research phase.** Do NOT modify files, delete repos, or change configs.")
+        lines.append("- If recommendation requires destructive action, flag as human-decision.")
+    elif hclass == "fix":
+        lines.append("- Apply bounded, reversible fixes only. Commit to branch, create PR, do NOT push to main.")
+        lines.append("- If fix requires infrastructure changes or service restarts, flag as human-decision.")
+    elif hclass == "remove":
+        lines.append("- **Do NOT delete anything.** Produce a removal plan for operator approval.")
+    lines.append("- Time budget: 15 min. Step budget: 20 tool calls.")
+    lines.append("- Mandatory: verify-done.py, skill effectiveness line, next improvement line, governance record.")
+    lines.append("")
+
+    # Source footer
     richness = issue.get("signal_richness", {})
+    facts = 0
     if isinstance(richness, dict):
         facts = richness.get("total_signal_facts", 0)
-    else:
-        facts = 0
-    lines.append(f"---")
+    lines.append("---")
     lines.append(f"Filed from {facts} memory.db facts | domain: {domain} | payoff: {payoff:.1f}")
 
     return "\n".join(lines)
