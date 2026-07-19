@@ -1399,20 +1399,20 @@ def run_funnel():
             dep_target=intent.is_deprecated(domain) if intent.is_deprecated(domain) else None,
         )
 
-        all_issues.append({
+        # Build domain context once, then explode into per-sub-pattern issues
+        domain_context = {
             "domain": domain,
             "tier": tier,
-            "recommendation": effective_rec,
+            "effective_rec": effective_rec,
             "confidence": result["confidence"],
-            "score": result.get("confidence_score", 0),
-            "payoff": payoff,
+            "confidence_score": result.get("confidence_score", 0),
+            "is_deprecated": is_dep,
+            "dep_target": intent.is_deprecated(domain) if intent.is_deprecated(domain) else None,
             "goal": goal,
             "derived_goal": derived_goal,
             "goal_criticality": goal_criticality,
             "signal_richness": richness,
-            "sub_patterns": sub_patterns,
-            "github": github_ctx,
-            "neo4j_available": Neo4jScanner.available(),
+            "github_ctx": github_ctx,
             "rationale": rationale,
             "narrative": narrative,
             "engine_dep": _is_engine_dependency(domain),
@@ -1423,7 +1423,34 @@ def run_funnel():
             "intent_external_fix": intent.is_external_fix(domain),
             "fix_cost": intent.fix_cost(domain),
             "trend": intent.trend(domain),
-        })
+        }
+
+        if sub_patterns:
+            # One issue per sub-pattern — each gets the domain's full payoff
+            for idx, (pat, cnt) in enumerate(sub_patterns):
+                clean = _clean_pattern(pat)
+                # Skip noise-only sub-patterns
+                if _is_noise_subpattern(clean):
+                    continue
+                sub_title = _short_title(domain, pat)
+                all_issues.append({
+                    **domain_context,
+                    "recommendation": effective_rec,
+                    "payoff": payoff,  # keep full domain payoff — each sub-issue is equally urgent
+                    "sub_patterns": [(pat, cnt)],
+                    "title": sub_title,
+                    "is_sub_issue": True,
+                })
+        else:
+            # Fallback: domain-level issue with no sub-patterns
+            all_issues.append({
+                **domain_context,
+                "recommendation": effective_rec,
+                "payoff": payoff,
+                "sub_patterns": [],
+                "title": domain,
+                "is_sub_issue": False,
+            })
 
     # Add behavior test issues (deduplicated)
     behavior_seen = set()
@@ -1527,7 +1554,7 @@ def run_funnel():
         rec = issue["recommendation"]
         payoff = issue["payoff"]
         subs = issue.get("sub_patterns", [])
-        richness = issue["signal_richness"]["total_signal_facts"]
+        richness = issue.get("signal_richness", {}).get("total_signal_facts", 0) if isinstance(issue.get("signal_richness"), dict) else 0
 
         if payoff > 8:
             prio = "P1"
@@ -1575,15 +1602,11 @@ def run_funnel():
             fix_cost_str = "never successfully resolved"
 
         # ── Issue header ──
-        # Derive a short title from the top sub-pattern
-        title = domain
-        if subs:
-            title = _short_title(domain, subs[0][0])
-
+        title = issue.get("title", domain)
         print()
         print("-" * 100)
         payoff_bar = "█" * min(int(payoff), 15)
-        print(f"  {prio}  payoff={payoff:4.1f} {payoff_bar}  {rec:<12}  {title[:80]}")
+        print(f"  {prio}  payoff={payoff:4.1f} {payoff_bar}  {rec:<12}  {title[:90]}")
         print(f"        domain: {domain}  |  tier: {tier}  |  {richness} facts")
         if intent_desc_parts:
             print(f"        {'. '.join(intent_desc_parts)}.")
@@ -1601,9 +1624,9 @@ def run_funnel():
 
         # ── Sub-issues ──
         if subs:
-            print(f"\n    Why it matters:")
-            for pat, cnt in subs[:3]:
-                print(f"      [{cnt}x] {pat[:120]}")
+            pat, cnt = subs[0]
+            clean = _clean_pattern(pat)
+            print(f"\n    [{cnt}x] {clean[:140]}")
 
         # ── Pros/Cons ──
         if rec == "FIX":
@@ -1615,8 +1638,8 @@ def run_funnel():
         elif rec == "INVESTIGATE":
             _show_pros_cons_investigate(domain, tier, goals)
 
-        # GitHub context (collapsed)
-        gh = issue.get("github", {})
+        # GitHub context
+        gh = issue.get("github_ctx", issue.get("github", {}))
         ci_fails = gh.get("ci_failures", [])
         if ci_fails:
             relevant_ci = [cf for cf in ci_fails if domain.lower().replace('-','') in cf['repo'].lower().replace('-','')]
@@ -1655,19 +1678,55 @@ def run_funnel():
     print("=" * 100)
 
 
-def _short_title(domain: str, pattern: str) -> str:
-    """Derive a short issue title from the domain + best sub-pattern."""
-    p = re.sub(r'^\d+x\s*', '', pattern.strip())
+def _clean_pattern(pat: str) -> str:
+    """Strip noise prefixes from a sub-pattern for display."""
+    p = pat.strip()
+    p = re.sub(r'^\d+x\s*', '', p)
     p = re.sub(r'^error:\s*', '', p)
     p = re.sub(r'^\[BLOCKER from \w+\]\s*', '', p)
-    # Take first meaningful sentence fragment
+    return p
+
+
+def _is_noise_subpattern(pat: str) -> bool:
+    """Return True if this sub-pattern is just a generic section header, not actionable."""
+    p = pat.strip().lower()
+    noise = {'status', 'update', 'sitrep', "here's the summary", "here is the summary",
+             'summary', 'plan (as requested)', 'result', "what i did",
+             'files changed + behavior changes', 'implemented now',
+             'section a:', 'section b:', 'findings', 'triage board:', 'result so far:'}
+    for n in noise:
+        if p == n or p.startswith(n):
+            return True
+    return len(p) < 10
+
+
+def _short_title(domain: str, pattern: str) -> str:
+    """Derive a short issue title from the domain + best sub-pattern."""
+    p = pattern.strip()
+    # Strip noise prefixes
+    p = re.sub(r'^\d+x\s*', '', p)
+    p = re.sub(r'^error:\s*', '', p)
+    p = re.sub(r'^\[BLOCKER from \w+\]\s*', '', p)
+    p = re.sub(r'^impact:\s*', '', p)
+    # Skip noise-only patterns
+    noise_patterns = [
+        r'^Here.?\s*(?:is|was)\s*(?:the|a)\s*(?:summary|status|result)',
+        r'^\[resolved\]', r'^Sitrep', r'^Status\s*$', r'^Update\s*$',
+        r'^I.ll\s+investigate', r'^\d+\s+tests?\s+pass',
+    ]
+    for np in noise_patterns:
+        if re.match(np, p, re.IGNORECASE):
+            return domain
+    # Take first meaningful clause after "->"
     if '->' in p:
         parts = p.split('->', 1)
         p = parts[-1].strip()
-    p = p[:100].strip()
-    if p:
-        return f"{domain} — {p}"
-    return domain
+    # Clean up
+    p = re.sub(r'^[-—>\s]+', '', p)
+    p = p[:100].strip().rstrip('.:;-')
+    if not p or len(p) < 8:
+        return domain
+    return f"{domain} — {p}"
 
 
 def _show_pros_cons_fix(domain: str, tier: str, goals: list, intent):
