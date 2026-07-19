@@ -1676,9 +1676,140 @@ def run_funnel():
 
     print()
     print("=" * 100)
+    return all_issues
 
 
 def _clean_pattern(pat: str) -> str:
+    """Strip noise prefixes from a sub-pattern for display."""
+    p = pat.strip()
+    p = re.sub(r'^\d+x\s*', '', p)
+    p = re.sub(r'^error:\s*', '', p)
+    p = re.sub(r'^\[BLOCKER from \w+\]\s*', '', p)
+    return p
+
+
+def _is_noise_subpattern(pat: str) -> bool:
+    """Return True if this sub-pattern is a generic section header, not actionable."""
+    p = pat.strip().lower()
+    noise = {'status', 'update', 'sitrep', "here's the summary", "here is the summary",
+             'summary', 'plan (as requested)', 'result', "what i did",
+             'files changed + behavior changes', 'implemented now',
+             'section a:', 'section b:', 'findings', 'triage board:', 'result so far:',
+             'test results summary', 'here is the full summary', 'remediation checklist'}
+    for n in noise:
+        if p == n or p.startswith(n):
+            return True
+    return len(p) < 10
+
+
+def _short_title(domain: str, pattern: str) -> str:
+    """Derive a short issue title from the domain + best sub-pattern."""
+    p = pattern.strip()
+    p = re.sub(r'^\d+x\s*', '', p)
+    p = re.sub(r'^error:\s*', '', p)
+    p = re.sub(r'^\[BLOCKER from \w+\]\s*', '', p)
+    p = re.sub(r'^impact:\s*', '', p)
+    noise_patterns = [
+        r'^Here.?\s*(?:is|was)\s*(?:the|a)\s*(?:summary|status|result)',
+        r'^\[resolved\]', r'^Sitrep', r'^Status\s*$', r'^Update\s*$',
+        r'^I.ll\s+investigate', r'^\d+\s+tests?\s+pass',
+    ]
+    for np in noise_patterns:
+        if re.match(np, p, re.IGNORECASE):
+            return domain
+    if '->' in p:
+        parts = p.split('->', 1)
+        p = parts[-1].strip()
+    p = re.sub(r'^[-—>\s]+', '', p)
+    p = p[:100].strip().rstrip('.:;-')
+    if not p or len(p) < 8:
+        return domain
+    return f"{domain} — {p}"
+
+
+def _build_issue_body(issue: dict) -> str:
+    """Build a GitHub issue body from a funnel issue dict."""
+    domain = issue["domain"]
+    tier = issue["tier"]
+    rec = issue["recommendation"]
+    payoff = issue["payoff"]
+    subs = issue.get("sub_patterns", [])
+
+    lines = []
+    lines.append(f"**Domain:** {domain} | **Tier:** {tier} | **Payoff:** {payoff:.1f}")
+    lines.append("")
+
+    # Intent
+    intent_parts = []
+    if issue.get("intent_divested"): intent_parts.append("divested (moving away)")
+    if issue.get("is_deprecated"):
+        target = issue.get("dep_target", "replacement")
+        intent_parts.append(f"migrating to {target}")
+    if issue.get("intent_invested"): intent_parts.append("actively invested")
+    if issue.get("intent_deprioritized"): intent_parts.append("deprioritized (worked around)")
+    if issue.get("intent_external_fix"): intent_parts.append("fixes happen externally")
+    trend = issue.get("trend", "")
+    if trend == "rising": intent_parts.append("errors increasing")
+    elif trend == "falling": intent_parts.append("errors declining")
+    if intent_parts:
+        lines.append(f"**Intent:** {'. '.join(intent_parts)}")
+        lines.append("")
+
+    # Fix cost
+    fc = issue.get("fix_cost", float('inf'))
+    if fc != float('inf') and fc > 0:
+        lines.append(f"**Fix cost:** {fc:.0f}:1 errors per resolution")
+    elif not issue.get("intent_external_fix") and not issue.get("intent_divested"):
+        lines.append("**Fix cost:** never resolved")
+    lines.append("")
+
+    # Sub-issue
+    if subs:
+        pat, cnt = subs[0]
+        clean = _clean_pattern(pat)
+        lines.append(f"**Sub-issue:** [{cnt}x] {clean}")
+        lines.append("")
+
+    # Goal
+    dg = issue.get("derived_goal", "")
+    if dg:
+        lines.append(f"**Goal:** {dg}")
+        lines.append("")
+
+    # Pros/Cons
+    lines.append("**Action:** " + rec)
+    if rec == "FIX":
+        lines.append(f"- Pro: {domain} is {tier} tier — fixing this unblocks dependent workflows")
+        if issue.get("intent_invested"):
+            lines.append("- Pro: you are actively investing in this area — fix compounds with ongoing work")
+        lines.append("- Con of inaction: problem will recur and error volume will grow")
+    elif rec == "REMOVE":
+        lines.append(f"- Pro: eliminates {domain} as a maintenance burden")
+        if tier == "experimental":
+            lines.append("- Pro: experimental surface — simpler to delete than maintain")
+        lines.append("- Con of inaction: continues to produce noise and consume attention")
+    elif rec == "MIGRATE" or issue.get("is_deprecated"):
+        target = issue.get("dep_target", "replacement")
+        lines.append(f"- Pro: removes {domain} dependency — {target} already provisioned")
+        lines.append("- Con of inaction: failures cascade into dependent workflows")
+    lines.append("")
+
+    # Source
+    richness = issue.get("signal_richness", {})
+    if isinstance(richness, dict):
+        facts = richness.get("total_signal_facts", 0)
+    else:
+        facts = 0
+    lines.append(f"---")
+    lines.append(f"Filed from {facts} memory.db facts | domain: {domain} | payoff: {payoff:.1f}")
+
+    return "\n".join(lines)
+
+
+def _issue_label(issue: dict) -> str:
+    """Return a GitHub label for the issue."""
+    rec = issue["recommendation"].lower()
+    return rec
     """Strip noise prefixes from a sub-pattern for display."""
     p = pat.strip()
     p = re.sub(r'^\d+x\s*', '', p)
@@ -1774,4 +1905,55 @@ def _show_pros_cons_investigate(domain: str, tier: str, goals: list):
 
 
 if __name__ == "__main__":
-    run_funnel()
+    import argparse
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--file", action="store_true", help="File issues to GitHub instead of printing")
+    parser.add_argument("--repo", default="lkmotto/fleet-triage", help="Target repo (default: lkmotto/fleet-triage)")
+    args = parser.parse_args()
+
+    if args.file:
+        # Run funnel and file all issues
+        import os
+        if 'GH_TOKEN' not in os.environ:
+            try:
+                result = subprocess.run(
+                    ['doppler', 'secrets', 'get', 'GITHUB_PAT', '--plain',
+                     '--project', 'auth-sso', '--config', 'prd'],
+                    capture_output=True, text=True, timeout=5
+                )
+                if result.returncode == 0:
+                    os.environ['GH_TOKEN'] = result.stdout.strip()
+            except Exception:
+                print("ERROR: Could not get GH_TOKEN from Doppler. Set GH_TOKEN env var.")
+                sys.exit(1)
+
+        # Silence print output during collection — we only want the issues list
+        import io
+        old_stdout = sys.stdout
+        sys.stdout = io.StringIO()
+        all_issues_data = run_funnel()
+        sys.stdout = old_stdout
+
+        filed = 0
+        for issue in all_issues_data:
+            body = _build_issue_body(issue)
+            title = issue.get("title", issue["domain"])[:200]
+            label = _issue_label(issue)
+            rec = issue["recommendation"].lower()
+            try:
+                r = subprocess.run(
+                    ['gh', 'issue', 'create', '--repo', args.repo,
+                     '--title', title, '--body', body, '--label', rec],
+                    capture_output=True, text=True, timeout=15
+                )
+                if r.returncode == 0:
+                    filed += 1
+                    print(f"  #{filed}: {title[:100]}")
+                else:
+                    print(f"  FAIL: {title[:80]} — {r.stderr.strip()[:100]}")
+            except Exception as e:
+                print(f"  ERROR: {title[:80]} — {e}")
+
+        print(f"\nFiled {filed} issues to {args.repo}")
+    else:
+        run_funnel()
