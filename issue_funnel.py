@@ -1646,6 +1646,9 @@ def run_funnel():
             if relevant_ci:
                 print(f"\n    GitHub CI failing: {relevant_ci[0]['repo']} — {relevant_ci[0]['name'][:60]}")
 
+    # ── Strategic Synthesis: theme-level direction, not plumbing ──
+    themes = _synthesize_strategy(all_issues, intent, collector)
+
     # Summary
     print()
     print("=" * 100)
@@ -1680,6 +1683,154 @@ def run_funnel():
 
 
 def _clean_pattern(pat: str) -> str:
+    """Strip noise prefixes from a sub-pattern for display."""
+    p = pat.strip()
+    p = re.sub(r'^\d+x\s*', '', p)
+    p = re.sub(r'^error:\s*', '', p)
+    p = re.sub(r'^\[BLOCKER from \w+\]\s*', '', p)
+    return p
+
+
+def _synthesize_strategy(all_issues: list, intent, collector) -> list[dict]:
+    """Cluster issues into strategic themes and produce directional recommendations.
+
+    Returns list of theme dicts: {name, domains, recommendation, rationale, search_hint}
+    """
+    # ── Theme definitions: domain clusters + strategic question ──
+    THEMES = [
+        {
+            "name": "Orchestration Consolidation",
+            "domains": {"hermes", "n8n", "mission-control", "director", "windmill"},
+            "question": "You have 5 orchestration surfaces. Hermes is the infra backbone (14.3 payoff). "
+                        "n8n and windmill are experimental. Director and mission-control are active. "
+                        "Can these consolidate to one or two surfaces?",
+            "search": "single orchestrator vs multi-orchestrator architecture",
+        },
+        {
+            "name": "Hostile Portal Strategy",
+            "domains": {"truetracts", "ntreis", "taxnet", "stagehand"},
+            "question": "3 portals fight browser automation. Truetracts blocked by Google secure-browser. "
+                        "NTREIS has Trestle WebAPI (credential pending). TaxNet works via Stagehand. "
+                        "Is browser automation sustainable, or pivot to API-first?",
+            "search": "real estate data api alternative to browser scraping mls tax records",
+        },
+        {
+            "name": "Credential Architecture",
+            "domains": {"doppler", "bitwarden", "credential-grabber", "credential"},
+            "question": "Doppler is migrating to Resend for sending, but still holds all other secrets. "
+                        "Bitwarden holds portal passwords. Credential-grabber retrieves them. "
+                        "Should secrets consolidate to one store, or is dual-store correct?",
+            "search": "doppler vs bitwarden vs hashicorp vault for solo operator secret management 2025",
+        },
+        {
+            "name": "Cross-Machine Resilience",
+            "domains": {"ssh", "tailscale", "wsl", "hostinger", "powershell"},
+            "question": "SSH over Tailscale has 23:1 fix cost — breaks repeatedly. Tailscale is infra. "
+                        "Is there a more resilient connectivity pattern (health daemon, auto-remediation, "
+                        "or alternative like Cloudflare Tunnel)?",
+            "search": "tailscale ssh vs cloudflare tunnel reliability solo operator 2025",
+        },
+        {
+            "name": "Observability Maturity",
+            "domains": {"otel", "tempo", "grafana", "neo4j", "sourcebot"},
+            "question": "OTEL collects 166 container metrics from 12 containers. Tempo has traces. "
+                        "Grafana is dormant (1 fact). Neo4j indexes 61 repos. "
+                        "Is this stack earning its keep, or is it overbuilt for a solo operator?",
+            "search": "minimal observability stack solo operator otel grafana alternatives 2025",
+        },
+        {
+            "name": "Dead Surface Removal",
+            "domains": {"optimization-db", "tavily", "comet", "steel", "sharepoint", "email-loe"},
+            "question": "These surfaces are dormant, experimental, or replaced. The Minimalist Operations "
+                        "Principle says remove. Should any be preserved for a reason the data doesn't show?",
+            "search": None,
+        },
+    ]
+
+    # Score each theme by aggregate issue payoff + intent alignment
+    domain_payoffs: dict[str, float] = {}
+    domain_tiers: dict[str, str] = {}
+    for issue in all_issues:
+        d = issue["domain"]
+        p = issue["payoff"]
+        if d not in domain_payoffs or p > domain_payoffs[d]:
+            domain_payoffs[d] = p
+        domain_tiers[d] = issue.get("tier", "unclassified")
+
+    results = []
+    for theme in THEMES:
+        theme_domains = theme["domains"] & set(domain_payoffs.keys())
+        if not theme_domains:
+            continue
+
+        total_payoff = sum(domain_payoffs.get(d, 0) for d in theme_domains)
+        exp_count = sum(1 for d in theme_domains if domain_tiers.get(d) == "experimental")
+        infra_count = sum(1 for d in theme_domains if domain_tiers.get(d) == "infra")
+        core_count = sum(1 for d in theme_domains if domain_tiers.get(d) == "core")
+
+        # Determine recommendation type
+        if core_count >= 2:
+            rec = "EVOLVE"  # core surfaces need deliberate evolution
+        elif infra_count >= 2:
+            rec = "CONSOLIDATE"  # infra surfaces can merge
+        elif exp_count >= 2:
+            rec = "REMOVE"  # experimental surfaces should go
+        elif total_payoff > 30:
+            rec = "RESTRUCTURE"  # high payoff = urgent strategic attention
+        else:
+            rec = "AUDIT"  # investigate before deciding
+
+        # Recycler search
+        search_result = ""
+        if theme.get("search"):
+            search_result = _recycler_search(theme["search"])
+
+        results.append({
+            "name": theme["name"],
+            "domains": sorted(theme_domains),
+            "total_payoff": round(total_payoff, 1),
+            "question": theme["question"],
+            "recommendation": rec,
+            "search_hint": theme.get("search", ""),
+            "search_result": search_result,
+            "core_count": core_count,
+            "infra_count": infra_count,
+            "exp_count": exp_count,
+        })
+
+    results.sort(key=lambda r: r["total_payoff"], reverse=True)
+
+    # Display strategic synthesis
+    print()
+    print("=" * 100)
+    print("  STRATEGIC SYNTHESIS — infrastructure direction, not plumbing")
+    print("=" * 100)
+
+    for i, r in enumerate(results):
+        print(f"\n  Theme {i+1}: {r['name']}  ({r['recommendation']}, aggregate payoff {r['total_payoff']:.0f})")
+        print(f"    Surfaces: {', '.join(r['domains'])}")
+        print(f"    ({r['core_count']} core, {r['infra_count']} infra, {r['exp_count']} experimental)")
+        print(f"\n    Strategic question: {r['question']}")
+        if r["search_result"]:
+            print(f"    External search: {r['search_result'][:300]}")
+
+    return results
+
+
+def _recycler_search(query: str) -> str:
+    """Run a quick recycler search via parts-bin or web search."""
+    # Try parts-bin first
+    try:
+        result = subprocess.run(
+            ["python", str(FACTORY / "scripts" / "parts-bin.py"), "search", query],
+            capture_output=True, text=True, timeout=10
+        )
+        if result.returncode == 0 and result.stdout.strip():
+            lines = [l for l in result.stdout.strip().split("\n") if l.strip()]
+            return " | ".join(lines[:2])[:300]
+    except Exception:
+        pass
+    return ""
     """Strip noise prefixes from a sub-pattern for display."""
     p = pat.strip()
     p = re.sub(r'^\d+x\s*', '', p)
@@ -1810,54 +1961,6 @@ def _issue_label(issue: dict) -> str:
     """Return a GitHub label for the issue."""
     rec = issue["recommendation"].lower()
     return rec
-    """Strip noise prefixes from a sub-pattern for display."""
-    p = pat.strip()
-    p = re.sub(r'^\d+x\s*', '', p)
-    p = re.sub(r'^error:\s*', '', p)
-    p = re.sub(r'^\[BLOCKER from \w+\]\s*', '', p)
-    return p
-
-
-def _is_noise_subpattern(pat: str) -> bool:
-    """Return True if this sub-pattern is just a generic section header, not actionable."""
-    p = pat.strip().lower()
-    noise = {'status', 'update', 'sitrep', "here's the summary", "here is the summary",
-             'summary', 'plan (as requested)', 'result', "what i did",
-             'files changed + behavior changes', 'implemented now',
-             'section a:', 'section b:', 'findings', 'triage board:', 'result so far:'}
-    for n in noise:
-        if p == n or p.startswith(n):
-            return True
-    return len(p) < 10
-
-
-def _short_title(domain: str, pattern: str) -> str:
-    """Derive a short issue title from the domain + best sub-pattern."""
-    p = pattern.strip()
-    # Strip noise prefixes
-    p = re.sub(r'^\d+x\s*', '', p)
-    p = re.sub(r'^error:\s*', '', p)
-    p = re.sub(r'^\[BLOCKER from \w+\]\s*', '', p)
-    p = re.sub(r'^impact:\s*', '', p)
-    # Skip noise-only patterns
-    noise_patterns = [
-        r'^Here.?\s*(?:is|was)\s*(?:the|a)\s*(?:summary|status|result)',
-        r'^\[resolved\]', r'^Sitrep', r'^Status\s*$', r'^Update\s*$',
-        r'^I.ll\s+investigate', r'^\d+\s+tests?\s+pass',
-    ]
-    for np in noise_patterns:
-        if re.match(np, p, re.IGNORECASE):
-            return domain
-    # Take first meaningful clause after "->"
-    if '->' in p:
-        parts = p.split('->', 1)
-        p = parts[-1].strip()
-    # Clean up
-    p = re.sub(r'^[-—>\s]+', '', p)
-    p = p[:100].strip().rstrip('.:;-')
-    if not p or len(p) < 8:
-        return domain
-    return f"{domain} — {p}"
 
 
 def _show_pros_cons_fix(domain: str, tier: str, goals: list, intent):
