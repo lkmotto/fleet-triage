@@ -1213,16 +1213,21 @@ class PayoffScorer:
         confidence = confidence_score
 
         # --- COST ---
+        # Cost reflects the RISK of getting it wrong, not just effort.
+        # Removal is irreversible — low effort but catastrophically expensive when wrong.
+        # Investigation is cheap and safe — read-only, no mutations.
         if is_divested or is_deprecated:
-            cost = 0.15
+            cost = 0.15    # already decided, just finishing
         elif is_deprioritized:
-            cost = 0.25
+            cost = 0.25    # low priority, low stakes
         elif is_external_fix:
-            cost = 0.5
-        elif recommendation == "REMOVE":
-            cost = 0.2
+            cost = 0.5     # depends on external surface
         elif recommendation == "DISMISS":
-            cost = 0.1
+            cost = 0.1     # cheapest — just close the issue
+        elif recommendation == "INVESTIGATE":
+            cost = 0.3     # cheap — read-only research, no mutations
+        elif recommendation == "REMOVE":
+            cost = 1.0     # EXPENSIVE — irreversible. Getting this wrong costs revenue.
         elif error_count > 3 and sub_pattern_count > 1:
             cost = 0.4
         elif error_count > 0:
