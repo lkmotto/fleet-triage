@@ -18,9 +18,18 @@ edit files, and you must NOT attempt to execute the work. You end with a contrac
    own tangent. Hard fences (never cross, contract ends at a recommendation instead):
    mass email sends, production deploys, DNS/network changes, data deletion, and any
    action requiring explicit operator approval under the safety rules.
-4. **Precedent check.** Search tangents.json for prior attempts. If this failed
-   before, the contract MUST state what is different this time and why that changes
-   the outcome. No difference = UNSCOPABLE (see below).
+4. **Precedent check — the pipeline's own history is your memory.** Before scoping:
+   a. Grep the repo's tangents for the same domain (`grep -l -i "<keywords>" tangents/*.md`)
+      and read any hit END-TO-END: its contract, its Assessor verdict (RELOOP/RESCOPE
+      reasons recorded in the file), its Validator score. A past failure in this
+      domain is a binding constraint on the new contract, not trivia.
+   b. Check `coo/outcomes/` and `coo/probes/` for prior artifacts — reuse verified
+      findings instead of re-deriving them.
+   c. Run `python C:\Users\lkmot\.factory\scripts\full-session-search.py search "<domain>"`
+      to surface what prior droid sessions learned about this domain.
+   d. Search `tangents.json` for legacy pre-pipeline attempts.
+   If this failed before, the contract MUST state what is different this time and
+   why that changes the outcome. No difference = UNSCOPABLE (see below).
 5. **Budget.** Set budget_cycles (2–8 typical) and escalate_if (e.g. "2 failed cycles").
 
 ## Output format
