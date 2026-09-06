@@ -1,8 +1,8 @@
 ---
 id: 20260906-e2e-stage3-comp-certainty
-status: assess
+status: validating
+assessor_session: 430a3c5a-605b-41be-86eb-b60fc11312ea assess
 executor_session: 99741121-51dd-4187-88fa-5fdbca7f9366 running
-assessor_session: 29a8d67e-a2b8-49cf-a9b2-7c77d614a85e assess
 priority: high
 budget_cycles: 6
 escalate_if: 2 failed non-environmental cycles; or Caladium has usable spark_export.csv on disk but cannot be CERTIFIED after one bounded handoff/status write + one offline stage3b attempt; or repeat zero-turn launch
@@ -158,3 +158,6 @@ run_started: 2026-09-06T16:01:23-05:00
 - what was done: Confirmed prior-run certification survived the harness outage (Caladium + Big Sky handoffs on disk, 6+6 ids verified against picks). Re-verified research trio + pb-0076 against live code/disk and appended the Verify/Amend stanza. Scanned all 17 spark holders (plus full by_address cohort, read-only) and wrote stage4-gate.json: **7 CERTIFIED / 10 BLOCKED**, min set Caladium + Big Sky; Brazos BLOCKED via documented pool-contamination override (Houston-polluted pre-fm23 pool). No live Matrix run needed; no Stage-4 attach performed; contaminated evidence workfiles untouched.
 - what remains: nothing — done-when fully met (Stage-4 attach runs belong to the sibling tangent, which should now consume stage4-gate.json)
 - rescope note: none
+
+## Assessor verdict
+=== VERDICT: DONE === All 6 done-when items independently verified on disk (7 CERTIFIED rows machine-checked incl. Caladium+Big Sky min set, gate JSON cohort of 17 complete, trio+pb-0076 verified with amended citations at comp_selection.py L76/L485); scope fence and no-spend/attach fences honored; 2/6 cycles used.
