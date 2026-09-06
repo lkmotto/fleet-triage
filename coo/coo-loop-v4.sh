@@ -320,10 +320,11 @@ for tf in $TFS; do
   f="tangents/$(basename "$tf")"
   st=$(status_of)
   case "$st" in
-    queued|scoped|approved|assess|validating|rescope) advance "$f" ;;
-    *) : ;;
+    queued|scoped|approved|assess|validating|rescope) log "SWEEP item=$tf status=$st action=advance"; advance "$f" ;;
+    *) log "SWEEP item=$tf status=$st action=skip"; : ;;
   esac
 done
+log "SWEEP MANIFEST: processed items above; TFS had $(echo $TFS | wc -w) words"
 
 if [ "$CYCLE_FAILURES" -gt 0 ]; then
   PREV=$(cat "$FAILS_FILE" 2>/dev/null || echo 0)

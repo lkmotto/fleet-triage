@@ -1,14 +1,3 @@
-Out-of-band scoping 2026-09-06 (operator-approved scoper session): the 2026-09-05
-in-loop scope attempt failed (parked-scoperfail, empty scoped artifacts). Grounding
-was re-verified live this session: ledger step memory-knowledge:scout-consumer still
-proposed, scout-orphan blocker since 2026-07-28, presence-only
-scout_candidates_unconsumed predicate in project_ledger.py, 5 real scout.candidate
-events (2026-07-28) in strategic_events.jsonl, stale cursor at 2026-08-06, live
-scout_consumer.py missing (archive is a GH-issue mill — do not restore). The
-approved contract below was written to tangents/20260905-scout-consumer-wiring.md
-(status: scoped; merge-mode approval handoff to the loop).
-
-=== CONTRACT ===
 ---
 id: 20260905-scout-consumer-wiring
 status: scoped
@@ -120,4 +109,3 @@ GitHub-issue mill.
 6. If reviving the scheduled GH-issue consumer is still wanted after this, file it as
    a SEPARATE tangent — do not expand this contract.
 
-=== END CONTRACT ===

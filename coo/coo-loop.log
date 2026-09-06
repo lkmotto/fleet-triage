@@ -545,3 +545,64 @@ board + 12 view pages regenerated
  3 files changed, 5 insertions(+), 1 deletion(-)
 board + 12 view pages regenerated
 [2026-09-06T10:07:43-05:00] ASSESS 20260905-ntreis-fm23
+[2026-09-06T10:17:31-05:00] VERDICT 20260905-ntreis-fm23 DONE -> validating
+[feature/coo-loop b6a036e] coo: 20260905-ntreis-fm23 assessed
+ 2 files changed, 6 insertions(+), 1 deletion(-)
+bash: /c/Users/lkmot/factory-context/code/fleet-triage/coo/gen-board.sh: No such file or directory
+[2026-09-06T10:17:32-05:00] WARN board gen failed
+[2026-09-06T10:17:32-05:00] VALIDATE 20260905-ntreis-fm23
+[2026-09-06T10:25:53-05:00] VALIDATION 20260905-ntreis-fm23 PASS -> done
+[feature/coo-loop ca0670a] coo: 20260905-ntreis-fm23 validated
+ 4 files changed, 27 insertions(+), 1 deletion(-)
+ create mode 100644 coo/live/20260905-ntreis-fm23.validate.live.log
+ create mode 100644 coo/probes/20260905-ntreis-fm23.probe.md
+bash: /c/Users/lkmot/factory-context/code/fleet-triage/coo/gen-board.sh: No such file or directory
+[2026-09-06T10:25:54-05:00] WARN board gen failed
+bash: /c/Users/lkmot/factory-context/code/fleet-triage/coo/gen-board.sh: No such file or directory
+[2026-09-06T10:25:54-05:00] WARN board gen failed
+bash: /c/Users/lkmot/factory-context/code/fleet-triage/coo/gen-board.sh: No such file or directory
+[2026-09-06T10:25:54-05:00] WARN board gen failed
+To https://github.com/lkmotto/fleet-triage.git
+   88b6042..ca0670a  feature/coo-loop -> feature/coo-loop
+[2026-09-06T10:25:56-05:00] ===== sweep end =====
+[2026-09-06T10:41:00-05:00] SCOPE claim 20260905-scout-consumer-wiring
+[feature/coo-loop b3e6d60] coo: 20260905-scout-consumer-wiring claim-scope
+ 2 files changed, 2 insertions(+), 1 deletion(-)
+/c/Users/lkmot/factory-context/code/fleet-triage/coo/coo-loop-v4.sh: line 98: coo/tmp/20260905-scout-consumer-wiring.scoped.sid: No such file or directory
+[2026-09-06T11:01:03-05:00] CONTRACT 20260905-scout-consumer-wiring scoped+approved
+[feature/coo-loop 5c2273c] coo: 20260905-scout-consumer-wiring scoped
+ 1 file changed, 25 insertions(+), 5 deletions(-)
+bash: /c/Users/lkmot/factory-context/code/fleet-triage/coo/gen-board.sh: No such file or directory
+[2026-09-06T11:01:04-05:00] WARN board gen failed
+[2026-09-06T11:01:04-05:00] EXECUTE claim 20260905-scout-consumer-wiring (continuity_sid=none reloop=0)
+[feature/coo-loop a99d24f] coo: 20260905-scout-consumer-wiring claim-execute
+ 2 files changed, 3 insertions(+), 1 deletion(-)
+[2026-09-06T11:13:42-05:00] SESSION 20260905-scout-consumer-wiring -> a30fae46-b542-4e9e-997e-27dd010fdff8
+[2026-09-06T11:13:42-05:00] EXECUTOR exited 0 20260905-scout-consumer-wiring
+[feature/coo-loop 0cdd041] coo: 20260905-scout-consumer-wiring executed
+ 2 files changed, 33 insertions(+), 1 deletion(-)
+ create mode 100644 coo/live/20260905-scout-consumer-wiring.execute.live.log
+bash: /c/Users/lkmot/factory-context/code/fleet-triage/coo/gen-board.sh: No such file or directory
+[2026-09-06T11:13:43-05:00] WARN board gen failed
+[2026-09-06T11:13:44-05:00] ASSESS 20260905-scout-consumer-wiring
+[2026-09-06T11:17:42-05:00] VERDICT 20260905-scout-consumer-wiring DONE -> validating
+[feature/coo-loop 98928dd] coo: 20260905-scout-consumer-wiring assessed
+ 3 files changed, 7 insertions(+), 1 deletion(-)
+ create mode 100644 coo/live/20260905-scout-consumer-wiring.assess.live.log
+bash: /c/Users/lkmot/factory-context/code/fleet-triage/coo/gen-board.sh: No such file or directory
+[2026-09-06T11:17:43-05:00] WARN board gen failed
+[2026-09-06T11:17:43-05:00] VALIDATE 20260905-scout-consumer-wiring
+[2026-09-06T11:25:24-05:00] VALIDATION 20260905-scout-consumer-wiring PASS -> done
+[feature/coo-loop 913ea40] coo: 20260905-scout-consumer-wiring validated
+ 4 files changed, 30 insertions(+), 1 deletion(-)
+ create mode 100644 coo/live/20260905-scout-consumer-wiring.validate.live.log
+ create mode 100644 coo/probes/20260905-scout-consumer-wiring.probe.md
+bash: /c/Users/lkmot/factory-context/code/fleet-triage/coo/gen-board.sh: No such file or directory
+[2026-09-06T11:25:25-05:00] WARN board gen failed
+bash: /c/Users/lkmot/factory-context/code/fleet-triage/coo/gen-board.sh: No such file or directory
+[2026-09-06T11:25:25-05:00] WARN board gen failed
+bash: /c/Users/lkmot/factory-context/code/fleet-triage/coo/gen-board.sh: No such file or directory
+[2026-09-06T11:25:25-05:00] WARN board gen failed
+To https://github.com/lkmotto/fleet-triage.git
+   add6cb6..913ea40  feature/coo-loop -> feature/coo-loop
+[2026-09-06T11:25:27-05:00] ===== sweep end =====
