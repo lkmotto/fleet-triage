@@ -1,8 +1,8 @@
 ---
 id: 20260906-e2e-stage4-truetracts-repair
-status: assess
+status: rescope
+assessor_session: 1deb6346-c147-4ba1-9446-c48d7cdc9c2e assess
 executor_session: cfe1c166-6a58-4d63-9e5a-a3bab32194b4 running
-assessor_session: 595240d1-6cf8-4d8b-ad70-0783d6b67f09 assess
 priority: high
 budget_cycles: 6
 escalate_if: 2 failed live Stage-4 execute cycles after preflight (auth valid + subject JSON ready + CSV gate green), OR google_secure_browser_block after one bounded reseed-refresh, OR address_not_committed twice with no new selector evidence, OR ss_not_defined twice after one bounded recovery fix, OR MLS attach still file_attached:false after one diagnostic + one bounded selector fix
@@ -101,3 +101,6 @@ run_started: 2026-09-06T15:47:06-05:00
 ## Assessor verdict
 === VERDICT: RESCOPE === Second failure of this contract (cycle-1 preflight RAM stop, cycle-2 RAM + harness-outage stop) exhausts the single RELOOP; my independent probes confirm channel recovered (Execute exit 0, 16:01:15) but RAM flat-red (2.26/31.19 GB free) with zero portal progress (no run JSON, storage/CSV mtimes unchanged) — contract path still valid, rescope carries operator flag to free RAM before cycle 3.
 run_started: 2026-09-06T16:05:47-05:00
+
+## Assessor verdict
+=== VERDICT: RESCOPE === Third consecutive zero-portal environmental stop (my probes: channel OK but 3.74-3.84 GB free vs ≥8 GB gate; no run JSON at named path, storage/CSV mtimes unchanged) — rescope count now two plus this one, escalating to operator with park; artifact evidence: coo/outcomes/20260906-e2e-stage4-truetracts-repair-run.json MISSING, executor Outcome cycle-3 block.
