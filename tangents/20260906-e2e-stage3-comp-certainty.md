@@ -1,6 +1,7 @@
 ---
 id: 20260906-e2e-stage3-comp-certainty
-status: scoping
+status: parked
+scoper_session: e2342232-60bd-4e04-9bb1-130acd338ab0 scoping
 priority: high
 budget_cycles: 6
 escalate_if: 2 failed cycles
@@ -47,3 +48,4 @@ Binding additions on re-scope:
 2. Done-when: an explicit stage-4 gate list — orders certified (CSV emitted) vs orders BLOCKED for
    stage 4 (no CSV) — recorded in the outcome artifact so the sibling stage-4 tangent consumes it.
 3. Recycler-first ordering and the no-spend fence (MLS API $200/mo) are unchanged.
+- scoper returned no contract twice, parked for operator review
