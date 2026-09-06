@@ -1,16 +1,12 @@
-Scoping complete. The contract is written to `C:\Users\lkmot\factory-context\code\fleet-triage\tangents\20260905-spark-csv-export.md` (status: scoped, ready for the coo-loop to dispatch an executor), governance record appended to `agent-governance.jsonl`, and verify-done passed (file exists, 8,740 bytes, readable).
+Rescope complete. The contract is persisted at `tangents/20260905-spark-csv-export.md` (verified, 12.7 KB) and is ready for dispatch once the loop is healthy. Key scoping findings, grounded live this session:
 
-Key grounding findings (all verified live, paths in the contract):
+- **Goal still sound.** All three target orders (Caladium/Perdenalas/Companero) remain CSV-less with only the Aug 6–11 search/error JPGs; ledger step `appraisal-pipeline:spark-csv` is still `proposed`/`outcome: null`. All contract pointers resolve: `tools/run_stage3_single_case.py`, `agent/stages/stage3_matrix_spark.py` (Strategy 1 `expect_download` at exactly L2211, `all_download_strategies_failed` at exactly L2301), `ntreis_matrix` storage state at `~\.motto-appraisal-pipeline\browser-state\`, Denham-pattern subject JSONs.
+- **Prior cycles were harness-only failures.** Cycles 1–2 never reached Stage 3 (zero-turn permission gate, `num_turns: 0`); cycle 3 never launched (assessor phase failing amid `flock: command not found` and a half-applied in-place patch to coo-loop-v4.sh, with stale loop bash processes from 21:45 still running). That is why this is a rescope, not UNSCOPABLE: the new angle is the first genuine live execute on post-`35ac67d` export code, with a **mandatory launch gate** and a **reset budget of 4 live cycles**.
+- **New hard fence added:** COO harness repair (`flock`, live PIDs, script patching) is explicitly out of scope here; if launch can't get past the permission gate, the executor stops with `failed (environmental: yes)` and the harness gets its own tangent.
 
-- **The bug is mostly historical, not current.** `_download_export_format` in `agent/stages/stage3_matrix_spark.py` (three capture strategies, commit `35ac67d` onward) has produced real `spark_export.csv` files for many orders since 2026-08-26 (16 CSVs on disk).
-- **Ledger oscillation explained:** `ledger-outcomes.jsonl` shows `spark-csv` evidence-clear on 2026-09-03 but still-live on 2026-09-05 because ~14 orders remain CSV-less with only `matrix_spark_error.jpg` — and several of those later errors are actually filter-population or CSV-fieldname failures, not download failures (e.g. Lark's diagnostics JSON shows `partial_csv` at 140KB).
-- **Precedent difference this time:** the three PARTIAL stub failures (Caladium/Perdenalas/Companero, Aug 6–11) predate the stabilized export path. The contract therefore runs a live Stage 3 on one of those exact orders first, and only patches download capture if the failure is still `all_download_strategies_failed`.
-- **Fences held:** fm23 controls, auth redesign, SFREP COM sessions, and the dirty pipeline tree are all hard-fenced; MLS no-CSV-skip is proven via disk handoff/discovery instead of opening a report session.
-
-Verification: verify-done.py `--task-type file` — 2 passed, 0 failed. Execution of the Stage 3 run itself is intentionally not started (Scoper does not execute).
-
-Next improvement: make `strategic_review.py`'s evidence detector distinguish "no CSV on disk" from "download strategy failed" so residual CSV-less orders don't re-flag the whole export subsystem as live.
-Gap observed: the contract format requires `scoped_at: <ISO date>`, but the stub template uses a bare date; the coo-loop should pin one convention (I used `2026-09-05` to match the stub's id date).
+```text
+Next improvement: add a launch-gate self-check to coo-loop-v4.sh (fail fast with an explicit log line when execute emits num_turns:0) so harness-only failures stop consuming product cycles.
+```
 
 === CONTRACT ===
 ---
@@ -18,45 +14,52 @@ id: 20260905-spark-csv-export
 status: scoped
 priority: high
 budget_cycles: 4
-escalate_if: 2 failed cycles
-origin: project-ledger proposed step (appraisal-pipeline:spark-csv)
+escalate_if: any zero-turn/permission launch fail (stop environmental immediately); or 2 live Stage 3 cycles still ending all_download_strategies_failed after one focused export patch
+origin: project-ledger proposed step (appraisal-pipeline:spark-csv); rescope after harness-only cycles 1-2 (2026-09-05)
 scoped_by: coo-scoper
-scoped_at: 2026-09-05
+scoped_at: 2026-09-06
 ---
 # Fix/verify NTREIS Spark CSV export (all_download_strategies_failed)
 
 ## Why
-Stage 3 comps must land a Spark CSV so Stage 4 / MLS import can attach comps. Ledger blocker `appraisal-pipeline:spark-csv` (core `appraisal-pipeline`) still gates "fully processed" orders when search succeeds but export captures nothing. Revenue path: tax → diagnostics → **comps CSV** → report.
+Stage 3 comps must land a Spark CSV so Stage 4 / MLS import can attach comps. Core ledger blocker `appraisal-pipeline:spark-csv` still gates "fully processed" orders when search succeeds but export captures nothing. Revenue path: tax → diagnostics → **comps CSV** → report. Prior 2026-09-05 execute attempts never ran Stage 3 (permission/harness failures only); the CSV-less orders remain on disk, so the product goal is unchanged and now gets its first real live attempt on post-`35ac67d` export code.
 
 ## Done when
-- [ ] A live Stage 3 run during this tangent writes `workfiles/by_address/<slug>/comps/spark_export.csv` with ≥1 data row (not header-only) for a previously CSV-less order (primary `1804_caladium_dr_corinth_tx_76210`; fallbacks `1208_perdenalas_trl_westlake_tx_76262` or `1441_companero_st_haslet_tx_76052`).
-- [ ] Same run leaves corroborating comps artifacts in that order's `comps/` (e.g. `matrix_search_results.jpg` and/or `matrix_export_page.jpg`, or export success metadata) and the export path does NOT end with `reason=all_download_strategies_failed`.
-- [ ] MLS no-CSV skip is cleared for that order via checkable handoff/discovery: either `agent/truetracts_context.py` / `agent/pipeline.py` resolution finds `comps/spark_export.csv` as ready input, or an existing/new `truetracts_mls_import_status.json` no longer records skip for missing CSV. Do NOT open SFREP COM solely to prove this.
-- [ ] Write-back recorded: outcome in `tangents/20260905-spark-csv-export.md` (Outcome section, plus `tangents.json` completed entry per loop convention) and `project-ledger.json` step `appraisal-pipeline:spark-csv` flipped with outcome text + absolute artifact paths.
+- [ ] **Launch gate evidence** exists for this execute cycle: the executor session actually takes ≥1 tool turn and leaves a run receipt under `C:\Users\lkmot\factory-context\code\fleet-triage\coo\live\` or `coo\tmp\` for this id. If the launch instead hits the zero-turn permission gate ("insufficient permission to proceed. Re-run with --auto medium or --auto high"), record Outcome `failed (environmental: yes)` with the live log path and make **no further product attempts** this cycle — the harness, not this contract, is broken.
+- [ ] A live Stage 3 run **during this tangent** writes `C:\Users\lkmot\factory-context\code\github\lkmotto\motto-appraisal-pipeline\workfiles\by_address\<slug>\comps\spark_export.csv` with ≥1 data row (not header-only). Primary slug `1804_caladium_dr_corinth_tx_76210`; fallbacks `1208_perdenalas_trl_westlake_tx_76262`, `1441_companero_st_haslet_tx_76052`. CSV mtime must be newer than this cycle's `run_started`.
+- [ ] Same run leaves corroborating comps artifacts in that order's `comps/` (e.g. refreshed `matrix_search_results.jpg` and/or `matrix_export_page.jpg`, or export success metadata/log) and the export path does NOT end with `reason=all_download_strategies_failed` (check run JSON `result.message` and the run's spark payload).
+- [ ] MLS no-CSV skip is cleared for that order via **disk/discovery only** (no SFREP COM): prove `comps/spark_export.csv` is resolvable the way Stage 4 would resolve it (grep/call the discovery path in `agent/truetracts_context.py` and/or `agent/pipeline.py`, or a small Python one-liner importing that resolver and printing the found path). If `truetracts_mls_import_status.json` already exists for that order, it must not record a missing-CSV skip. Do NOT create a full Stage 4 run solely to prove this.
+- [ ] Write-back recorded: outcome on `C:\Users\lkmot\factory-context\code\fleet-triage\tangents\20260905-spark-csv-export.md` (Outcome section, plus `tangents.json` completed entry per loop convention) and `C:\Users\lkmot\.factory\knowledge\project-ledger.json` step `appraisal-pipeline:spark-csv` flipped with outcome text + **absolute** artifact paths. Clear blocker `spark-csv` only if the live CSV success above is proven.
 
 ## Out of scope
-- fm23 radius/type controls (`20260905-ntreis-fm23`) — if mandatory-coverage blocks before export, capture artifact and stop.
-- Auth/session rearchitecture; Clareity redesign; portal mass actions.
+- **COO harness repair** (`coo-loop-v3.sh`/`v4.sh` bash syntax, `flock`, live loop PIDs, patch re-apply). If the execute launch cannot get past the permission gate, stop with environmental failure and recommend a separate harness tangent — do not debug bash inside this tangent.
+- fm23 radius/type controls (`20260905-ntreis-fm23` / `appraisal-pipeline:ntreis-fm23`). If mandatory-coverage blocks before export, capture the artifact and stop.
+- Auth/session rearchitecture; Clareity redesign; portal mass actions; storage-state rebuild campaigns (existing `ntreis_matrix` state path is what it is — if stale, that is an environmental fail or a one clean re-auth via the existing portal_auth path only).
 - Full Stage 4 TrueTracts workflow, SFREP COM sessions, report completion.
-- Unrelated Stage 3 failure modes (filter population blanks, CSV fieldname explosion, 100-row price-band coverage) — label and recommend a separate tangent only.
+- Unrelated Stage 3 failure modes (filter-population blanks, CSV fieldname explosion, 100-row price-band merge, `format_readback_mismatch` as primary reason) — label and recommend a separate tangent only.
+- Polar/other download rescuers outside Matrix Spark `_download_export_format`.
 - Mass email, production deploy, DNS/network changes, data deletion; cleaning/reverting unrelated dirty files in the pipeline working tree.
-- Polar/other download rescuers outside Matrix Spark export.
 
-## Context (verified during scoping)
-- Ledger `C:\Users\lkmot\.factory\knowledge\project-ledger.json`: blocker `spark-csv` since 2026-08-06, step still `proposed`, 2026-09-05 evidence `comps_partial_csv: true`; `ledger-outcomes.jsonl` oscillates (evidence-clear 09-03, still-live 09-05).
-- Precedent PARTIALs in `tangents.json`: Caladium 08-06, Perdenalas 08-07, Companero 08-11 (search OK, `all_download_strategies_failed`, no CSV); Heidi 08-02 Stage 4 "MLS import skipped (no CSV)".
-- 14 orders CSV-less with spark error under `C:\Users\lkmot\factory-context\code\github\lkmotto\motto-appraisal-pipeline\workfiles\by_address\` (list in tangent file); 16 `spark_export.csv` successes on disk post-08-26.
-- What is different this time: export plumbing landed (`35ac67d` resilient helpers; strategies at `stage3_matrix_spark.py` ~2211–2301) and fm23 path works; residual failures are a mix, so this is verify-then-patch-once, not a blind rewrite.
-- Entry points: `tools/run_stage3_single_case.py --subject-file`; `tools/_autonudge_run_stage.py`; storage key `ntreis_matrix`; `auth-userpass/prd` wrapper convention; optional `SPARK_EXPORT_FORMAT`/`SPARK_EXPORT_OCCURRENCE`/`SPARK_PRICE_BAND`.
-- MLS consume path: `agent/truetracts_context.py` + `agent/pipeline.py` discover `comps/spark_export.csv`; Stage 4 writes `truetracts_mls_import_status.json`.
-- Full grounding + flow diagram: `C:\Users\lkmot\.factory\specs\2026-09-06-contract-fix-verify-ntreis-spark-csv-export-all_download_strategies_failed.md`; contract persisted at `C:\Users\lkmot\factory-context\code\fleet-triage\tangents\20260905-spark-csv-export.md`.
+## Context (verified during rescope, 2026-09-06)
+- **Ledger** `C:\Users\lkmot\.factory\knowledge\project-ledger.json`: project `appraisal-pipeline` (core); blockers `ntreis-fm23` + `spark-csv` (since 2026-08-06); next step `appraisal-pipeline:spark-csv` still `status: proposed`, `outcome: null`, `dispatched_at: null`. `C:\Users\lkmot\.factory\knowledge\ledger-outcomes.jsonl` oscillates (evidence-clear 09-03/09-04, still-live 09-05 with `comps_partial_csv: true`).
+- **Precedent PARTIALs** in `C:\Users\lkmot\.factory\knowledge\tangents.json` completed list: Caladium `20260806T090200-...-comps`, Perdenalas `20260807T210600-...-comps`, Companero `20260811T210500-...-comps` — search OK, then `all_download_strategies_failed`; Heidi `1325_heidi_dr_plano_tx_75025` Stage 4 "MLS import skipped (no CSV)".
+- **2026-09-05 harness precedent for this id**: cycles 1-2 were launch-only failures — run 1 non-start 21:52; run 2 `num_turns: 0` "insufficient permission to proceed" after 187.9s, session `02442482-32c9-4f30-80b8-fa6c35634ad3`, live log `coo/live/20260905-spark-csv-export.execute.live.log`; cycle 3 never launched (assessor failed twice). Root cause shared with `20260905-ntreis-fm23`: execute launched without `--auto`. The `--auto` injection now exists in coo-loop-v4.sh (L141 `EXEC_AUTO=${COO_EXECUTE_AUTO:-medium}`, L145/147 launch lines), but live loop instances may still be running pre-fix code — hence the launch gate above. Full pre-rescope evidence is archived in git history of this file (feature/coo-loop branch).
+- **Disk targets still CSV-less** (verified): each of the three slugs has only `comps\matrix_search_results.jpg` + `comps\matrix_spark_error.jpg` (Aug 6/7/11) plus subject/tax artifacts; no `spark_export.csv`, no `truetracts_mls_import_status.json`. Fleet-wide: 16 `spark_export.csv` successes elsewhere (post-08-26), 18 `matrix_spark_error.jpg` (mixed causes — not all are download failures).
+- **Code hot path**: `agent\stages\stage3_matrix_spark.py` — `_download_export_format` at L2139 (opens Export.aspx, records "Export N Records", selects format via `SPARK_EXPORT_FORMAT`/`SPARK_EXPORT_OCCURRENCE`, readback check); Strategy 1 `expect_download` timeout=15000 at L2211; Strategy 2 click + body capture; Strategy 3 `__doPostBack`/JS click + poll; `payload["reason"] = "all_download_strategies_failed"` at exactly L2301. Success path writes `comps/spark_export.csv` (~L3434). Commit lineage includes `35ac67d` (resilient export helpers) plus later hardening (`041ee19` CSV quality validation, `4b8cc8f` SUCCESS return fix, `8c1ae3e` mandatory-field gate, `838ef9f` archive copy).
+- **Entry points**: `python tools/run_stage3_single_case.py --subject-file <json> --workfile-root workfiles` (prints one JSON body: address, workfile_dir, status, message, elapsed_seconds, files); alternative env-var wrapper `tools/_autonudge_run_stage.py` with `AUTONUDGE_STAGE=3` + `AUTONUDGE_ADDRESS/CITY/STATE/ZIP/COUNTY` + `WORKFILE_DIR`. Subject JSON pattern: `tools/_tmp_subject_denham.json` / `tools/_tmp_subject_pine_meadow.json` (SubjectProperty fields; file loader tolerates utf-8-sig/utf-16).
+- **Auth**: storage state `C:\Users\lkmot\.motto-appraisal-pipeline\browser-state\ntreis_matrix.json` (+ `ntreis_matrix_chrome_profile`); credentials via Doppler project `auth-userpass` config `prd` (NTREIS user/pass; wrapper convention `/ auth-userpass-prd` used by all prior stage runs). KB: Stagehand + Playwright on Legion; NTREIS is a known flaky surface (kb error pattern `ntreis`, 11 sessions).
+- **MLS consume path**: `agent\truetracts_context.py` and `agent\pipeline.py` discover `comps/spark_export.csv`; Stage 4 writes `truetracts_mls_import_status.json`.
+- **Full prior grounding + flow diagram**: `C:\Users\lkmot\.factory\specs\2026-09-06-contract-fix-verify-ntreis-spark-csv-export-all_download_strategies_failed.md` and rescope spec `C:\Users\lkmot\.factory\specs\2026-09-06-spark-csv-export-rescope.md`.
+- **Repo note**: `C:\Users\lkmot\factory-context\code\github\lkmotto\motto-appraisal-pipeline` working tree is dirty — do not revert or clean; run from current tree state.
+- **Sister fence**: `tangents/20260905-ntreis-fm23.md` (parked) owns radius/type controls; this id owns CSV capture only.
 
 ## Approach sketch
-1. Pre-flight: confirm `_download_export_format` + Spark step present; check `ntreis_matrix` state age; build Caladium subject JSON (mirror `_tmp_subject_*.json` pattern).
-2. One live Stage 3 run via `tools/run_stage3_single_case.py --subject-file` with workfile root = repo `workfiles/`.
-3. CSV with ≥1 data row → validate structure, prove MLS discovery/handoff ready, write back; done.
-4. Fail with `all_download_strategies_failed` only → harden capture ONCE (longer expect_download timeout, response listener for Export.aspx CSV body, avoid double-click racing strategies); re-run.
-5. Any other fail reason → PARTIAL + recommend new tangent; do not burn budget on filters.
-6. Two live cycles still failing post-patch → escalate per `escalate_if`.
+1. **Launch gate (mandatory first)**: confirm this session can act (≥1 real tool turn), then immediately append `run_started` + a short preflight note to this file. If the environment is permission-blocked/zero-turn, Outcome = `failed (environmental: yes)` citing the live log; stop.
+2. **Preflight**: confirm `_download_export_format` present in `agent/stages/stage3_matrix_spark.py`; check `ntreis_matrix` storage state file exists/age; build `tools/_tmp_subject_caladium.json` mirroring the Denham pattern for `1804 Caladium Dr, Corinth, TX 76210` (county Denton).
+3. **One live Stage 3 run** from the pipeline repo with the same auth wrapper convention as prior successful comps pulls (Doppler `auth-userpass/prd`): `python tools/run_stage3_single_case.py --subject-file tools/_tmp_subject_caladium.json --workfile-root workfiles`. Capture the stdout JSON into the Outcome block / `coo/tmp/`.
+4. **Success path**: `comps/spark_export.csv` exists with ≥1 data row past header and sensible size; corroborating screenshot/metadata refreshed this run; run a discovery one-liner proving `truetracts_context`/`pipeline` resolution finds the CSV; write back ledger + `tangents.json` + this file's Outcome; done.
+5. **Failure = `all_download_strategies_failed` only**: inspect same-run `matrix_spark_error.jpg` + logs; harden `_download_export_format` **once** (e.g. longer expect_download timeout, response listener for the Export.aspx CSV body, avoid double-click racing strategies 1→2, careful reuse of the longer `download_file` pattern); re-run the same order or the next fallback once.
+6. **Any other fail reason** (fm23 mandatory fields, format_readback_mismatch, filter populate, auth): PARTIAL with artifacts + a recommended new tangent id; do not burn remaining budget on filters/auth.
+7. **Escalate** without further silent reloops if: zero-turn launch recurs, or two live cycles still end `all_download_strategies_failed` after the one focused patch.
 
 === END CONTRACT ===
