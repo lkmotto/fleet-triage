@@ -1,6 +1,7 @@
 ---
 id: 20260905-strategic-outcomes-verify
-status: running
+status: assess
+executor_session: ff46aaab-9dd0-467d-b96f-330f65098ebb running
 priority: medium
 budget_cycles: 2
 escalate_if: 1 failed cycle of any kind after this rescope (including permission-gate num_turns:0) OR any patch beyond minimal unconditional outcomes append is attempted without a new tangent
@@ -126,3 +127,10 @@ You are the Executor for this tangent. Rules:
 - what remains: <or "nothing — done-when fully met">
 - rescope note: <only if bailing>
 run_started: 2026-09-06T12:25:38-05:00
+
+## Outcome (filled by executor)
+- status: success (closed as classified; environmental: no)
+- artifacts: coo/tmp/20260905-strategic-outcomes-verify.run.log; coo/tmp/20260905-strategic-outcomes-verify.guard-check.py + .out; coo/tmp/20260905-strategic-outcomes-verify.diagnostic.py + diagnostic-rerun.out; coo/outcomes/20260905-strategic-outcomes-verify.md
+- what was done: Preflight passed (coo-loop-v4.sh L202/206/208 use --auto; multi-turn tool use, no gate). Re-cited always-append at strategic_review.py L349-356 plus guard/early-exit lines; proof run --no-file failed upstream (60s client timeout, strategic_agents.py L161); refreshed diagnostic reproduced D1 (finish_reason=length, reasoning_tokens=4096, content_len=0). Guard verified import-level (20260809=True, 20260906=False). Root cause: upstream-LLM; append code present, ledger claim fair.
+- what remains: strategic_outcomes.jsonl still absent - blocked by D1/D2/D3 (max_tokens starvation, unguarded length-finish, 60s timeout). Follow-up tangent 20260906-fix-strategic-review-llm-truncation recommended in outcome note. No code changes made (patch branch not triggered).
+- rescope note: none
