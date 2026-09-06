@@ -1,6 +1,6 @@
 ---
 id: 20260905-ms01-scripts-inventory
-status: assess
+status: rescope
 priority: low
 budget_cycles: 3
 escalate_if: 1 failed cycle OR any non-inventory mutation of code/ ms01-* files
@@ -127,3 +127,6 @@ run_started: 2026-09-05T21:24:15-05:00
 ## Assessor verdict
 === VERDICT: RELOOP === Root cause was the harness permission-gate launch defect, now verified fixed in coo-loop-v3.sh:118/v4.sh:138 (--auto medium); executor produced zero work (execute.live.log num_turns:0), mutation guard clean (0 ms01-* in git status, 65-script recount matches), first failure with 2 cycles remaining.
 run_started: 2026-09-05T22:28:06-05:00
+
+## Assessor verdict
+=== VERDICT: RESCOPE === Contract sound but second environmental harness failure: reloop executor ran exactly the 1200s stage timeout (claim commit b1966b9 22:28:07, "EXECUTOR exited nonzero" 22:48:08, 0-byte execute.live.log) producing no artifacts; done-when 1/4 with mutation guard clean (65 scripts recounted, zero ms01-* in git status/log), so fresh contract with same done-when plus a longer execute-stage budget.
