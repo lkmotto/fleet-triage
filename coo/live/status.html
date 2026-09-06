@@ -1,36 +1,36 @@
 <html><head><meta http-equiv='refresh' content='15'><title>COO Board</title><style>body{font-family:consolas;background:#111;color:#ddd;padding:16px}table{border-collapse:collapse}td,th{border:1px solid #444;padding:4px 10px}.done{color:#6f6}.running{color:#ff6}.scoping,.assess,.validating{color:#6cf}.parked,.rescope{color:#f66}</style></head><body>
-<h3>COO Pipeline Board &mdash; 2026-09-05T22:39:28-05:00</h3><table><tr><th>tangent</th><th>status</th></tr>
+<h3>COO Pipeline Board &mdash; 2026-09-05T22:49:23-05:00</h3><table><tr><th>tangent</th><th>status</th></tr>
 <tr><td>20260905-campaign-105629-review</td><td class='done'>done</td></tr>
 <tr><td>20260905-glenhaven-harvest-verify</td><td class='done'>done</td></tr>
 <tr><td>20260905-gmail-intake-repair</td><td class='done'>done</td></tr>
 <tr><td>20260905-kb-gmail-crossref</td><td class='done'>done</td></tr>
-<tr><td>20260905-ms01-scripts-inventory</td><td class='running'>running</td></tr>
+<tr><td>20260905-ms01-scripts-inventory</td><td class='assess'>assess</td></tr>
 <tr><td>20260905-ntreis-fm23</td><td class='parked'>parked</td></tr>
 <tr><td>20260905-scout-consumer-wiring</td><td class='parked'>parked</td></tr>
 <tr><td>20260905-sdr-9800-recovery</td><td class='parked'>parked</td></tr>
 <tr><td>20260905-spark-csv-export</td><td class='assess'>assess</td></tr>
-<tr><td>20260905-strategic-outcomes-verify</td><td class='assess'>assess</td></tr>
+<tr><td>20260905-strategic-outcomes-verify</td><td class='running'>running</td></tr>
 <tr><td>20260905-tangents-ledger-hygiene</td><td class='done'>done</td></tr>
 <tr><td>20260906-sales-outreach-ledger-hygiene</td><td class='queued'>queued</td></tr>
 </table><h4>recent loop events</h4><pre style='font-size:11px'>
-[2026-09-05T22:31:35-05:00] WARN gitlock timeout in commit
-[feature/coo-loop b51fdee] coo: 20260905-spark-csv-export assessfail
- 3 files changed, 32 insertions(+), 1 deletion(-)
-[2026-09-05T22:31:37-05:00] ASSESS 20260905-spark-csv-export
-[2026-09-05T22:32:39-05:00] ASSESSOR FAILED 20260905-strategic-outcomes-verify (retry next sweep)
-/c/Users/lkmot/factory-context/code/fleet-triage/coo/coo-loop-v4.sh: line 26: flock: command not found
-[2026-09-05T22:32:39-05:00] WARN gitlock timeout in commit
-[feature/coo-loop d0759a2] coo: 20260905-strategic-outcomes-verify assessfail
- 4 files changed, 39 insertions(+), 79 deletions(-)
-/c/Users/lkmot/factory-context/code/fleet-triage/coo/coo-loop-v4.sh: line 255: syntax error near unexpected token `('
-/c/Users/lkmot/factory-context/code/fleet-triage/coo/coo-loop-v4.sh: line 255: `[ -f "$BREAKER" ] && { log "BREAKER TRIPPED - paused (delete coo/.breaker)"; exit 0; }'
-[2026-09-05T22:36:15-05:00] EXECUTOR exited nonzero 20260905-strategic-outcomes-verify
-[feature/coo-loop 39ff1aa] coo: 20260905-strategic-outcomes-verify executed
- 3 files changed, 9 insertions(+), 8 deletions(-)
-[2026-09-05T22:36:15-05:00] ASSESS 20260905-strategic-outcomes-verify
-[2026-09-05T22:39:28-05:00] ASSESSOR FAILED 20260905-spark-csv-export (retry next sweep)
 /c/Users/lkmot/factory-context/code/fleet-triage/coo/coo-loop-v4.sh: line 26: flock: command not found
 [2026-09-05T22:39:28-05:00] WARN gitlock timeout in commit
 [feature/coo-loop 7980abf] coo: 20260905-spark-csv-export assessfail
  3 files changed, 33 insertions(+), 35 deletions(-)
+[2026-09-05T22:39:30-05:00] ASSESS 20260905-spark-csv-export
+[2026-09-05T22:46:51-05:00] VERDICT 20260905-strategic-outcomes-verify RELOOP
+[feature/coo-loop dba25b4] coo: 20260905-strategic-outcomes-verify assessed
+ 4 files changed, 60 insertions(+), 46 deletions(-)
+[2026-09-05T22:46:52-05:00] EXECUTE claim 20260905-strategic-outcomes-verify (continuity_sid=none reloop=2)
+[feature/coo-loop 73a5ed4] coo: 20260905-strategic-outcomes-verify claim-execute
+ 1 file changed, 2 insertions(+), 1 deletion(-)
+[2026-09-05T22:48:08-05:00] EXECUTOR exited nonzero 20260905-ms01-scripts-inventory
+[feature/coo-loop 49f16fc] coo: 20260905-ms01-scripts-inventory executed
+ 2 files changed, 1 insertion(+), 2 deletions(-)
+[2026-09-05T22:48:08-05:00] ASSESS 20260905-ms01-scripts-inventory
+[2026-09-05T22:49:22-05:00] ASSESSOR FAILED 20260905-spark-csv-export (retry next sweep)
+/c/Users/lkmot/factory-context/code/fleet-triage/coo/coo-loop-v4.sh: line 26: flock: command not found
+[2026-09-05T22:49:22-05:00] WARN gitlock timeout in commit
+[feature/coo-loop 5073584] coo: 20260905-spark-csv-export assessfail
+ 4 files changed, 26 insertions(+), 28 deletions(-)
 </pre></body></html>
