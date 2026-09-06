@@ -1,6 +1,7 @@
 ---
 id: 20260905-ms01-scripts-inventory
-status: assess
+status: validating
+assessor_session: cb4479f0-c0ed-416e-a214-e53a4a35ed18 assess
 executor_session: 561dd6d8-ecb2-495a-badd-5b5880047452 running
 priority: low
 budget_cycles: 2
@@ -90,3 +91,6 @@ run_started: 2026-09-06T17:28:39-05:00
 - what was done: Live recount succeeded this cycle (no permission gate): 72 `ms01*` files = 65 scripts (19 `.sh` + 46 `.ps1`) + 7 PNGs, exactly matching the seed freeze. Bulk header extract of all 65 into one scratch blob; classified offline per seed rules. Wrote the outcomes md in one shot: keep=4 archive-candidate=61 unknown=0 total=65; era docker-wsl-recovery=19 hyperv-iso=46 proxmox-adjacent=0; mapped_workflow=none for all rows (no match against any of the 6 workflows.json ids); 7 PNGs noted ignore-as-script; 3 follow-on cull tangents recommended (names only).
 - what remains: nothing — done-when fully met. Mutation guard proven: post-run re-listing at 2026-09-06T17:36:34-05:00 shows all 72 files identical name|mtime|size to the pre-run freeze (Compare-Object empty; 5-file spot-check mtimes all 2026-07-15/07-30/08-08, none after inventory start 17:28:39). Executor wrote only the outcomes md, the scratch files, and this Outcome block. Counts in this block match the outcomes md exactly: keep=4 archive-candidate=61 unknown=0 total=65.
 - rescope note: none
+
+## Assessor verdict
+=== VERDICT: DONE === All 3 done-when items independently verified: 65-row inventory matches live recount (72 files, newest mtime 2026-08-08), counts keep=4/archive=61/total=65 consistent across outcome artifacts, mutation guard proven by fresh mtime spot-check.
