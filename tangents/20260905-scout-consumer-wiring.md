@@ -1,6 +1,7 @@
 ---
 id: 20260905-scout-consumer-wiring
-status: validating
+status: done
+validator_session: bff50838-24a5-4c11-870e-e170246a6b7d validating
 assessor_session: 69d072c9-cf0b-4153-a5a1-7d61428aaf3b assess
 executor_session: a30fae46-b542-4e9e-997e-27dd010fdff8 running
 priority: medium
@@ -165,3 +166,6 @@ run_started: 2026-09-06T11:01:04-05:00
 
 ## Assessor verdict
 === VERDICT: DONE === All 4 done-when items independently verified (blockers citing real event_ids in project-ledger.json; live dry-run proves unconsumed=false with idempotent re-stamp; 2 outcome lines at 16:08Z; step scout-consumer marked done), zero out-of-scope touches, 1/3 cycles used.
+
+## Validator
+=== VALIDATION: PASS === value:kills_recurring_noise; score:4; live dry-run re-execution showed unconsumed=false with idempotent re-stamps, 3 scout blockers cite all 5 real event_ids, outcomes lines 16:08Z/16:12Z present, fences clean (no schema/scheduler/GH-issue/out-of-scope touches)
