@@ -1,6 +1,6 @@
 ---
 id: 20260905-kb-gmail-crossref
-status: running
+status: assess
 priority: low
 budget_cycles: 2
 escalate_if: live gmail credential query still empty after one verified repair cycle, or any need to touch secret values / non-kb_credentials tables
