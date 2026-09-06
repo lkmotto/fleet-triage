@@ -1,6 +1,6 @@
 ---
 id: 20260905-strategic-outcomes-verify
-status: approved
+status: running
 priority: medium
 budget_cycles: 2
 escalate_if: 1 failed cycle OR any patch beyond append/lines-only verification is attempted without a new tangent
@@ -118,3 +118,4 @@ You are the Executor for this tangent. Rules:
 - what was done: <2-4 lines>
 - what remains: <or "nothing — done-when fully met">
 - rescope note: <only if bailing>
+run_started: 2026-09-05T21:39:29-05:00
