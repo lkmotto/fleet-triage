@@ -1,0 +1,18 @@
+Error during droid execution: ## Assessment — `20260905-ms01-scripts-inventory` (cycle 1 of 3)
+
+**Done-when verification (checked directly, not from claims):**
+
+1. **Outcome file missing.** `coo\outcomes\ms01-scripts-inventory.md` does not exist (ENOENT, not empty/partial). A directory-wide Glob for `*scripts-inventory*` artifacts confirms nothing was produced anywhere in the repo.
+2. **Outcome block missing.** `tangents\20260905-ms01-scripts-inventory.md` still ends at the executor-instructions template — no `## Outcome (filled by executor)` block was ever appended.
+3. **Mutation guard: PASS.** `git status --porcelain` shows only COO bookkeeping (loop log, live logs, tmp files) — zero `ms01-*` files touched. The inventory-only fence was not violated; nothing else in scope was either.
+
+**Ground truth confirmed:** the source set is intact and correctly counted — exactly **65 scripts + 7 PNGs** in `C:\Users\lkmot\factory-context\code\`, matching the scope-time numbers.
+
+**Failure class (from executor's own live log, `execute.live.log`):** `num_turns: 0`, `subtype: failure` — *"Exec ended early: insufficient permission to proceed. Re-run with --auto medium or --auto high."* The executor session died at the harness permission gate **before performing any turn**. No wrong plan, no wrong artifacts, no misunderstanding of the contract, no environmental tool outage.
+
+**Verdict reasoning:**
+- **RELOOP** does not fit: a zero-turn permission-gate refusal is not an environmental/transient failure in the contract's sense (tool down, auth expired, watchdog 124, network, interruption). It is a wrong launch configuration for a fully achievable contract — exactly the "wrong plan/wrong understanding of what it takes to execute" class that RESCOPE governs, since the fix (relaunch with an appropriate autonomy mode) is a fresh contract parameter, not feedback to the same session.
+- **ESCALATE** does not fit: no hard fence was crossed (mutation guard passed), no rescopes have occurred, and the work itself never started.
+- Budget: 1 of 3 cycles consumed, done-when untouched and plainly achievable — a fresh contract with the executor relaunch flag raised to `medium` should complete in one cycle.
+
+=== VERDICT: RESCOPE === zero-turn executor death at permission gate (num_turns:0, execute.live.log) produced no artifact; plan was sound (mutation guard passed, 65+7 recount matches), so re-contract with elevated executor autonomy rather than feedback-reloop.
