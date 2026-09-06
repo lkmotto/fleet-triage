@@ -1,0 +1,26 @@
+Tangent complete — **overall verdict: READY for appraiser use.**
+
+**Report:** `workfiles\by_address\2010_glenhaven_street_arlington_tx_76010\metadata\glenhaven_export_gap_verification.md` (6.1 KB; verify-done: 2/2 checks passed). Tangent file updated to `done` with the outcome block appended.
+
+**Verdicts (all artifact-backed, zero sessions opened):**
+
+| Check | Verdict | Basis |
+|---|---|---|
+| Garage $/space | **PASS** | Final harvest JSON `garage_rate: "$6,000"`, flags `[]`; raw export text carries the full support block (GAM $5,200–$6,900 CI, peer range $5,000–$10,000); templates say "$6,000 per space" |
+| Boundary reading | **PASS** | `boundary.ok: true`, four edge streets populated (W E Mitchell St / N E Abram St / E Swatson Rd / S E Park Row Dr), 15 visible streets, zero verify-markers in templates, six map/crop JPGs on disk, `gate_cleared: true` |
+| Core export package | **PASS** | Report.tdcx 13.65 MB; workfiles.zip 8.02 MB, 6 substantive PDFs (~5.8 MB uncompressed) |
+| Overall | **READY** | With two non-blocking observations below |
+
+**Early-vs-final explanation:** `truetracts_workflow_status.json` holds the stale gated-page snapshot (ok=false, 229 chars, both autonudge flags, SS gate notice); the rerun overwrote the harvest artifacts with real data per the documented design in `tools\_exploration\truetracts_findings.md`, but never rewrote the status snapshot. The autonudge report read the stale file. **Harvest-bug tangent: No** — the final harvest succeeded end-to-end; nothing defective remains to fix.
+
+**Two observations for appraiser review (report §5, non-blocking):**
+1. Filter wording mismatch: export page says "Garage Spaces: ≤ 2" but both narrative templates say "up to 3 garage spaces." The rate is consistent everywhere; align the narrative before delivery.
+2. `tdcx_subject_block_absent` residual (by design, noted only).
+
+**Fences respected:** no SFREP COM / TrueTracts browser session, no Stage-4 rerun, no code edits, pipeline workfile root only. One limitation recorded in the report: pixel-level JPG label spot-check wasn't possible (no vision input in this session), so boundary PASS rests on structured JSON + notes + marker sweep + file evidence, consistent with the 09-01 decision precedent that vision boundary reads need appraiser verification anyway.
+
+Verification: verify-done.py file check passed (2/2). Governance record appended to agent-governance.jsonl.
+
+Next improvement: Teach the autonudge flag reader to prefer `truetracts_export_harvest.json` (final) over `truetracts_workflow_status.json` (stale early snapshot) when both exist — this class of false-positive flag would self-eliminate.
+
+Gap observed: The contract's "spot-check map JPG labels (local/Qwen)" step assumed an image-capable path in-session; no routing fallback for vision checks was specified when the session model can't accept image input.
