@@ -1,7 +1,7 @@
 ---
 id: 20260906-e2e-stage5-sfrep-wiring
-status: assess
-assessor_session: 6ef7d716-b045-4769-9075-f618b114d90a assess
+status: rescope
+assessor_session: 0a6ed110-0c0a-43fa-837f-e502cc910c1f rescope
 priority: high
 budget_cycles: 6
 escalate_if: 2 failed live Stage-5 apply cycles after diagnosis memo + preflight (RAM gate + payload rebuild) with the same root cause class; OR free RAM cannot stay ≥8 GB around a single agent-owned SFREP session; OR Appraise-It/sfrep-mcp unavailable on Legion after one install/path check
@@ -79,3 +79,21 @@ run_started: 2026-09-06T14:56:51-05:00
 ## Assessor verdict
 === VERDICT: RELOOP === Executor never ran — nonzero exit after 1202s with 0-byte exec/live logs, zero of six done-when artifacts on disk, first failure, 5/6 cycles remain (same num_turns:0 crash class as d0871e0)
 run_started: 2026-09-06T15:24:30-05:00
+
+## Assessor verdict (cycle 2)
+- status: rescope (second failure of this contract)
+- Cycle 2 relooped executor also exited nonzero after exactly 1202s (watchdog class), 0-byte exec and live logs (coo/tmp/20260906-e2e-stage5-sfrep-wiring.exec.log; coo/live/…execute.live.log); metrics.jsonl 15:44:32; commit b2015ac contains no code/artifact changes — same num_turns:0 crash class as cycle 1 and d0871e0.
+- Partial work WAS produced mid-window before the kill: diagnosis memo on disk (coo/outcomes/20260906-e2e-stage5-sfrep-wiring-diagnosis.md, 15:43) and pipeline-repo form_prefill_bridge.py modified 15:43:48 (uncommitted, amid a heavily dirty tree). Comp-grid canonical-map hole independently spot-verified by assessor in SfrepPayloadPlanner.cs (CompType/CompIndex record fields exist; no canonical entries use them).
+- Done-when at assessment: 1 of 6 satisfied (diagnosis memo). Missing: payload-inventory.json, apply.json + report_full.pdf, field checklist, session-safety record, Outcome write-back.
+- Ram gate NOT holding: assessor measured 2.05 GB free (15:46) vs ≥8 GB required; three user-owned Sfrep.AppraiseIt instances running; diagnosis's own preflight (4.21→5.20 GB) also below gate. Live apply correctly never attempted.
+- Scope adherence: clean — no out-of-scope fence crossed, no SFREP session opened, no delivery call.
+- Escalate_if check: "2 failed live apply cycles" NOT met (zero live applies attempted); not a hard-fence crossing. But SECOND failure of the contract + budget pressure + degraded environment (RAM 2/8 GB, ambient 1202s watchdog kills, harness-level exit-66 storm during assessment) → RESCOPE.
+- Attached evidence for Scoper: diagnosis memo is sound and reusable (guinea pig 6037_sundown_dr_fort_worth_tx_76114; root causes: comp-grid canonical-map hole, bridge reading only comps/selected_comps.json while Sundown's selection lives at metadata/artifact_selected_comps__<slug>.json, subject-side fields already working; fix plan items 1–3 map to remaining done-when items 2–4). Remaining work is bounded: rebuild payload, one gated live apply, readback checklist, safety record. Scoper should: (a) carry the fix plan forward as explicit steps, (b) make the ≥8 GB RAM gate a hard precheck that SKIPS/defers the cycle rather than burning watchdog cycles, (c) address the 1202s num_turns:0 exec-crash class (two consecutive cycles on this tangent) — a runner defect, not a contract defect.
+
+=== VERDICT: RESCOPE === Second consecutive 1202s nonzero exec with 0-byte logs — only 1/6 done-when artifacts produced (diagnosis memo); 5 missing incl. payload inventory, apply proof, checklist, safety record; RAM 2.05 GB vs ≥8 GB gate.
+
+Next improvement: harden the coo runner to treat a 0-byte exec.log + nonzero exit as an environmental crash and auto-requeue instead of re-consuming a full 1202s watchdog cycle.
+Gap observed: assessor verification was blocked mid-run by a harness-wide exit-66 failure on every execution tool (echo, Get-Item, Grep, Glob all failed); verdicts issued during such storms rest on pre-outage evidence only.
+
+## Assessor verdict
+=== VERDICT: RESCOPE === Second consecutive 1202s nonzero exec with 0-byte logs produced only 1/6 done-when artifacts (diagnosis memo); payload inventory, apply proof, checklist, and safety record missing; RAM 2.05 GB vs ≥8 GB gate.
