@@ -1,6 +1,6 @@
 ---
 id: 20260905-ms01-scripts-inventory
-status: queued
+status: scoping
 priority: low
 budget_cycles: 3
 escalate_if: 1 failed cycle OR any non-inventory mutation of code/ ms01-* files
