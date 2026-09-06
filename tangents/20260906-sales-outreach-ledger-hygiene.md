@@ -1,6 +1,6 @@
 ---
 id: 20260906-sales-outreach-ledger-hygiene
-status: queued
+status: scoping
 priority: medium
 budget_cycles: 2
 escalate_if: 2 failed cycles
