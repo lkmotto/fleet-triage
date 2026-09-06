@@ -1,6 +1,6 @@
 ---
 id: 20260905-ms01-scripts-inventory
-status: running
+status: assess
 priority: low
 budget_cycles: 2
 escalate_if: 1 failed cycle OR any non-inventory mutation of code/ ms01-* files OR execute stage hits wall timeout with zero inventory rows written
