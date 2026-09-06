@@ -1,6 +1,6 @@
 ---
 id: 20260905-scout-consumer-wiring
-status: scoping
+status: parked
 priority: medium
 budget_cycles: 3
 escalate_if: 1 failed cycle
@@ -21,3 +21,4 @@ as ledger blockers. Closing this makes the strategic layer's signal actually con
 ## Out of scope
 - Redesigning the event schema
 - Touching strategic_review.py proposals logic
+- scoper session failed, parked
