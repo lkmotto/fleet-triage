@@ -1,0 +1,31 @@
+Execution complete. Outcome: **partial (environmental)**, escalate condition met — the contract was executed to its verifiable edge, and one concrete blocker was measured rather than guessed.
+
+## What was verified (contract done-when items)
+
+1. **Always-append code: PRESENT** — `strategic_review.py` lines 350–357 write `strategic_outcomes.jsonl` unconditionally after a successful LLM call (`OUTCOMES_PATH` at line 49). The ledger's 2026-08-24 "done" claim is real code.
+2. **Run once → file created: NOT MET.** The run (`strategic-review-20260906`, `--no-file`) failed with exit 1 *before* the append block: DeepSeek returned `finish_reason: length`, empty `content` → `json.loads("")` crashed.
+3. **Patch path: N/A** — the "if absent" branch doesn't apply (code is present), and the actual needed fix is fenced by this contract, so no patch was applied.
+4. **Same-day guard: VERIFIED (read-only, logic-level)** — against real data: `20260809` run_id → guard triggers True; `20260906` → False; dedup set covers 6 hypotheses; filed-run filter correct. The guard short-circuits before any writes (lines 295–297).
+
+## Root cause (measured via exact prompt replication)
+
+- **D1:** `REVIEW_AGENT.max_tokens = 4096` is too small — deepseek-v4-pro spent all 4096 completion tokens on `reasoning_content` (18KB of it), leaving final `content` empty. Key/endpoint/auth confirmed healthy via a minimal probe.
+- **D2:** Empty/`length` finish is unguarded — the script exits as a generic "LLM call failed" without writing anything.
+- **Why the signal stayed False since 08-24:** the strategic-review automation was archived 2026-08-28 and `\Factory-Strategic-Review` is Disabled, so the patch was never executed post-land. No runner + D1/D2 = file can never appear.
+
+## Artifacts
+
+- Outcome note: `coo/outcomes/20260905-strategic-outcomes-verify.md` (findings, rescope recommendation)
+- Tangent file: executor outcome block appended per executor addendum
+- Diagnostics: `coo/tmp/20260905-strategic-outcomes-verify.{probe,diagnostic,guard-check}.py`
+- Governance record (outcome: partial) + decision record appended and JSON-validated
+- Spend disclosure: the failed run recorded $0.35 in spend-ledger
+
+## Rescope recommendation (new tangent, fenced here)
+
+"Fix strategic_review LLM truncation so outcomes always land": raise `max_tokens` to 8192, handle `finish_reason: length`/empty content with one retry or a failure record to outcomes, optional `utf-8-sig` BOM fix (`_load_jsonl` silently drops proposals row 1 today). Then re-run this contract's proof steps. Un-archiving the Sunday schedule afterward is an operator decision.
+
+Verification: `verify-done.py --task-type file` passed (2/2).
+
+Next improvement: pipeline "done" claims should require a post-patch execution artifact (like this contract did); the ledger's `verify` field for outcomes-always-write ("file exists and grows each run") was never actually run.
+Gap observed: the executor addendum has no pre-flight step for reproducing an upstream script failure before touching anything, which is exactly what avoided an unfenced patch here.
