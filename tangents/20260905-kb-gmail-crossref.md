@@ -1,6 +1,6 @@
 ---
 id: 20260905-kb-gmail-crossref
-status: approved
+status: running
 priority: low
 budget_cycles: 2
 escalate_if: live gmail credential query still empty after one verified repair cycle, or any need to touch secret values / non-kb_credentials tables
@@ -84,3 +84,4 @@ You are the Executor for this tangent. Rules:
 - what was done: <2-4 lines>
 - what remains: <or "nothing — done-when fully met">
 - rescope note: <only if bailing>
+run_started: 2026-09-05T22:02:30-05:00
