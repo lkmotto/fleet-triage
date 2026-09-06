@@ -1,6 +1,6 @@
 ---
 id: 20260905-tangents-ledger-hygiene
-status: validating
+status: done
 priority: medium
 budget_cycles: 2
 escalate_if: Verification fails and pending again contains status=completed rows that cannot be moved without id loss, schema change, or deletion; or backup artifact missing/unreadable
@@ -93,3 +93,6 @@ run_started: 2026-09-05T21:15:45-05:00
 
 ## Assessor verdict
 === VERDICT: DONE === Backup tangents.json.20260906T020828Z.bak present; live parse shows pending=0, completed=74 (all completed), 0 completed-in-pending, 74 unique ids matching backup exactly, valid JSON, last_updated/_note document the reconciliation — verified directly, not from executor claims.
+
+## Validator
+=== VALIDATION: PASS === value:hygiene_only; score:3; Re-ran all 5 done-when items independently: backup parses (47 completed misfiled + 27 = 74), live JSON pending=0/completed=74 with 74 unique ids exactly matching backup, note+last_updated+decisions row (line 49) + stub outcome present, fence clean (only coo logs dirty; live mtime predates executor start).
