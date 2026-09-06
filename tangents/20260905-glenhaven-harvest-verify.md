@@ -1,6 +1,6 @@
 ---
 id: 20260905-glenhaven-harvest-verify
-status: scoping
+status: parked
 priority: medium
 budget_cycles: 2
 escalate_if: 1 failed cycle
@@ -27,3 +27,4 @@ sfrep-complete. An appraiser delivering this workfile needs to know the export i
 - Fixing the template harvest logic itself (that is its own tangent if verification
   confirms a harvest bug)
 - Any other order's workfiles
+- scoper session failed, parked

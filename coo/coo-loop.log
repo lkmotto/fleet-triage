@@ -1,0 +1,5 @@
+[2026-09-05T18:53:33-05:00] SCOPE claim 20260905-glenhaven-harvest-verify
+[feature/coo-loop 6480f19] coo: claim 20260905-glenhaven-harvest-verify for scoping
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+Error during droid execution: Exec ended early: insufficient permission to proceed. Re-run with --auto medium or --auto high. For destructive commands, use --skip-permissions-unsafe.
+[2026-09-05T19:04:50-05:00] SCOPER FAILED 20260905-glenhaven-harvest-verify
