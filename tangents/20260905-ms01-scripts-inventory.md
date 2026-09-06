@@ -113,3 +113,13 @@ You are the Executor for this tangent. Rules:
 - what remains: <or "nothing — done-when fully met">
 - rescope note: <only if bailing>
 run_started: 2026-09-05T21:24:15-05:00
+
+
+## Assessor evidence (cycle 1, 2026-09-05T22:11:36-05:00)
+- Done-when 0/4. coo/outcomes/ms01-scripts-inventory.md does not exist; no Outcome block in this file; no inventory artifacts anywhere in the repo.
+- Executor died before its first turn: coo/live/20260905-ms01-scripts-inventory.execute.live.log is a JSON failure result (num_turns: 0, duration 269.9s, session 561dd6d8-ecb2-495a-badd-5b5880047452): "Exec ended early: insufficient permission to proceed. Re-run with --auto medium or --auto high." No inventory work was performed.
+- Root cause is deterministic, not transient: coo/coo-loop-v3.sh (~line 119) and coo-loop-v4.sh (~lines 142/144, including the RELOOP resume branch) launch the executor WITHOUT --auto, while scope/assess/validate all pass --auto medium|high. The identical failure is already proven twice on tangent 20260905-ntreis-fm23 (cycles 1 and 2). Neither a reloop nor a re-scoped contract can fix a launch-flag defect.
+- Mutation guard CLEAN: git status shows no ms01-* modifications anywhere; independent recount of C:\Users\lkmot\factory-context\code\ = 65 scripts (46 .ps1 + 19 .sh) + 7 PNGs, mtimes 2026-07-15 / 2026-07-30 only, matching scope-time ground truth exactly. escalate_if mutation trigger NOT met.
+- escalate_if "1 failed cycle" IS MET. Budget: 1 of 3 cycles consumed, 0 rescopes; the one available reloop was deliberately not spent on a provably deterministic failure.
+- To Scoper: park this tangent UNSCOPABLE (executor harness cannot execute any command) until the launch fix lands. The contract itself is sound; do not rewrite it.
+- To operator (lkmot): add --auto medium to the executor invocations (run_droid execute exec ... in coo/coo-loop-v3.sh and coo-loop-v4.sh), or run one manual pass: droid exec -o text --auto medium -f tangents/20260905-ms01-scripts-inventory.md. The same defect blocks 20260905-ntreis-fm23 (already RESCOPE for this cause). Secondary harness bug: coo-loop-v4.sh line ~147 greps "sessionId" but droid JSON emits "session_id", so executor_session never persists and RELOOP session continuity can never engage.
