@@ -1,6 +1,6 @@
 ---
 id: 20260905-strategic-outcomes-verify
-status: queued
+status: scoping
 priority: medium
 budget_cycles: 2
 escalate_if: 1 failed cycle
