@@ -1,6 +1,6 @@
 ---
 id: 20260905-scout-consumer-wiring
-status: queued
+status: scoping
 priority: medium
 budget_cycles: 3
 escalate_if: 1 failed cycle

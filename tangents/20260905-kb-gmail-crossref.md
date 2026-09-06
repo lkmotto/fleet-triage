@@ -1,6 +1,6 @@
 ---
 id: 20260905-kb-gmail-crossref
-status: queued
+status: scoping
 priority: low
 budget_cycles: 1
 escalate_if: immediate
