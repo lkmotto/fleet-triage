@@ -1,6 +1,6 @@
 ---
 id: 20260905-spark-csv-export
-status: running
+status: assess
 priority: high
 budget_cycles: 4
 escalate_if: any zero-turn/permission launch fail (stop environmental immediately); or 2 live Stage 3 cycles still ending all_download_strategies_failed after one focused export patch
