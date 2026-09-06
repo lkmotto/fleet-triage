@@ -1,6 +1,6 @@
 ---
 id: 20260905-gmail-intake-repair
-status: validating
+status: done
 priority: high
 budget_cycles: 4
 escalate_if: 2 failed cycles
@@ -40,3 +40,6 @@ funnel.
 
 ## Assessor verdict
 === VERDICT: DONE === All three done-when items artifact-verified and independently reproduced (scan re-run exit 0, metadata-only, JSON-valid; mcp.json single-key diff vs sha256-matched backup); zero failed cycles.
+
+## Validator
+=== VALIDATION: PASS === value:unblocks_revenue; score:5; Independent live re-run exit 0 (SCAN_OK 201/5, ids-only privacy fence held in my own execution); 16/16 static checks incl. mcp.json single-key diff vs sha256-matched backup; 4 blind-cycle reports corroborated; zero failed cycles.

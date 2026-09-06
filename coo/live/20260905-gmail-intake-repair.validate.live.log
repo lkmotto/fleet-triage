@@ -1,0 +1,58 @@
+## Validation report — `20260905-gmail-intake-repair`
+
+**Verdict: PASS.** All three done-when items independently re-verified, including a live re-execution of the intake scan under my own hands. The Assessor's DONE verdict holds.
+
+### Item 1 — Repeatable scan path, verified, metadata-only, JSON-valid: PASS
+- Script read in full at `~/.factory/automations/autonudge-loop/gmail_intake_scan.py`: stdlib-only, one GET list call through the Composio REST proxy, persists only `id`/`threadId`.
+- **Independent live re-run (me):** `doppler run -p auth-api -c prd -- python gmail_intake_scan.py` → `SCAN_OK: resultSizeEstimate=201 listed=5`, **EXIT=0**. My own output JSON contained the same 5 message IDs, keys only `id`/`threadId` — privacy fence held in my own execution, not just the executor's.
+- Contract artifact `coo/outcomes/20260905-gmail-intake-repair-scan.json`: JSON-valid, `ok=true`, no body/snippet/subject/headers content anywhere in the file. Memory cache `gmail-scan-latest.json` exists with the same shape (checked_at 2026-09-06T01:47:37Z, matching the executor's claim).
+- HEARTBEAT.md wires the exact command and exit-code semantics (0=use count, 1=continue, 2=stop and flag).
+
+### Item 2 — Operative path documented: PASS
+`proof.md` names the root cause (`smithery-toolbox.disabled: true` in `~/.factory/mcp.json`), the Composio REST proxy path, and heartbeat consumption (Smart Gate Step 1 count from `memory\gmail-scan-latest.json`). The HEARTBEAT block matches that description.
+
+### Item 3 — Zero sends; metadata only; no Doppler changes: PASS
+- Static scan of the script: no `/send`, `/modify`, `/trash`, `/labels`, `removeLabelIds`; only POST is the proxy execute endpoint. No Gmail write endpoints exist in the code path.
+- `mcp.json` flat-diff vs backup: **exactly one key differs** (`mcpServers.smithery-toolbox.disabled`), URL intact, no BOM (first bytes `123,10,32`), backup sha256 matches the proof doc's `A042000F...AB5DE` exactly.
+- Doppler used read-only via env injection; `.consec_fails` = 0; budget 4 authorized / ~1 consumed.
+
+### Fence audit: PASS
+Git history shows only tangent-scoped artifacts entering the repo. Out-of-repo changes were limited to the three named surfaces (mcp.json single-key + backup, new scan script, HEARTBEAT fallback block). The blind-intake premise is corroborated: 4 consecutive `UNAVAILABLE this session` reports (20260904T17, 20260905T09/12/17), with drift visible back to 09-02. My own session's deferred-tools list also lacks `smithery-toolbox___*` — confirming the executor's honest caveat that the MCP re-enable lands in fresh sessions.
+
+### Value scoring
+- **Signal: `unblocks_revenue`** (secondary: `kills_recurring_noise`). Order intake is the top of the revenue funnel; 4+ blind cycles on a 3x/day cadence is ~1.5 days of undetected orders. The fix is durable (MCP-independent fallback + re-enabled MCP), cheap (stdlib, no new deps), and proven live twice independently.
+- **Score: 5/5.** Zero failed cycles; escalation threshold not approached.
+- Caveats (non-blocking, executor-flagged and confirmed): the 201 count is query noise; MCP tool availability in fresh sessions is unproven until the 09-06 09:00Z cycle — the probe covers this cheaply. KB cross-reference gap (`credential "gmail"` empty) remains open, out of scope.
+
+Validation: probe written to `coo/probes/20260905-gmail-intake-repair.probe.md`; governance record appended; verify-done file check passed 2/2.
+
+Gap observed: the loop's streamed `validation.txt` for this run was 0 bytes at start, so I wrote my evidence to my own script/probe files rather than relying on harness capture.
+
+Next improvement: wire `gmail_intake_scan.py` as the primary Smart Gate count source (not just fallback) so MCP tool availability stops gating cycle starts entirely.
+
+=== VALIDATION: PASS === value:unblocks_revenue; score:5; Independent live re-run exit 0 (SCAN_OK 201/5, ids-only privacy fence held in my own execution); 16/16 static checks incl. mcp.json single-key diff vs sha256-matched backup; 4 blind-cycle reports corroborated; zero failed cycles.
+
+=== PROBE ===
+# Probe: 20260905-gmail-intake-repair
+revalidate_after: 2026-09-08 (after 2+ autonudge cycles at 09:00Z/12:00Z on 09-06)
+checks:
+  - check: outcome artifact JSON-valid, ok, metadata-only (privacy fence)
+    command: python -c "import json;d=json.load(open(r'C:\Users\lkmot\factory-context\code\fleet-triage\coo\outcomes\20260905-gmail-intake-repair-scan.json',encoding='utf-8'));print(d['ok'],d['path'],d['result_count'],all(set(m)<={'id','threadId'} for m in d['messages']))"
+    expect: "True composio-rest 201 True (ok, composio path, nonzero count, ids/threads only)"
+  - check: smithery-toolbox re-enabled in mcp.json, no BOM
+    command: python -c "raw=open(r'C:\Users\lkmot\.factory\mcp.json','rb').read();import json;d=json.loads(raw.decode('utf-8'));print(raw[:1]==b'{', d['mcpServers']['smithery-toolbox'].get('disabled'))"
+    expect: "True False (no BOM, disabled is false)"
+  - check: scan script still send-free (no modify/mark/label endpoints)
+    command: python -c "s=open(r'C:\Users\lkmot\.factory\automations\autonudge-loop\gmail_intake_scan.py',encoding='utf-8').read();print(any(t in s for t in ('/send','/modify','/trash','removeLabelIds','/labels')))"
+    expect: "False (no send/mark endpoints present)"
+  - check: HEARTBEAT fallback block still wired
+    command: Select-String -Path "C:\Users\lkmot\.factory\automations\autonudge-loop\HEARTBEAT.md" -Pattern "gmail_intake_scan.py" | Measure-Object | Select-Object -ExpandProperty Count
+    expect: ">= 1 (fallback command referenced in heartbeat)"
+  - check: post-repair autonudge cycles no longer report blind intake
+    command: Get-ChildItem "C:\Users\lkmot\.factory\automations\autonudge-loop\reports" -Filter "2026090[6-9]*-summary.md" | Sort-Object Name | Select-Object -Last 3 | ForEach-Object { Select-String -Path $_.FullName -Pattern "Gmail scan|UNAVAILABLE" | Select-Object -First 2 }
+    expect: no "UNAVAILABLE this session" on the Gmail scan line in reports dated 2026-09-06 onward (MCP tool loaded or fallback used)
+  - check: live re-scan still succeeds (optional, network, metadata only)
+    command: doppler run -p auth-api -c prd -- python C:\Users\lkmot\.factory\automations\autonudge-loop\gmail_intake_scan.py --out "$env:TEMP\probe-gmail-scan.json"
+    expect: "SCAN_OK ... EXIT=0; output JSON contains only id/threadId message keys"
+verdict_on_last_run: PASS 2026-09-06 (validator independently re-executed scan: SCAN_OK resultSizeEstimate=201 listed=5, exit 0; 16/16 static checks passed; script at coo/tmp/20260905-gmail-intake-repair.validator-checks.py)
+=== END PROBE ===
