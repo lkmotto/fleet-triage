@@ -119,7 +119,7 @@ $(cat "$f")"
   if droid exec -o text --auto medium "$PROMPT" > coo/tmp/"$id".verdict.txt 2>> "$LOG"; then
     V=$(grep -m1 '=== VERDICT:' coo/tmp/"$id".verdict.txt || echo "=== VERDICT: RESCOPE === assessor returned no verdict line")
     case "$V" in
-      *DONE*)    NEW=done ;;
+      *DONE*)    NEW=validating ;;   # validator must confirm before done
       *RELOOP*)  NEW=approved ;;   # same contract, one retry (assessor allows)
       *)         NEW=rescope; CYCLE_FAILURES=$((CYCLE_FAILURES+1)) ;;
     esac
@@ -130,6 +130,32 @@ $(cat "$f")"
     log "ASSESSOR FAILED $id (leave in assess for retry)"; CYCLE_FAILURES=$((CYCLE_FAILURES+1))
   fi
   git add tangents/ coo/ >/dev/null; git commit -m "coo: $id -> $NEW" >> "$LOG" 2>&1 || true
+done
+
+# ================= PHASE 4: VALIDATE (anti-crap gate) ========
+for f in $(grep -l '^status: *validating$' tangents/*.md 2>/dev/null || true); do
+  id=$(basename "$f" .md)
+  log "VALIDATE $id"
+  PROMPT="$(cat coo/mandates/validator.md)
+
+=== COMPLETED TANGENT WITH OUTCOME AND VERDICT ===
+$(cat "$f")"
+
+  if droid exec -o text --auto medium "$PROMPT" > coo/tmp/"$id".validation.txt 2>> "$LOG"; then
+    VL=$(grep -m1 '=== VALIDATION:' coo/tmp/"$id".validation.txt || echo "=== VALIDATION: FAIL === validator returned no validation line")
+    awk '/=== PROBE ===/{flag=1}/=== END PROBE ===/{flag=0}flag' \
+      coo/tmp/"$id".validation.txt > "coo/probes/$id.probe.md"
+    echo "" >> "$f"; echo "## Validator" >> "$f"; echo "$VL" >> "$f"
+    case "$VL" in
+      *PASS*) NEW=done ;;
+      *)      NEW=assess; CYCLE_FAILURES=$((CYCLE_FAILURES+1)) ;;  # back to assessor with failure evidence
+    esac
+    sed -i "s/^status:.*/status: $NEW/" "$f"
+    log "VALIDATION $id -> $NEW"
+  else
+    log "VALIDATOR FAILED $id (leave in validating for retry)"; CYCLE_FAILURES=$((CYCLE_FAILURES+1))
+  fi
+  git add tangents/ coo/ >/dev/null; git commit -m "coo: $id validation -> $NEW" >> "$LOG" 2>&1 || true
 done
 
 # ---- RESCOPE phase: rescope items go back to the scoper next cycle -----------

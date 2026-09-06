@@ -1,6 +1,6 @@
 ---
 id: 20260905-glenhaven-harvest-verify
-status: done
+status: validating
 priority: medium
 budget_cycles: 2
 escalate_if: 1 failed cycle
