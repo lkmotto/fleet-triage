@@ -1,0 +1,46 @@
+## Validation complete: all three done-when items independently re-verified — PASS
+
+**Done-when re-execution (my own evidence, not the executor's claims):**
+
+1. **Artifacts** — `comps/matrix_search_results.jpg` exists (164,151 bytes, valid `FF D8 FF E0` JPEG, mtime 09-06 09:45); `comps/spark_export.csv` exists with **100 data rows** (Import-Csv count, not line count), 411,523 bytes, SHA-256 prefix `acdeee18faab` matching the recorded hash. Archive CSV + `matrix_export_page.jpg` also present.
+2. **Filter-context gate** — Both new artifacts (`presubmit_20260906_094428`, `postexport_20260906_094525`) show `form_version: fm23` via `id_scan` (fm23_id/name_markers true), `filter_population_verified.all_populated: true` with radius `context_implied`, and **zero** occurrences of `radius_control_unavailable`/`type_control_unavailable`. Zero new `*blocked*` metadata files after 09-06; the old 08-19 blocked artifact is superseded, not the evidence base.
+3. **Write-backs** — `tangents.json` entry `20260906T144600-308_big_sky_circle_northlake_tx_76226-comps` (SUCCESS, artifact paths); ledger step `appraisal-pipeline:ntreis-fm23` `status: done`, `outcome` non-null, `completed_at: 2026-09-06T14:46:00Z`, 4 evidence paths; Outcome section filled in `tangents/20260905-ntreis-fm23.md`.
+
+**Fence audit — clean.**
+- Big Sky comps file was `.gitignore`d (`workfiles/`) before this run; no fence-relevant tracked-file diff in the pipeline repo attributable to this tangent.
+- `coo-loop-v3.sh`/`v4.sh`: **zero commits** in this window (last v4 commit `1e4f4dc`, pre-dating); only the scoped-out-of-scope-contract diffs vs the `.bak-20260906` backups, which came from the separately-authorized harness patch.
+- Workfiles-wide activity in the 09:30–10:30 run window: all 6 touched files under Big Sky only — no other orders touched.
+
+**Value scoring.** Signal: `kills_recurring_noise`. This closed a fleet-wide Stage-3 comps blocker that had failed every comps run Aug 12–19 and left ledger step + real orders (308 Big Sky et al.) in blocked state; the re-run is load-bearing evidence for clearing the core pipeline's Stage 3. Score **4** (not 5: the adapter fix and 6 prior SUCCESS runs already existed — this tangent added the closure artifact + write-backs on one order). Budget consumed was modest: ~130s run time within 1 execute cycle post-rescope; not a hygiene-only concern.
+
+**Notes for the record.** One `run_started` line was appended by execute cycle 3 for bookkeeping after re-verification instead of a portal re-run — sound idempotency call, correctly documented. The `ntreis-fm23` ledger *blocker* entry remains (correctly outside the executor's fence); next ledger review should clear it plus consider the recommended bounded verify for `appraisal-pipeline:spark-csv`, since this run's export succeeded end-to-end.
+
+**Artifacts produced:** `coo/probes/20260905-ntreis-fm23.probe.md` (5 re-runnable checks, house format); governance record appended to `agent-governance.jsonl`. verify-done.py: 2/2 passed on the probe file.
+
+=== VALIDATION: PASS === value:kills_recurring_noise; score:4; All 3 done-when items re-proven on disk (100-row CSV w/ matching SHA-256, fm23 gate artifacts clean of blocked_reason, ledger step done/completed_at + tangents.json SUCCESS); fences clean (no harness commits, single-order workfiles scope).
+
+=== PROBE ===
+# Probe: 20260905-ntreis-fm23
+revalidate_after: 2026-10-06
+checks:
+  - check: Big Sky comps artifacts still exist with required jpg and >=1-row CSV
+    command: $d='C:\Users\lkmot\factory-context\code\github\lkmotto\motto-appraisal-pipeline\workfiles\by_address\308_big_sky_circle_northlake_tx_76226\comps'; $j=Test-Path "$d\matrix_search_results.jpg"; $rows=(Import-Csv "$d\spark_export.csv").Count; "jpg:$j csv_rows:$rows"
+    expect: "jpg:True csv_rows:100 (>=1)"
+  - check: CSV integrity unchanged (size + SHA-256 prefix)
+    command: $p='C:\Users\lkmot\factory-context\code\github\lkmotto\motto-appraisal-pipeline\workfiles\by_address\308_big_sky_circle_northlake_tx_76226\comps\spark_export.csv'; $i=Get-Item $p; "$($i.Length)|$((Get-FileHash $p -Algorithm SHA256).Hash.Substring(0,32).ToLower())"
+    expect: "411523|acdeee18faab90f566bc879e411f2a36"
+  - check: Postexport filter-context artifact still shows fm23 with no radius/type unavailable block
+    command: $j = Get-Content 'C:\Users\lkmot\factory-context\code\github\lkmotto\motto-appraisal-pipeline\workfiles\by_address\308_big_sky_circle_northlake_tx_76226\metadata\artifact_matrix_comp_filter_context_postexport_20260906_094525.json' -Raw; "fv:$($j -match '\"form_version\":\s*\"fm23\"') blocked:$($j -match 'radius_control_unavailable|type_control_unavailable')"
+    expect: "fv:True blocked:False"
+  - check: Ledger step appraisal-pipeline:ntreis-fm23 still done with non-null outcome and completed_at
+    command: python -c "import json; d=json.load(open(r'C:\Users\lkmot\.factory\knowledge\project-ledger.json',encoding='utf-8')); ns=[s for p in d['projects'] for s in p['next_steps'] if s['id']=='appraisal-pipeline:ntreis-fm23'][0]; print(ns['status'], ns.get('completed_at') is not None, ns.get('outcome') is not None)"
+    expect: "done True True"
+  - check: tangents.json still carries the 2026-09-06 Big Sky comps SUCCESS entry
+    command: Select-String -Path 'C:\Users\lkmot\.factory\knowledge\tangents.json' -Pattern '20260906T144600-308_big_sky_circle_northlake_tx_76226-comps' -SimpleMatch | Measure-Object | Select-Object -ExpandProperty Count
+    expect: "Count >= 1 (entry present)"
+verdict_on_last_run: PASS 2026-09-06
+=== END PROBE ===
+
+Next improvement: add a cheap idempotency check at execute-cycle dispatch (read the tangent's Outcome section / ledger step state before launching) so completed tangents aren't re-dispatched against the portal.
+
+Gap observed: the validator contract specifies the probe format inline but no canonical location for probe files; house convention (`coo/probes/<id>.probe.md`) had to be inferred from directory inspection.

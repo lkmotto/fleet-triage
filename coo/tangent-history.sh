@@ -43,10 +43,40 @@ echo "## Verdicts"
 grep -E '=== (VERDICT|VALIDATION):' "$T" | sed 's/\r$//' || echo "(none yet)"
 echo ""
 echo "## Legacy (pre-pipeline sessions on this domain)"
-title=$(grep -m1 '^# ' "$T" | sed 's/^# //;s/\r$//')
-python "$HOME/.factory/scripts/full-session-search.py" search "$id" 2>/dev/null | head -8
-if [ -n "$title" ] && [ "$title" != "$id" ]; then
-  echo "--- (by title: $title) ---"
-  python "$HOME/.factory/scripts/full-session-search.py" search "$title" 2>/dev/null | head -8
+# The raw tangent ID never appears in legacy sessions (they predate the
+# pipeline), and searching it makes the search tool return its default page
+# (uniform 0.150 noise — 2026-09-06 probe). Search DOMAIN KEYWORDS instead:
+# distinctive tokens from slug + title, score-floored, keyword-verified.
+slug=$(echo "$id" | sed 's/^[0-9]\{8\}-//')
+# Keywords from the SLUG ONLY. Curated at filing time, no prose noise. LLM
+# titles pulled in generic words ("download", "blocker") that wrecked precision
+# (2026-09-06 probe, 3 iterations).
+kw=$(echo "$slug" | tr ' -_' '\n\n\n' | tr -d '"'"'"'.,:()' | tr 'A-Z' 'a-z' \
+  | grep -Ev '^(|verify|verification|check|report|review|hygiene|tangent|update|test|fix)$' \
+  | awk '!seen[$0]++' | head -3)
+: > "coo/tmp/$id.legacy.seen"
+emit_hits() { # $1=query  $2=label
+  python "$HOME/.factory/scripts/full-session-search.py" search "$1" 2>/dev/null \
+    | grep -E '^\[0\.[3-9]' \
+    | while read -r line; do
+        low=$(echo "$line" | tr 'A-Z' 'a-z')
+        case "$low" in
+          *"$2"*)
+            sid=$(echo "$line" | grep -oE '[0-9a-f]{8}-[0-9a-f]{4}' | head -1)
+            grep -q "^$sid$" "coo/tmp/$id.legacy.seen" 2>/dev/null && continue
+            echo "$sid" >> "coo/tmp/$id.legacy.seen"
+            echo "[match: $2] $(echo "$line" | cut -c1-200)"
+            ;;
+        esac
+      done | head -4
+}
+if [ -n "$kw" ]; then
+  # phrase query first (higher precision), then single tokens (recall)
+  bigram=$(echo "$kw" | head -2 | tr '\n' ' ' | sed 's/ $//;s/ / /')
+  [ "$(echo "$kw" | wc -w)" -ge 2 ] && emit_hits "$bigram" "$bigram"
+  for k in $kw; do emit_hits "$k" "$k"; done
+else
+  echo "(no distinctive keywords extracted)"
 fi
+rm -f "coo/tmp/$id.legacy.seen"
 exit 0

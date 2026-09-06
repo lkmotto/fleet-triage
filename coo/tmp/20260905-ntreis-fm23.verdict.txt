@@ -1,18 +1,28 @@
-Assessment complete for tangent `20260905-ntreis-fm23`, cycle 2 of 6.
+Assessment complete. All three done-when items were verified directly against disk and knowledge files, not taken from the executor's outcome block.
 
-**What I verified directly (not from the executor's claims):**
-- **Done-when 0/3.** `workfiles/by_address/308_big_sky_circle_northlake_tx_76226/comps/` is empty; `metadata/` contains only the 2026-08-19 blocked artifact; zero new files anywhere in the pipeline workfiles since 2026-09-05. No `tangents.json`/`project-ledger.json` write-back occurred.
-- **Run 2 never executed a turn.** `num_turns: 0`, exited after 388.8s with "insufficient permission to proceed. Re-run with --auto medium or --auto high" (sessions `5634a6ec` cycle 1, `514c7e4b` cycle 2 — identical signatures).
-- **Root cause is the harness, not the contract.** `coo-loop-v3.sh`/`v4.sh` launch the executor with no `--auto` flag while scope/assess/validate all pass `--auto medium|high`. A reloop or a re-scoped contract cannot fix a launch-flag defect — the next execute attempt fails deterministically.
-- **Escalate_if (`2 failed cycles`) is MET.** Two failures, same environmental root cause, one reloop already consumed.
-- **Scope adherence: clean** (executor mutated nothing; pipeline dirty tree matches the contract's documented pre-existing state). **Contract re-verified viable** for later re-run: `FM23_CONTEXT_IMPLIED` / `#Fm23_Ctrl19_Radius` present in the adapter and stage-3; both fallback targets' comps dirs still empty.
+## Done-when verification (independently checked)
 
-Per the verdict rules, a second failure forces RESCOPE (fresh scoping with my evidence attached). I've appended a cycle-2 evidence block to the tangent file recommending the operator park the tangent until the executor launch gains `--auto medium|high` (plus a noted harness bug: RELOOP continuity greps `"sessionId"` while droid JSON emits `"session_id"`, so `executor_session:` is never persisted). Governance record emitted.
+**1. Comps artifacts from this execute cycle — PASS.** Primary slug `308_big_sky_circle_northlake_tx_76226`, no fallback needed. `comps/matrix_search_results.jpg` (164,151 bytes, valid JPEG magic `ffd8ff`, timestamp 2026-09-06 09:45) and `comps/spark_export.csv` (411,523 bytes, 101 lines = header + **100 data rows**, 218 columns) both on disk, plus the archive CSV and `matrix_export_page.jpg`. CSV SHA-256 prefix `ACDEEE18FAAB90F5` matches the executor's claim. Subject file `tools/_tmp_subject_big_sky.json` present with correct address/county. Caveat stated honestly: I could not visually render the JPEG in this session, so image validity rests on magic bytes, size, the corroborating export-page screenshot, and the CSV evidence chain.
 
-Verification: N/A for this task type — assessment is judgment over artifacts; every done-when claim was independently checked on disk rather than trusted.
+**2. New fm23 filter-context artifact — PASS.** Both new files (`..._presubmit_20260906_094428.json`, `..._postexport_20260906_094525.json`) read directly: `form_version: fm23` (id_scan detection), `filter_population_verified.all_populated: true` with radius `context_implied` and Fm23 zip-fill ID, and zero occurrences of `radius_control_unavailable`, `type_control_unavailable`, or `blocked_reason` in either file. The pre-fix blocked artifact from 08-19 remains but is superseded exactly as the contract anticipated.
 
-Next improvement: add the `--auto` flag to the executor invocations in coo-loop-v3.sh/v4.sh; it is the single change that unblocks this tangent and every future execute stage.
+**3. Write-backs — PASS.** Parsed `project-ledger.json` as JSON: step `appraisal-pipeline:ntreis-fm23` is `status: done`, `completed_at: 2026-09-06T14:46:00.000Z`, outcome non-null with evidence paths. `tangents.json` contains the SUCCESS entry `20260906T144600-308_big_sky_circle_northlake_tx_76226-comps` with artifact paths. Tangent file Outcome section filled.
 
-Gap observed: the loop's RELOOP session-continuity mechanism has never worked as designed (`session_id` vs `sessionId` mismatch), so both reloops launched fresh sessions while the contract records implied continuity.
+## Scope and budget
 
-=== VERDICT: RESCOPE === Done-when 0/3 with zero artifacts (308 Big Sky comps/ empty, only 8/19 blocked artifact in metadata/); second consecutive num_turns:0 permission-gate failure is harness-caused (execute launched without --auto in coo-loop-v3/v4.sh), and escalate_if "2 failed cycles" is met — evidence block appended to tangents/20260905-ntreis-fm23.md for the Scoper.
+- **Fence respected.** The pipeline repo's dirty tree predates the tangent (contract said do not revert/clean). Only 2026-09-06 changes outside workfiles are the sanctioned subject JSON and pytest temp output. fleet-triage `git status` is clean: no `coo-loop-v3.sh`/`v4.sh` edits, no auth redesign. Auth used the contracted Doppler + `ntreis_matrix` path, credentials injected into process env only.
+- **Budget.** 3 of 4 post-rescope cycles consumed (cycle 1 environmental fast-fail on missing env creds, cycle 2 the successful run, cycle 3 an idempotent re-verify). `escalate_if` requires 2 failed post-harness cycles: there is exactly 1. Auth never died, fm23 selectors matched. Not met.
+
+## Observations for the operator (outside this contract)
+
+1. Ledger blocker entry `ntreis-fm23` in `projects[0].blockers[]` is now contradicted by the completed step; clear it at the next ledger review (executor correctly left it, as blocker removal was outside its fence).
+2. This run's Spark CSV export succeeded end-to-end, so the separate `spark-csv` blocker likely needs one bounded verify cycle.
+3. The cycle-3 re-dispatch of an already-complete tangent is a harness idempotency gap worth closing.
+
+Verification: verify-done.py run (research task type, 2 passed / 0 failed; two earlier invocations failed on the script's naive answer-term-overlap check, a CLI tokenization artifact, resolved on retry). Governance record emitted to `agent-governance.jsonl`, decision logged to `decisions.jsonl`.
+
+Gap observed: the contract defines no behavior for a re-dispatched execute cycle landing on an already-complete prior cycle's outcome.
+
+Next improvement: add a cheap idempotency check at execute-cycle dispatch (read the tangent's Outcome section or ledger step state before launching) so completed tangents are not re-run against the portal.
+
+=== VERDICT: DONE === All three done-when items independently verified on disk (Big Sky `matrix_search_results.jpg` + 100-row `spark_export.csv`, clean fm23 filter-context JSONs, ledger/tangents.json write-backs); scope respected, escalate_if not met.
