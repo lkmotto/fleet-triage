@@ -1,6 +1,7 @@
 ---
 id: 20260905-strategic-outcomes-verify
-status: validating
+status: done
+validator_session: d4b45222-8fe9-48e1-be7a-f5e2b0afba75 validating
 assessor_session: a15ce703-58aa-4f7f-a748-cb5c24fc6758 assess
 executor_session: ff46aaab-9dd0-467d-b96f-330f65098ebb running
 priority: medium
@@ -138,3 +139,6 @@ run_started: 2026-09-06T12:25:38-05:00
 
 ## Assessor verdict
 === VERDICT: DONE === All 7 done-when items verified live (exec.log num_turns:14; append code present at strategic_review.py L349-356 with zero mtime drift; run.log + diagnostic-rerun.out prove upstream-LLM failure before append; guard-check.out True/False; outcomes file confirmed absent by assessor), scope clean, no code changes.
+
+## Validator
+=== VALIDATION: PASS === value:prevents_error; score:4; all 7 done-when items independently re-executed (exec.log num_turns:14 final, append code live at L349-356, run.log + diagnostic prove upstream-LLM D1/D3 before append, guard True/False, outcomes file absent as classified, fence intact, spend recorded)
