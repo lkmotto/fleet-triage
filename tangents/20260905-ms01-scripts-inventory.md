@@ -1,6 +1,6 @@
 ---
 id: 20260905-ms01-scripts-inventory
-status: approved
+status: running
 priority: low
 budget_cycles: 2
 escalate_if: 1 failed cycle OR any non-inventory mutation of code/ ms01-* files OR execute stage hits wall timeout with zero inventory rows written
@@ -103,3 +103,4 @@ You are the Executor for this tangent. Rules:
 - what was done: <2-4 lines>
 - what remains: <or "nothing — done-when fully met">
 - rescope note: <only if bailing>
+run_started: 2026-09-05T22:59:43-05:00
