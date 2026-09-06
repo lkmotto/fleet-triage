@@ -1,6 +1,7 @@
 ---
 id: 20260906-e2e-stage3-comp-certainty
-status: assess
+status: approved
+assessor_session: 29a8d67e-a2b8-49cf-a9b2-7c77d614a85e assess
 priority: high
 budget_cycles: 6
 escalate_if: 2 failed non-environmental cycles; or Caladium has usable spark_export.csv on disk but cannot be CERTIFIED after one bounded handoff/status write + one offline stage3b attempt; or repeat zero-turn launch
@@ -139,3 +140,6 @@ You are the Executor for this tangent. Rules:
 - what remains: <or "nothing — done-when fully met">
 - rescope note: <only if bailing>
 run_started: 2026-09-06T15:35:40-05:00
+
+## Assessor verdict
+=== VERDICT: RELOOP === Executor certified Caladium+Big Sky (handoffs verified on disk, 3:49 PM) then harness Execute/LS outage (exit 66, executor-shell-diag.txt, 0-byte exec.log/verdict.json) cut the run before gate JSON/Verify-Amend/Outcome write-backs — first environmental failure, 5/6 cycles remain.
