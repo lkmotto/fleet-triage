@@ -1,45 +1,35 @@
-# Assessment — 20260905-strategic-outcomes-verify (cycle 2)
+Error during droid execution: # Assessment — `20260905-strategic-outcomes-verify`
 
-Machine confirmed: **LEGION**. All Done-when items checked against reality, not the outcome note.
+## What actually happened this cycle
 
-## Done-when scoreboard (my own verification)
+The executor session for this contract died before doing anything: `coo/live/20260905-strategic-outcomes-verify.execute.live.log` shows `num_turns: 0`, `Exec ended early: insufficient permission to proceed. Re-run with --auto medium or --auto high` (session ff46aaab, 203s, exit nonzero at 21:43:26). The loop log confirms: EXECUTE claim at 21:39:29 (`reloop=0`), executor exit 21:43:26, then five assessor attempts failed. **This cycle produced zero new artifacts.** All substantive artifacts on disk (outcome note 21:33, probe/diagnostic/guard scripts 21:26–21:31, decisions.jsonl 02:34Z) predate the contract approval at 21:39:28 and belong to the prior cycle, exactly as the scoper's "precedent" framing describes.
 
-| # | Item | Status | Evidence |
-|---|------|--------|----------|
-| 1 | Append path cited with exact line numbers in outcome note | **Met** | I re-read `strategic_review.py` myself: `OUTCOMES_PATH` L49, `_append_jsonl` L81–84, guard L96–98 / enforcement L295–297, early exits L309–330, **always-append present at L350–357**. Script is unmodified (mtime 2026-08-24 17:11:47, 401 lines / 16,054 bytes). The outcome note's citations match the live code exactly. |
-| 2 | Controlled `--no-file` proof run, log captured | **Not met** | `coo/tmp/20260905-strategic-outcomes-verify.run.log` does not exist. The prior cycle's run predates this contract. This cycle's executor never ran at all. |
-| 3 | Post-run artifact check (file exists OR measured upstream-failure evidence) | **Not met this cycle** | `strategic_outcomes.jsonl` is absent (Test-Path → False). Prior cycle's measured evidence (finish_reason=length, 4096 reasoning tokens, content_len 0, exit 1 pre-append) is valid history but this cycle produced no fresh proof run. |
-| 4 | Guard-check artifact `.py` + `.out` | **Half-met** | `guard-check.py` exists and its logic is sound (True on `strategic-review-20260809`, False on never-seen id, all read-only). But `guard-check.out` does not exist. Prior note records the results; contract says "confirmed with a check artifact", and `.out` was never persisted. |
-| 5 | Final outcome note with scoreboard, root-cause class, follow-up recommendation | **Met (from prior cycle)** | `coo/outcomes/20260905-strategic-outcomes-verify.md` (mtime 21:33) has scoreboard, D1/D2 root-cause class, the `20260906-fix-strategic-review-llm-truncation` handoff, and an explicit judgment on ledger "done". |
-| 6 | Minimal patch if append absent | **N/A** | Append code is present; no patch applied, none attempted. |
+## Done-when scoreboard (verified by direct inspection, not from claims)
 
-## Executor outcome block
+| # | Item | Status | My evidence |
+|---|------|--------|-------------|
+| 1 | Append path cited w/ exact line numbers | **Met (prior cycle, re-verified)** | I read the file myself: `OUTCOMES_PATH` L49, `max_tokens: 4096` L57, `_same_day_run_exists` L96, guard L295, `--dry-run` exit L309, `if not result: return 1` L328, `_append_jsonl(OUTCOMES_PATH, …)` L352. Matches the note. mtime 8/24 17:11 proves no patch. |
+| 2 | One proof run + `.run.log` artifact | **Not met** | `Test-Path …verify.run.log` → **False**. No run log exists for this contract. The prior cycle's run evidence lives only in the outcome note + decisions.jsonl, not the required artifact. |
+| 3 | Post-run artifact check recorded | **Partially** | `strategic_outcomes.jsonl` absent (I checked). D1 evidence (`finish_reason: length`, 4096 reasoning tokens) is consistent across decisions.jsonl and the diagnostic script design, and the spend-ledger row for `strategic-review-20260906` ($0.35, outcome allowed) is real. But no `.run.log` to point at. |
+| 4 | Guard check with `.py` **and `.out`** | **Half** | `guard-check.py` exists and is genuinely read-only (imports module, prints only). `.out` → **False**. Never executed to an artifact. |
+| 5 | Final outcome note w/ scoreboard, root-cause class, follow-up rec | **Met (prior cycle)** | Present, complete, recommends `20260906-fix-strategic-review-llm-truncation`; correctly does NOT claim the append fix is missing. |
+| 6 | Minimal patch if append absent | **N/A** | Append code present; script untouched (mtime + zero strategic_review.py entries in git status). Correct behavior. |
 
-**Missing entirely.** The tangent file has no `## Outcome` section. The contract-mandated exit append never happened.
+## Scope, budget, fence
 
-## Why nothing ran this cycle
+- **Scope adherence: clean.** No out-of-scope changes. Git status shows no modifications to `strategic_review.py`, ledger, scheduler, or proposals file; script mtime predates the contract; decisions.jsonl records the patch as rejected-when-fenced.
+- **Budget: 1 of 2 cycles consumed**, and the failure was environmental (permission gate, zero turns), not a wrong plan.
+- **Escalate condition:** fired in the prior cycle; the Scoper's fresh contract with budget_cycles: 2 is the operator-sanctioned continuation, so re-escalating now would just re-park work the contract explicitly plans to close.
 
-`exec.log` shows the executor session died at launch: `num_turns: 0`, duration 203s, "insufficient permission to proceed. Re-run with --auto medium or --auto high." That is an environmental/tooling failure, not a wrong plan. A second `verdict.txt` was also written empty at 22:18 (the assessor slot for this cycle fired and produced nothing — consistent with this assessment being its retry). Commit `14f8854` already records `assessfail` for this id, and the escalating condition in the contract header ("1 failed cycle") has fired.
+## Ruling rationale
 
-## Scope adherence
+RELOOP conditions all hold: the failure was environmental (permission gate at turn 0, not a wrong plan or wrong understanding); it is the first failure of *this* contract revision; and the remaining work is small, mechanical, and needs no new authority: capture the one authorized proof run to `.run.log` (the $0.35 spend is already authorized by the done-when's spend line, and if D1 still fails, the log itself becomes the upstream-evidence artifact), execute the existing read-only guard-check script to produce `.out`, and fill the executor Outcome block in the tangent file.
 
-Clean. Nothing in `strategic_review.py` was modified (mtime still 08-24); the working tree shows no touch to any of this contract's files beyond pre-existing unrelated pipeline churn. No fenced items (max_tokens, utf-8-sig, scheduler, ledger mutation) were attempted.
+**Reloop instructions:** relaunch the executor with adequate autonomy (the harness error names the fix: `--auto medium` or higher). Order of work: (1) run `python C:\Users\lkmot\.factory\scripts\strategic_review.py --no-file` with full console redirected to `coo/tmp/20260905-strategic-outcomes-verify.run.log`; (2) run `python coo\tmp\20260905-strategic-outcomes-verify.guard-check.py > coo\tmp\20260905-strategic-outcomes-verify.guard-check.out`; (3) refresh the outcome-note scoreboard to cite both artifact paths; (4) fill the Outcome block. No code changes, no D1/D2 patching, no second LLM run unless the first log materially differs from the recorded length-starvation signature.
 
-## Budget
+Verification: N/A for this task type — assessor verdict; every load-bearing claim was re-verified read-only against files, code, logs, and git history. Governance record appended to agent-governance.jsonl (outcome: success).
 
-`budget_cycles: 2`, one cycle consumed by a zero-turn executor launch failure. Second cycle remains. However, the contract's `escalate_if` ("1 failed cycle") is already satisfied — the escalation it prescribes is the verdict tier below.
+Next improvement: the COO loop claimed and burned a full executor cycle at `num_turns: 0` on a permission-gate failure; the harness should launch executors with the required `--auto` level (or preflight it) instead of discovering it mid-run.
+Gap observed: the contract's done-when required a `.run.log` artifact, but nothing in the contract or harness guarantees the executor session runs with permissions sufficient to execute anything at all.
 
-## Environment repair (relevant to feasibility)
-
-`coo/tmp/patch_coo_loop_20260906.py` was applied at 22:17 today and is confirmed live in `coo-loop-v4.sh` L139–147: executor launches now pass `--auto "$EXEC_AUTO"` (default medium) and session capture reads `session_id`, with `.sh.bak-20260906` backups. The specific failure that killed this cycle has been remediated in the harness, so a reloop is not doomed to repeat it.
-
-## Verdict reasoning
-
-The failure was environmental (harness permission gate), it is the first failure of this contract as an executed cycle, one budget cycle remains, and done-when is plausibly achievable: code inspection is already done, the proof run is a single command, and the expected outcome (D1/D2 still blocking, documented with a fresh log) satisfies the split-branched success criteria. The harness fix means the reloop executor can actually launch. Reloop, not rescope — but one more failure of any kind forces RESCOPE per the definitions.
-
-Governance record appended to `agent-governance.jsonl` (outcome: success, touched: verdict + governance log).
-
-Next improvement: add a launch smoke-check to the loop harness (abort the cycle and emit an explicit "executor-launch-failed" marker file when exec.log shows num_turns 0, instead of letting the cycle silently produce empty artifacts).
-Gap observed: the contract required executor self-append of the Outcome block, but a zero-turn launch failure leaves no mechanism to record that failure state in the tangent file.
-
-=== VERDICT: RELOOP === Executor died pre-turn on harness permission gate (exec.log num_turns:0, 0 artifacts this cycle), append code verified present at strategic_review.py L350-357, harness --auto patch now live (coo-loop-v4.sh L139-147), 1 of 2 cycles remains; next failure of any kind is RESCOPE.
+=== VERDICT: RELOOP === Cycle failed environmentally at turn 0 (execute.live.log: num_turns 0, permission gate) on first failure of this contract; append-code claims re-verified present (strategic_review.py L350–357, mtime 8/24) but required artifacts coo/tmp/20260905-strategic-outcomes-verify.run.log and .guard-check.out do not exist; completable within remaining 1 cycle.
