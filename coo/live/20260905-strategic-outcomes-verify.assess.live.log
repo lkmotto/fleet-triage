@@ -1,0 +1,30 @@
+Error during droid execution: # Assessment — 20260905-strategic-outcomes-verify
+
+## Cycle accounting
+`tangents.json`-style history from loop git log shows: claim-scope → scope-reloop → claim-scope → scoped → claim-execute → executed → assessfail → (this assess). The **execution cycle ran once** (prior cycle, artifacts 9:24–9:33 PM); this cycle's execution attempt **crashed at startup** with zero turns. Cycles consumed: 1 failed execution cycle of budget 2. The `escalate_if` header (1 failed cycle) technically fired, but the assessor verdict rules govern disposition, and the work product itself is verifiable.
+
+## Done-when verification (artifacts, not claims)
+
+| # | Item | Verdict | Evidence I checked myself |
+|---|------|---------|---------------------------|
+| 1 | Append path cited with exact line numbers | **MET** | Re-read `strategic_review.py`: `OUTCOMES_PATH` **L49**; same-day guard enforcement **L295–297**; early exits **L309–312** (`--dry-run`), **L314–315** (missing key), **L328–329** (`if not result: return 1`); unconditional `_append_jsonl(OUTCOMES_PATH, …)` **L350–357** with the "Always write outcomes" comment. Matches the outcome note exactly. Append code is **present**. |
+| 2 | Controlled proof run + log at `coo/tmp/…run.log` | **PARTIAL** | `run.log` **does not exist** — the contract-named artifact was never produced. The run itself demonstrably happened: spend-ledger row 6 (`strategic-review-20260906`, $0.35, 2026-09-06T02:25Z, allowed) and the diagnostic.py replication is consistent. Artifact-path miss, not a work miss. |
+| 3 | Post-run artifact check | **MET (failure branch)** | `strategic_outcomes.jsonl` still absent (verified via `Test-Path` → False, just now). Failure is proven upstream of append: diagnostic.py measured `finish_reason=length`, 4096/4096 completion tokens all reasoning, `content_len: 0` → `json.loads("")` exit 1 at L328, before L350. Key/endpoint healthy via tiny probe (200). No false "append missing" claim made. |
+| 4 | Same-day guard check artifacts | **PARTIAL, logic independently confirmed** | `guard-check.py` exists but `.out` does not. I re-ran the read-only script myself: `_same_day_run_exists("strategic-review-20260809")` → **True**, never-seen id → **False**, BOM row-drop reproduced (3 of 4 proposals lines parsed). No proposals row exists for today, so the second-full-run branch was vacuous. |
+| 5 | Outcome note with scoreboard, root-cause class, follow-up recommendation | **MET** | `coo/outcomes/20260905-strategic-outcomes-verify.md`: scoreboard present; root-cause class = **upstream-LLM** (D1 max_tokens=4096 starvation at L57, D2 unguarded empty/length finish); explicit follow-up tangent recommended (`20260906-fix-strategic-review-llm-truncation`); fair judgment rendered on ledger "done". |
+| 6 | Minimal patch if append absent | **N/A** | Append code present at L350–357; no patch applied, and git working tree shows no modifications to `strategic_review.py` (it lives outside this repo anyway; mtime 2026-08-24 17:11 unchanged). |
+
+## Scope adherence
+Clean. No code changes anywhere (git status shows only loop bookkeeping files and **other** tangents' artifacts). The executor correctly refused the fenced D1/D2 patch and the Task Scheduler re-enable. One deviation: the contract named `…run.log` and `…guard-check.out` as artifacts and neither was written — an execution shortfall inside the fence, not a fence crossing.
+
+## This cycle's execution attempt
+`coo/tmp/20260905-strategic-outcomes-verify.exec.log`: `num_turns: 0`, "Exec ended early: insufficient permission to proceed. Re-run with --auto medium." The executor session never began work — a harness permission-gate failure, purely environmental, first occurrence of this failure class on this contract. All substantive verification was already delivered by the prior cycle and has now been independently re-confirmed by me.
+
+## Budget / escalation
+budget_cycles 2, ~1.5 consumed (one failed execution cycle; the permission-crash consumed wall-time but no LLM spend). The contract's re-assessment is now complete with independent confirmation, so a reloop would add no information — the only remaining gaps are two missing artifact files, and the substantive next step (D1/D2 fix) is explicitly fenced to a new tangent. The follow-up tangent is already fully specified in the outcome note and is ready to hand to the Scoper.
+
+=== VERDICT: RESCOPE === Done-when 1/3/5/6 verified real (append present L350-357, failure measured upstream, guard True/False reproduced) but contract-named artifacts run.log and guard-check.out were never written and the retry cycle died at zero turns (exec.log: insufficient permission) — fresh contract must re-execute the two capture steps only, with the D1/D2 fix split to the already-drafted follow-up tangent.
+
+Next improvement: the executor harness died on a permission gate (`--auto` level) — the loop should launch executors with the auto-approval level encoded in the contract header so a cycle is never spent on a zero-turn startup crash.
+
+Gap observed: the contract's escalate_if (1 failed cycle) conflicts with the assessor verdict rules' RESCOPE-on-second-failure threshold; this assessment had to reconcile the two by hand.
