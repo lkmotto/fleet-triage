@@ -43,3 +43,6 @@ Error during droid execution: Exec ended early: insufficient permission to proce
  create mode 100644 coo/probes/20260905-glenhaven-harvest-verify.probe.md
  create mode 100644 coo/tmp/20260905-glenhaven-harvest-verify.validation.txt
 [2026-09-05T20:00:38-05:00] ===== cycle end =====
+[2026-09-05T20:03:42-05:00] SCOPE claim 20260905-campaign-105629-review
+[feature/coo-loop e740f07] coo: claim 20260905-campaign-105629-review for scoping
+ 1 file changed, 1 insertion(+), 1 deletion(-)
