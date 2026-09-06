@@ -1,6 +1,6 @@
 ---
 id: 20260906-e2e-stage3-comp-certainty
-status: approved
+status: running
 assessor_session: 29a8d67e-a2b8-49cf-a9b2-7c77d614a85e assess
 priority: high
 budget_cycles: 6
@@ -143,3 +143,4 @@ run_started: 2026-09-06T15:35:40-05:00
 
 ## Assessor verdict
 === VERDICT: RELOOP === Executor certified Caladium+Big Sky (handoffs verified on disk, 3:49 PM) then harness Execute/LS outage (exit 66, executor-shell-diag.txt, 0-byte exec.log/verdict.json) cut the run before gate JSON/Verify-Amend/Outcome write-backs — first environmental failure, 5/6 cycles remain.
+run_started: 2026-09-06T16:01:23-05:00
