@@ -51,7 +51,7 @@ for f in $(grep -l '^status: *queued$' tangents/*.md 2>/dev/null || true); do
 === STUB ===
 $(cat "$f")"
 
-  if droid exec --use-spec -o text --auto medium "$PROMPT" > coo/tmp/"$id".scoped.txt 2>> "$LOG"; then
+  if droid exec --use-spec -o text --auto high "$PROMPT" > coo/tmp/"$id".scoped.txt 2>> "$LOG"; then
     if grep -q '=== UNSCOPABLE:' coo/tmp/"$id".scoped.txt; then
       REASON=$(grep -m1 '=== UNSCOPABLE:' coo/tmp/"$id".scoped.txt)
       sed -i 's/^status:.*/status: parked/' "$f"

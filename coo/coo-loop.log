@@ -13,3 +13,6 @@ Error during droid execution: Exec ended early: insufficient permission to proce
  1 file changed, 1 insertion(+), 1 deletion(-)
 Error during droid execution: Exec ended early: insufficient permission to proceed. Re-run with --auto high. For destructive commands, use --skip-permissions-unsafe.
 [2026-09-05T19:17:42-05:00] SCOPER FAILED 20260905-glenhaven-harvest-verify
+[feature/coo-loop 8864898] coo: 20260905-glenhaven-harvest-verify scoped
+ 2 files changed, 7 insertions(+), 1 deletion(-)
+[2026-09-05T19:17:42-05:00] ===== cycle end =====
