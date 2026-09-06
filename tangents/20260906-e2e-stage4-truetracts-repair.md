@@ -1,6 +1,6 @@
 ---
 id: 20260906-e2e-stage4-truetracts-repair
-status: approved
+status: running
 assessor_session: 595240d1-6cf8-4d8b-ad70-0783d6b67f09 assess
 executor_session: cfe1c166-6a58-4d63-9e5a-a3bab32194b4 running
 priority: high
@@ -93,3 +93,4 @@ run_started: 2026-09-06T15:47:06-05:00
 
 ## Assessor verdict
 === VERDICT: RESCOPE === Second failure of this contract (cycle-1 preflight RAM stop, cycle-2 RAM + harness-outage stop) exhausts the single RELOOP; my independent probes confirm channel recovered (Execute exit 0, 16:01:15) but RAM flat-red (2.26/31.19 GB free) with zero portal progress (no run JSON, storage/CSV mtimes unchanged) — contract path still valid, rescope carries operator flag to free RAM before cycle 3.
+run_started: 2026-09-06T16:05:47-05:00
