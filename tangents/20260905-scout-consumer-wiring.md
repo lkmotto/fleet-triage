@@ -1,6 +1,6 @@
-﻿---
+---
 id: 20260905-scout-consumer-wiring
-status: scoped
+status: approved
 priority: medium
 budget_cycles: 3
 escalate_if: 1 failed cycle
@@ -8,7 +8,6 @@ origin: project-ledger proposed step (memory-knowledge:scout-consumer)
 scoped_by: coo-scoper
 scoped_at: 2026-09-06
 ---
-
 # Wire scout.candidate events into ledger blockers refresh
 
 ## Why
@@ -32,7 +31,7 @@ GitHub-issue mill.
 - [ ] `C:\Users\lkmot\.factory\knowledge\ledger-outcomes.jsonl` gains a run/assessment
       line covering the scout consumption path
 - [ ] Outcome documentation names the consumer code path + verification commands,
-      written into this file's Outcome section and/or the ledger step
+      written into the tangent Outcome section and/or the ledger step
       `memory-knowledge:scout-consumer.outcome`
 
 ## Out of scope
@@ -104,8 +103,29 @@ GitHub-issue mill.
    --dry-run` shows the planned blocker(s); then one normal `--propose-only` run
    (add `--force` only if the same-hour run lock blocks). Show the ledger diff and
    the new `ledger-outcomes.jsonl` line.
-5. Document the consumer path + verification commands in this file's Outcome section
+5. Document the consumer path + verification commands in the tangent Outcome section
    (and optionally the ledger step outcome field). Do not modify
    `strategic_review.py` or the event schema; do not delete historical events.
 6. If reviving the scheduled GH-issue consumer is still wanted after this, file it as
    a SEPARATE tangent — do not expand this contract.
+
+
+## Executor instructions (pipeline section)
+
+You are the Executor for this tangent. Rules:
+
+1. Work ONLY toward the "Done when" items. The "Out of scope" fence is HARD — if the
+   real path crosses it, STOP and write a rescope note instead of improvising.
+2. If you discover the contract itself is wrong (goal unachievable as written, a
+   context pointer doesn't resolve), do a MID-FLIGHT BAIL: stop, write the rescope
+   note, exit. Do not wander.
+3. Stay inside this repo's working area and the paths the contract names. SFREP COM
+   sessions are forbidden unless the contract explicitly authorizes them.
+4. Before exiting, append to THIS FILE (tangents/<id>.md):
+
+## Outcome (filled by executor)
+- status: success | partial | failed (environmental: yes/no)
+- artifacts: <paths produced>
+- what was done: <2-4 lines>
+- what remains: <or "nothing — done-when fully met">
+- rescope note: <only if bailing>
