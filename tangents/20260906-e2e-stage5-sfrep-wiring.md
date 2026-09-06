@@ -1,6 +1,6 @@
 ---
 id: 20260906-e2e-stage5-sfrep-wiring
-status: scoped
+status: approved
 priority: high
 budget_cycles: 6
 escalate_if: 2 failed live Stage-5 apply cycles after diagnosis memo + preflight (RAM gate + payload rebuild) with the same root cause class; OR free RAM cannot stay ≥8 GB around a single agent-owned SFREP session; OR Appraise-It/sfrep-mcp unavailable on Legion after one install/path check
@@ -52,6 +52,7 @@ Stage 5 (Export & Deliver → forms prefill / SFREP apply) is the last core domi
 - Authorize SFREP COM only for this tangent’s single proof session.
 - Prefer existing tools: `generate_forms_prefill_bundle`, `tools/sfrep_apply.py`, `tools/e2e_validate.py` dry_run helpers, sfrep-mcp field get/PDF create.
 - If apply fails twice on the same class after diagnosis, stop and escalate with artifacts — no thrash loops.
+
 
 ## Executor instructions (pipeline section)
 
