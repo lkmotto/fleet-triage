@@ -21,4 +21,3 @@ checks:
     command: python C:\Users\lkmot\factory-context\code\fleet-triage\coo\tmp\validate-20260906-sales-outreach-ledger-hygiene.py
     expect: "RESULT: ALL CHECKS PASSED (exit 0)"
 verdict_on_last_run: PASS 2026-09-06 (validator re-executed all done-when items independently, 53/53 PASS; suite at coo/tmp/validate-20260906-sales-outreach-ledger-hygiene.py)
-=== END PROBE ===

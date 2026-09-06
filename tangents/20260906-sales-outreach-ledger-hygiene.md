@@ -1,6 +1,7 @@
 ---
 id: 20260906-sales-outreach-ledger-hygiene
-status: validating
+status: done
+validator_session: 86d9cef0-7c5c-4cf8-984d-27815864ce3f validating
 assessor_session: 2564f2f0-570c-4133-8439-457982808827 assess
 executor_session: a804d7c4-03de-4be1-a3e4-4df18dc8513b running
 priority: medium
@@ -75,3 +76,9 @@ run_started: 2026-09-06T15:24:37-05:00
 
 ## Assessor verdict
 === VERDICT: DONE === All four done-when items verified against live files by independent 42-check suite (coo/tmp/assess-20260906-sales-outreach-ledger-hygiene.py): narrow diff vs .bak shows only named entries, decisions line 57 appended, byte accounting exact, scope held, 1/2 cycles used.
+
+## Validator
+=== VALIDATION: PASS === value:kills_recurring_noise; score:3; Independently re-executed all 4 done-when items (fresh 53-check suite, coo/tmp/validate-20260906-sales-outreach-ledger-hygiene.py, 53/53 PASS): recursive content diff vs .20260906T201233Z.bak shows changes only in sales-outreach {blockers,next_steps} + top-level updated and only sales_emails {description,status,blockers,notes,last_checked} (infrastructure_health HOLD line, manyreach-auth blocker, sibling steps untouched); decisions line 57 is the applied-retirement entry with line 51 scoping intact (file now 60 lines from later tangents' appends); byte accounting exact (ledger -2 CRLF, registry +1 LF, no BOM); evidence verified live (kill-list K1, reconciliation, unscopable spec, archive tree present; retired C:\Users\lkmot\motto-sdr-agent absent); report at coo/tmp/20260906-sales-outreach-ledger-hygiene.validation.txt, probe at coo/probes/20260906-sales-outreach-ledger-hygiene.probe.md.
+
+## Validator
+=== VALIDATION: PASS === value:kills_recurring_noise; score:3; Independent 53-check suite re-executed every done-when item from raw bytes (recursive diff vs .bak: only named entries changed, HOLD line/manyreach-auth/siblings untouched; decisions line 57 applied-entry intact; byte accounting exact; evidence paths live) — all PASS.
