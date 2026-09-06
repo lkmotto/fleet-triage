@@ -1,36 +1,36 @@
-<html><head><meta http-equiv='refresh' content='10'><title>COO Board</title><style>body{font-family:consolas;background:#111;color:#ddd;padding:16px}table{border-collapse:collapse}td,th{border:1px solid #444;padding:4px 10px}a{color:#6cf}.done{color:#6f6}.running{color:#ff6}.scoping,.assess,.validating{color:#6cf}.parked,.rescope{color:#f66}pre{font-size:11px;white-space:pre-wrap}h4{margin:14px 0 4px}</style></head><body>
-<h3>COO Pipeline Board &mdash; 2026-09-05T21:58:40-05:00</h3><p>click a tangent for its live view</p>
-<table><tr><th>tangent</th><th>status</th></tr>
-<tr><td><a href='20260905-campaign-105629-review.view.html'>20260905-campaign-105629-review</a></td><td class='done'>done</td></tr>
-<tr><td><a href='20260905-glenhaven-harvest-verify.view.html'>20260905-glenhaven-harvest-verify</a></td><td class='done'>done</td></tr>
-<tr><td><a href='20260905-gmail-intake-repair.view.html'>20260905-gmail-intake-repair</a></td><td class='done'>done</td></tr>
-<tr><td><a href='20260905-kb-gmail-crossref.view.html'>20260905-kb-gmail-crossref</a></td><td class='done'>done</td></tr>
-<tr><td><a href='20260905-ms01-scripts-inventory.view.html'>20260905-ms01-scripts-inventory</a></td><td class='assess'>assess</td></tr>
-<tr><td><a href='20260905-ntreis-fm23.view.html'>20260905-ntreis-fm23</a></td><td class='assess'>assess</td></tr>
-<tr><td><a href='20260905-scout-consumer-wiring.view.html'>20260905-scout-consumer-wiring</a></td><td class='scoping'>scoping</td></tr>
-<tr><td><a href='20260905-sdr-9800-recovery.view.html'>20260905-sdr-9800-recovery</a></td><td class='scoping'>scoping</td></tr>
-<tr><td><a href='20260905-spark-csv-export.view.html'>20260905-spark-csv-export</a></td><td class='assess'>assess</td></tr>
-<tr><td><a href='20260905-strategic-outcomes-verify.view.html'>20260905-strategic-outcomes-verify</a></td><td class='assess'>assess</td></tr>
-<tr><td><a href='20260905-tangents-ledger-hygiene.view.html'>20260905-tangents-ledger-hygiene</a></td><td class='done'>done</td></tr>
-<tr><td><a href='20260906-sales-outreach-ledger-hygiene.view.html'>20260906-sales-outreach-ledger-hygiene</a></td><td class='queued'>queued</td></tr>
-</table><h4>recent loop events</h4><pre> create mode 100644 coo/live/20260905-scout-consumer-wiring.scope.live.log
- create mode 100644 coo/live/20260905-sdr-9800-recovery.scope.live.log
- create mode 100644 coo/live/20260905-spark-csv-export.scope.live.log
- create mode 100644 coo/metrics.jsonl
-[2026-09-05T21:54:20-05:00] ASSESSOR FAILED 20260905-ms01-scripts-inventory (retry next sweep)
-[feature/coo-loop c3ccc5d] coo: 20260905-ms01-scripts-inventory assessfail
- 2 files changed, 32 insertions(+)
- create mode 100644 coo/live/20260905-spark-csv-export.execute.live.log
-[2026-09-05T21:54:20-05:00] ASSESS 20260905-ms01-scripts-inventory
-[2026-09-05T21:55:46-05:00] EXECUTOR exited nonzero 20260905-spark-csv-export
+<html><head><meta http-equiv='refresh' content='15'><title>COO Board</title><style>body{font-family:consolas;background:#111;color:#ddd;padding:16px}table{border-collapse:collapse}td,th{border:1px solid #444;padding:4px 10px}.done{color:#6f6}.running{color:#ff6}.scoping,.assess,.validating{color:#6cf}.parked,.rescope{color:#f66}</style></head><body>
+<h3>COO Pipeline Board &mdash; 2026-09-05T21:59:18-05:00</h3><table><tr><th>tangent</th><th>status</th></tr>
+<tr><td>20260905-campaign-105629-review</td><td class='done'>done</td></tr>
+<tr><td>20260905-glenhaven-harvest-verify</td><td class='done'>done</td></tr>
+<tr><td>20260905-gmail-intake-repair</td><td class='done'>done</td></tr>
+<tr><td>20260905-kb-gmail-crossref</td><td class='queued'>queued</td></tr>
+<tr><td>20260905-ms01-scripts-inventory</td><td class='assess'>assess</td></tr>
+<tr><td>20260905-ntreis-fm23</td><td class='assess'>assess</td></tr>
+<tr><td>20260905-scout-consumer-wiring</td><td class='scoping'>scoping</td></tr>
+<tr><td>20260905-sdr-9800-recovery</td><td class='scoping'>scoping</td></tr>
+<tr><td>20260905-spark-csv-export</td><td class='assess'>assess</td></tr>
+<tr><td>20260905-strategic-outcomes-verify</td><td class='assess'>assess</td></tr>
+<tr><td>20260905-tangents-ledger-hygiene</td><td class='done'>done</td></tr>
+<tr><td>20260906-sales-outreach-ledger-hygiene</td><td class='queued'>queued</td></tr>
+</table><h4>recent loop events</h4><pre style='font-size:11px'>
+ 16 files changed, 1089 insertions(+), 60 deletions(-)
+ create mode 100644 coo/live/20260905-campaign-105629-review.view.html
+ create mode 100644 coo/live/20260905-glenhaven-harvest-verify.view.html
+ create mode 100644 coo/live/20260905-gmail-intake-repair.view.html
+ create mode 100644 coo/live/20260905-kb-gmail-crossref.view.html
+ create mode 100644 coo/live/20260905-ms01-scripts-inventory.view.html
+ create mode 100644 coo/live/20260905-ntreis-fm23.view.html
+ create mode 100644 coo/live/20260905-scout-consumer-wiring.view.html
+ create mode 100644 coo/live/20260905-sdr-9800-recovery.view.html
+ create mode 100644 coo/live/20260905-spark-csv-export.view.html
+ create mode 100644 coo/live/20260905-strategic-outcomes-verify.view.html
+ create mode 100644 coo/live/20260905-tangents-ledger-hygiene.view.html
+ create mode 100644 coo/live/20260906-sales-outreach-ledger-hygiene.view.html
+ create mode 100644 coo/live/metrics-view.html
+[2026-09-05T21:58:54-05:00] ASSESS 20260905-ms01-scripts-inventory
+[2026-09-05T21:59:17-05:00] NO CONTRACT 20260905-kb-gmail-crossref - strict scoper reloop (1 of 1)
 /c/Users/lkmot/factory-context/code/fleet-triage/coo/coo-loop-v4.sh: line 26: flock: command not found
-[2026-09-05T21:55:47-05:00] WARN gitlock timeout in commit
-[feature/coo-loop ad8ffe7] coo: 20260905-spark-csv-export executed
- 3 files changed, 2 insertions(+), 33 deletions(-)
-[2026-09-05T21:55:48-05:00] ASSESS 20260905-spark-csv-export
-[2026-09-05T21:56:07-05:00] ASSESSOR FAILED 20260905-strategic-outcomes-verify (retry next sweep)
-[feature/coo-loop 27f75d2] coo: 20260905-strategic-outcomes-verify assessfail
- 3 files changed, 59 insertions(+), 21 deletions(-)
- create mode 100644 coo/live/20260905-spark-csv-export.assess.live.log
-[2026-09-05T21:56:08-05:00] ASSESS 20260905-strategic-outcomes-verify</pre>
-<p><a href='metrics-view.html'>stage metrics</a></p></body></html>
+[2026-09-05T21:59:17-05:00] WARN gitlock timeout in commit
+[feature/coo-loop aa1f868] coo: 20260905-kb-gmail-crossref scope-reloop
+ 4 files changed, 57 insertions(+), 19 deletions(-)
+</pre></body></html>
