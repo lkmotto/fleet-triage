@@ -1,6 +1,6 @@
 ---
 id: 20260906-e2e-stage4-truetracts-repair
-status: approved
+status: running
 priority: high
 budget_cycles: 6
 escalate_if: 2 failed live Stage-4 execute cycles after preflight (auth valid + subject JSON ready), OR google_secure_browser_block persists after one bounded reseed-refresh attempt, OR create-modal address bind fails the same way twice (address_not_committed) with no new selector evidence
@@ -61,3 +61,4 @@ You are the Executor for this tangent. Rules:
 - what was done: <2-4 lines>
 - what remains: <or "nothing — done-when fully met">
 - rescope note: <only if bailing>
+run_started: 2026-09-06T14:26:08-05:00
