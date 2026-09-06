@@ -1,6 +1,6 @@
 ---
 id: 20260905-spark-csv-export
-status: running
+status: assess
 priority: high
 budget_cycles: 4
 escalate_if: 2 failed cycles
