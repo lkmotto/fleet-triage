@@ -1,6 +1,6 @@
 ---
 id: 20260906-e2e-stage4-truetracts-repair
-status: running
+status: assess
 priority: high
 budget_cycles: 6
 escalate_if: 2 failed live Stage-4 execute cycles after preflight (auth valid + subject JSON ready), OR google_secure_browser_block persists after one bounded reseed-refresh attempt, OR create-modal address bind fails the same way twice (address_not_committed) with no new selector evidence
