@@ -1,8 +1,8 @@
 ---
 id: 20260906-e2e-stage4-truetracts-repair
-status: assess
+status: approved
+assessor_session: 595240d1-6cf8-4d8b-ad70-0783d6b67f09 assess
 executor_session: cfe1c166-6a58-4d63-9e5a-a3bab32194b4 running
-assessor_session: a2102af8-d9db-4322-84ef-ae42d6eca794 assess
 priority: high
 budget_cycles: 6
 escalate_if: 2 failed live Stage-4 execute cycles after preflight (auth valid + subject JSON ready + CSV gate green), OR google_secure_browser_block after one bounded reseed-refresh, OR address_not_committed twice with no new selector evidence, OR ss_not_defined twice after one bounded recovery fix, OR MLS attach still file_attached:false after one diagnostic + one bounded selector fix
@@ -90,3 +90,6 @@ run_started: 2026-09-06T15:47:06-05:00
 - what was done: Cycle-2 preflight only. (1) RAM gate re-sampled 10x total between 15:48 and 15:50 — 1.64-2.28 GB free (of 31.2 GB), flat, no upward trend; top consumers are user-owned apps (chrome ~2.2 GB across 8 procs, droid sessions ~3.2 GB, factory-desktop, MsMpEng, Sfrep.AppraiseIt x3, alamode.WinTOTAL) which the contract forbids killing, so portal work stayed gated. (2) At ~15:52 the Factory harness Execute tool began failing UNIVERSALLY with exit code 66 (trivial PowerShell, python -c, and quote-free commands all fail; LS tool fails identically with "Directory listing failed with code 66") while Read/Create/Edit remain functional — a harness/backend channel outage, not a code or quoting problem (diagnosed in coo/tmp/executor-shell-diag.txt). Zero portal actions taken; no processes started or killed; no pipeline code touched; no artifacts created or deleted beyond the two diagnostic files.
 - what remains: everything — all four done-when items are open. Resume preconditions: (a) free RAM ≥ 8 GB (close WinTOTAL/SFREP/chrome surplus or reboot; do NOT have the agent kill user apps), (b) harness Execute verified healthy (probe: Get-Date returns exit 0), then re-run preflight and the contract's live command. All other gates were green at 15:19 (storage state 14:48 today, Caladium CSV 100/100 local rows, subject JSON, tax PDF).
 - rescope note: none — contract remains valid as written; this is a consecutive-environmental-failure escalation flag (cycle 1 RAM-only, cycle 2 RAM + tooling outage, both zero-portal-progress). If cycle 3 opens with RAM <8 GB or Execute still failing, stop the loop and escalate to operator rather than spending another cycle.
+
+## Assessor verdict
+=== VERDICT: RESCOPE === Second failure of this contract (cycle-1 preflight RAM stop, cycle-2 RAM + harness-outage stop) exhausts the single RELOOP; my independent probes confirm channel recovered (Execute exit 0, 16:01:15) but RAM flat-red (2.26/31.19 GB free) with zero portal progress (no run JSON, storage/CSV mtimes unchanged) — contract path still valid, rescope carries operator flag to free RAM before cycle 3.
