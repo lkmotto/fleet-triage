@@ -1,5 +1,5 @@
 <html><head><meta http-equiv='refresh' content='15'><title>COO Board</title><style>body{font-family:consolas;background:#111;color:#ddd;padding:16px}table{border-collapse:collapse}td,th{border:1px solid #444;padding:4px 10px}.done{color:#6f6}.running{color:#ff6}.scoping,.assess,.validating{color:#6cf}.parked,.rescope{color:#f66}</style></head><body>
-<h3>COO Pipeline Board &mdash; 2026-09-05T22:15:45-05:00</h3><table><tr><th>tangent</th><th>status</th></tr>
+<h3>COO Pipeline Board &mdash; 2026-09-05T22:15:51-05:00</h3><table><tr><th>tangent</th><th>status</th></tr>
 <tr><td>20260905-campaign-105629-review</td><td class='done'>done</td></tr>
 <tr><td>20260905-glenhaven-harvest-verify</td><td class='done'>done</td></tr>
 <tr><td>20260905-gmail-intake-repair</td><td class='done'>done</td></tr>
@@ -8,18 +8,11 @@
 <tr><td>20260905-ntreis-fm23</td><td class='scoping'>scoping</td></tr>
 <tr><td>20260905-scout-consumer-wiring</td><td class='parked'>parked</td></tr>
 <tr><td>20260905-sdr-9800-recovery</td><td class='parked'>parked</td></tr>
-<tr><td>20260905-spark-csv-export</td><td class='running'>running</td></tr>
+<tr><td>20260905-spark-csv-export</td><td class='assess'>assess</td></tr>
 <tr><td>20260905-strategic-outcomes-verify</td><td class='assess'>assess</td></tr>
 <tr><td>20260905-tangents-ledger-hygiene</td><td class='done'>done</td></tr>
 <tr><td>20260906-sales-outreach-ledger-hygiene</td><td class='queued'>queued</td></tr>
 </table><h4>recent loop events</h4><pre style='font-size:11px'>
-[2026-09-05T22:07:32-05:00] ASSESS 20260905-strategic-outcomes-verify
-[2026-09-05T22:11:55-05:00] VERDICT 20260905-spark-csv-export RELOOP
-/c/Users/lkmot/factory-context/code/fleet-triage/coo/coo-loop-v4.sh: line 26: flock: command not found
-[2026-09-05T22:11:55-05:00] WARN gitlock timeout in commit
-[feature/coo-loop ae6c330] coo: 20260905-spark-csv-export assessed
- 4 files changed, 33 insertions(+), 31 deletions(-)
-[2026-09-05T22:11:56-05:00] EXECUTE claim 20260905-spark-csv-export (continuity_sid=none reloop=1)
 /c/Users/lkmot/factory-context/code/fleet-triage/coo/coo-loop-v4.sh: line 26: flock: command not found
 [2026-09-05T22:11:57-05:00] WARN gitlock timeout in commit
 [feature/coo-loop 43575dc] coo: 20260905-spark-csv-export claim-execute
@@ -33,4 +26,11 @@
 [2026-09-05T22:15:44-05:00] WARN gitlock timeout in commit
 [feature/coo-loop 578d54f] coo: 20260905-kb-gmail-crossref assessed
  3 files changed, 43 insertions(+), 19 deletions(-)
+[2026-09-05T22:15:46-05:00] VALIDATE 20260905-kb-gmail-crossref
+[2026-09-05T22:15:51-05:00] EXECUTOR exited nonzero 20260905-spark-csv-export
+/c/Users/lkmot/factory-context/code/fleet-triage/coo/coo-loop-v4.sh: line 26: flock: command not found
+[2026-09-05T22:15:51-05:00] WARN gitlock timeout in commit
+[feature/coo-loop 8e8a683] coo: 20260905-spark-csv-export executed
+ 5 files changed, 20 insertions(+), 18 deletions(-)
+ create mode 100644 coo/live/20260905-kb-gmail-crossref.validate.live.log
 </pre></body></html>

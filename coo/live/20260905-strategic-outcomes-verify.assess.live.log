@@ -1,0 +1,40 @@
+Error during droid execution: Governance record written. Assessment complete.
+
+## Assessor verdict — `20260905-strategic-outcomes-verify`
+
+**Machine:** LEGION (confirmed). All paths verified live.
+
+### Done-when scoreboard (independently verified, not trusted from claims)
+
+| # | Item | Status | Evidence |
+|---|------|--------|----------|
+| 1 | Append path cited with exact line numbers | **MET** (by prior cycle's note; re-verified by me today) | I re-read the live `strategic_review.py`: `OUTCOMES_PATH` L49, `max_tokens: 4096` L57, `_same_day_run_exists` L96–98, guard enforcement L295–297, early exits L309–330, **always-append present L350–357**. Content matches the outcome note's citations exactly. |
+| 2 | Fresh proof run captured to `.run.log` | **NOT MET** | No `20260905-strategic-outcomes-verify.run.log` exists in `coo/tmp`. This cycle's executor **died at turn 0**: `exec.log` records `"Exec ended early: insufficient permission to proceed. Re-run with --auto medium or --auto high"`, `num_turns: 0`, 203 s, failure. No run was executed; no log captured. |
+| 3 | Post-run artifact check | **NOT MET** | `Test-Path …strategic_outcomes.jsonl` → **False** (verified just now). No fresh run this cycle, so no fresh measured evidence exists; the upstream-LLM evidence in the outcome note belongs to the prior cycle. |
+| 4 | Guard-check artifact pair `.guard-check.{py,out}` | **NOT MET** | `.guard-check.py` exists (prior cycle, 1,156 bytes) but **`.guard-check.out` does not exist**. The claimed True/False results have no output artifact. |
+| 5 | Final outcome note with scoreboard/root-cause/follow-up | **PARTIAL** | `coo/outcomes/20260905-strategic-outcomes-verify.md` has scoreboard, root-cause class (D1/D2 upstream + schedule-never-ran), and the follow-up tangent recommendation — but it was written **9:33 PM, before this contract's re-scope at 9:39 PM**. This cycle updated nothing. |
+| 6 | Conditional minimal patch | **N/A, correctly skipped** | Append code is present; no patch applied. `strategic_review.py` untouched. |
+
+Additional contract breach: the executor's mandatory **"## Outcome (filled by executor)"** block was never appended to `tangents/20260905-strategic-outcomes-verify.md` — the file ends at `run_started:` with no outcome.
+
+### Scope adherence
+**PASS.** Executor consumed zero turns; no out-of-scope edits anywhere. Working-tree changes are unrelated pipeline bookkeeping from other tangents.
+
+### Budget
+**2 of 2 cycles consumed** (prior partial + this turn-0 death). Done-when unmet. `escalate_if: 1 failed cycle` condition has fired (this cycle).
+
+### Classification
+- **RELOOP is barred**: this is the **second failure** on this contract id (prior cycle: upstream-LLM length-starvation, measured; this cycle: harness permission gate). RELOOP requires first-failure-only.
+- **RESCOPE triggers**: second failure of any kind, and budget_cycles exhausted without done-when. Both hold.
+
+### What the fresh contract must carry (for the Scoper)
+1. Same done-when, minus item 1 (satisfied, double-verified) and item 6 (N/A). Items 2–4 remain the actual work: one `--no-file` run with stdout/stderr captured to `.run.log`, post-run branch check, `.guard-check.out` written.
+2. **Fix the harness invocation, not the contract**: the immediate blocker is the executor permission gate. The runner must launch the executor with `--auto medium` (or high) so read-only verification commands don't die at turn 0. This is a coo-loop configuration change, outside any tangent.
+3. Require the executor Outcome block append as an explicit done-when item (it was skipped this cycle).
+4. Carry forward the prior cycle's recommended fix tangent `20260906-fix-strategic-review-llm-truncation` (D1: `max_tokens` ≥ 8192; D2: guard `finish_reason=length`/empty content, write failure record to outcomes; optional `utf-8-sig` decode) and the operator decision on the Disabled `\Factory-Strategic-Review` scheduled task.
+
+**Note to Luke directly:** two cycles have now been spent on a verification tangent whose remaining work is one LLM-spending command plus three small artifact writes. If a third verify cycle fails for any reason, route straight to the fix tangent (or park this id and run the fix tangent first) — the verify-only loop is now the bottleneck, not the unknown.
+
+Next improvement: pass executor automation-permission flags (`--auto medium`) from coo-loop-v4.sh so read-only verify tangents stop dying at turn 0 on permission gates.
+
+=== VERDICT: RESCOPE === Second failure on this id and budget 2/2 exhausted: executor died at turn 0 on a permission gate (coo/tmp/20260905-strategic-outcomes-verify.exec.log, "insufficient permission", num_turns 0) leaving done-when 2–4 unmet — no .run.log, no .guard-check.out, strategic_outcomes.jsonl still absent — though append code L350–357 verified present and no out-of-scope changes were made.
