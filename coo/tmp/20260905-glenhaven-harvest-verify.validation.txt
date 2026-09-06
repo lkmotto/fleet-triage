@@ -1,0 +1,42 @@
+## Validation complete — all five done-when items independently re-verified
+
+I re-executed every check myself rather than trusting the executor's outcome block or the Assessor's verdict. Evidence:
+
+**Done-when re-execution**
+1. **Report exists** — PASS. Read directly at the Done-when path (6,147 bytes, written 19:30:19 today). `verify-done.py --task-type file`: 2/2 passed.
+2. **Explicit verdicts** — PASS. Verdicts table shows garage **PASS**, boundary **PASS**, core package **PASS**, overall **READY**.
+3. **Early-vs-final citation** — PASS. I opened both JSONs myself: `truetracts_workflow_status.json` → `Export.export.template_harvest` holds the early gated state (`ok:false`, `text_chars:229`, garage + boundary flags, empty boundary streets, SS notice) while `truetracts_export_harvest.json` shows `flags:[]`, `garage_rate:"$6,000"`, `boundary.ok:true` with all four edge streets. Flag origin confirmed verbatim at lines 41–42 and 51 of the 09-05 09:00Z autonudge summary; the by-design degradation note confirmed in `tools\_exploration\truetracts_findings.md` item 5.
+4. **Harvest-bug tangent call** — PASS. §6 says **No** with a coherent reason; my independent re-read agrees (final harvest fully populated, `boundary_recovery.json` shows `gate_cleared:true` + both downloads recorded, zero final flags — no logic defect remains).
+5. **No browser/COM session** — PASS. Fence audit: the *only* write anywhere in the pipeline repo during the 19:24–19:31 run window is the report itself; every `subject/` artifact predates the run (04:04–04:21); Desktop Motto-Workfiles untouched; no new SFREP processes (the two `Sfrep.AppraiseIt` instances are user-owned from 9/4, a day before this tangent existed).
+
+**Independent corroboration beyond the report:** workfiles.zip entries verified byte-for-byte (6 PDFs, sizes match verbatim); garage support text confirmed in the raw export page ("adjusted at $6,000 per garage space", GAM $5,200–$6,900); verify-marker sweep independently reproduced (0 matches). The executor's observation #1 is real: export filter says garage "≤ 2" while templates say "up to 3" — correctly surfaced as pre-delivery alignment, non-blocking. One shared limitation, honestly disclosed by the executor and true for me too: neither session could pixel-check the boundary JPGs (no image input available); the verdict rests on two corroborating machine sources (final harvest JSON + recovery JSON), which meets the contract's offline standard.
+
+**Value:** `prevents_error` — converts ambiguous "verify manually" flags into an artifact-backed READY call before a revenue workfile is used, and prevents a wasteful harvest-bug tangent / unnecessary Stage-4 rerun. Cheaply executed (1 of 2 cycles, static work only), correctly fenced. Score 4: load-bearing for this order's delivery; not 5 because the noise source (autonudge reading the stale `workflow_status.json` instead of the final harvest) remains unfixed by design here, so a future order could re-trip the same false flags.
+
+Governance record emitted to `agent-governance.jsonl`. Outcome status is `success`; the loop commits the `validating → done` transition.
+
+Next improvement: fix the autonudge scanner to read `truetracts_export_harvest.json` (final) instead of `truetracts_workflow_status.json` (stale early snapshot) so the garage/boundary false flag stops recurring on future orders.
+
+=== VALIDATION: PASS === value:prevents_error; score:4; All 5 done-when checks independently re-verified (report verdicts, early-vs-final JSONs, zip contents, zero verify-markers, harvest-bug=No); fence audit shows the report was the only write in the run window, no COM/browser session.
+
+=== PROBE ===
+# Probe: 20260905-glenhaven-harvest-verify
+revalidate_after: 2026-10-05
+checks:
+  - check: Verification report still exists with READY and three PASS verdicts
+    command: Select-String -Path 'C:\Users\lkmot\factory-context\code\github\lkmotto\motto-appraisal-pipeline\workfiles\by_address\2010_glenhaven_street_arlington_tx_76010\metadata\glenhaven_export_gap_verification.md' -Pattern '\*\*PASS\*\*','READY' | Measure-Object | Select-Object -ExpandProperty Count
+    expect: Count >= 4 (garage/boundary/package PASS rows + overall READY)
+  - check: Final harvest still shows populated garage rate, complete boundary, zero flags
+    command: $h = Get-Content 'C:\Users\lkmot\factory-context\code\github\lkmotto\motto-appraisal-pipeline\workfiles\by_address\2010_glenhaven_street_arlington_tx_76010\subject\truetracts_export_harvest.json' -Raw | ConvertFrom-Json; "$($h.parsed.garage_rate)|$($h.boundary.ok)|$($h.boundary.west)/$($h.boundary.north)/$($h.boundary.east)/$($h.boundary.south)|$(@($h.flags).Count)"
+    expect: "$6,000|True|E Mitchell St/E Abram St/Swatson Rd/E Park Row Dr|0"
+  - check: Core export package files still non-trivial
+    command: Get-Item 'C:\Users\lkmot\factory-context\code\github\lkmotto\motto-appraisal-pipeline\workfiles\by_address\2010_glenhaven_street_arlington_tx_76010\subject\Report.tdcx','C:\Users\lkmot\factory-context\code\github\lkmotto\motto-appraisal-pipeline\workfiles\by_address\2010_glenhaven_street_arlington_tx_76010\subject\workfiles.zip' | ForEach-Object { "{0}:{1}" -f $_.Name,$_.Length }
+    expect: Report.tdcx:13653547 and workfiles.zip:8020796 (>=13 MB and >=8 MB respectively)
+  - check: Templates still carry zero verify-markers and the garage rate
+    command: $t = Get-Content 'C:\Users\lkmot\factory-context\code\github\lkmotto\motto-appraisal-pipeline\workfiles\by_address\2010_glenhaven_street_arlington_tx_76010\subject\truetracts_comment_templates.md' -Raw; "verify:$(([regex]::Matches($t,'verify')).Count) garage6000:$($t -match '6,000 per space')"
+    expect: verify:0 garage6000:True
+  - check: Early-vs-final inconsistency citation remains accurate (stale snapshot unchanged)
+    command: $s = (Get-Content 'C:\Users\lkmot\factory-context\code\github\lkmotto\motto-appraisal-pipeline\workfiles\by_address\2010_glenhaven_street_arlington_tx_76010\subject\truetracts_workflow_status.json' -Raw | ConvertFrom-Json).Export.export.template_harvest; "$($s.ok)|$($s.text_chars)|$(@($s.flags).Count)"
+    expect: False|229|3 (proves the cited stale state is still the stale state)
+verdict_on_last_run: PASS 2026-09-05
+=== END PROBE ===

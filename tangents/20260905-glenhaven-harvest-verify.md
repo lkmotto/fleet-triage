@@ -1,6 +1,6 @@
 ---
 id: 20260905-glenhaven-harvest-verify
-status: validating
+status: done
 priority: medium
 budget_cycles: 2
 escalate_if: 1 failed cycle
@@ -77,3 +77,6 @@ run_started: 2026-09-05T19:24:51-05:00
 
 ## Assessor verdict
 === VERDICT: DONE === All five done-when items personally verified on disk (report present with PASS/PASS/PASS/READY verdicts; early-vs-final JSON inconsistency confirmed stale; harvest-bug tangent "No" correct; zero post-run repo writes prove no session opened), 1/2 cycles used, no fence violations.
+
+## Validator
+=== VALIDATION: PASS === value:prevents_error; score:4; All 5 done-when checks independently re-verified (report verdicts, early-vs-final JSONs, zip contents, zero verify-markers, harvest-bug=No); fence audit shows the report was the only write in the run window, no COM/browser session.
