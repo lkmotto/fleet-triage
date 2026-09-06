@@ -1,6 +1,6 @@
 ---
 id: 20260905-spark-csv-export
-status: approved
+status: running
 assessor_session: c8ce88e5-9d8e-42d1-b962-87570e153a80 assess
 priority: high
 budget_cycles: 4
@@ -76,3 +76,4 @@ run_started: 2026-09-05T23:17:27-05:00
 
 ## Assessor verdict
 === VERDICT: RELOOP === Zero-turn permission-gate failure on session 05da7f92 was environmental and now-remediated (live Stage 3 CSV success on 308 Big Sky 2026-09-06 09:45, 0/5 done-when met, first failure, 3/4 cycles left)
+run_started: 2026-09-06T14:54:47-05:00
