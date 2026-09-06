@@ -1,0 +1,30 @@
+# Assessment — 20260905-tangents-ledger-hygiene
+
+## Done-when verification (independently checked, not trusted from claims)
+
+| Item | Result | Artifact evidence |
+|---|---|---|
+| Timestamped backup beside live file | PASS | `C:\Users\lkmot\.factory\knowledge\tangents.json.20260906T020828Z.bak` exists (71,673 bytes; live 70,901; both last written 2026-09-05 21:08 local ≈ 02:08Z) |
+| `pending` only genuine remaining work; all completed rows under `completed`; ids preserved; nothing deleted | PASS | Direct parse: `pending=0`, `completed=74` (all 74 rows `status=completed`), 0 completed-in-pending. Id-set diff against backup: **empty both directions** — every pre-reconcile id (47 misfiled + 27 already completed) survives; no new ids appeared, confirming no rewrites or deletions occurred after scoping |
+| Live file parses as JSON; `len(pending)+len(completed) == 74` | PASS | Parses cleanly; 0+74 = 74, matching the backup's 47+27 = 74. No before/after delta to explain |
+| `last_updated` set; `_note` describes the reconciliation | PASS | `last_updated: 2026-09-06T02:08:48Z`; `_note` explicitly states the one-time move of 47 completed rows out of pending and names the backup. `recent` untouched (1 entry, unchanged vs backup) |
+| Verification note on stub OR confirmation in decision trail | PASS via decision trail | `decisions.jsonl` line 49 (`2026-09-06T02:10:04Z`): reconciled 47 rows pending→completed, counts and backup named, writer bug flagged as NOT fixed. The stub file `tangents\20260905-tangents-ledger-hygiene.md` has **no executor Outcome block** — the contract's OR clause is satisfied, but the stub-outcome habit is worth tightening |
+
+## Scope adherence
+
+PASS. Only `tangents.json` was modified (vs its backup); `recent` untouched; schema keys unchanged; the autonudge writer bug was left alone per fence (recommendation-only: it remains able to re-misfile — file its own tangent if pursued). No other knowledge files were altered beyond the pre-existing decision row.
+
+## Budget
+
+1 of 2 cycles consumed (reconcile in the prior session, verify-only this cycle). `escalate_if` condition not met: no completed-in-pending rows, no id loss, schema untouched, backup readable.
+
+## Admin
+
+Governance record appended to `agent-governance.jsonl` (`run_id: 20260905-tangents-ledger-hygiene-assess`, outcome success). Verification: N/A for verify-done.py — assessor judgment task; verification was performed directly above via read-only parse of the artifacts themselves.
+
+Next improvement: Require executors to append the mandated Outcome block to the tangent stub file, not just the decision trail — this assessment had to fall back to the OR clause.
+Gap observed: The contract's evidence rule allowed the stub note to be skipped, so the primary artifact location for executor outcomes went unfilled; future contracts should make the stub Outcome block unconditional.
+
+=== VERDICT: DONE === Backup tangents.json.20260906T020828Z.bak present; live parse shows pending=0, completed=74 (all completed), 0 completed-in-pending, 74 unique ids matching backup exactly, valid JSON, last_updated/_note document the reconciliation — verified directly, not from executor claims.
+
+=== CONTRACT WITH OUTCOME ===

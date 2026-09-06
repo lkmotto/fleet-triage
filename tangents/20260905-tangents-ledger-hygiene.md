@@ -1,6 +1,6 @@
 ---
 id: 20260905-tangents-ledger-hygiene
-status: assess
+status: validating
 priority: medium
 budget_cycles: 2
 escalate_if: Verification fails and pending again contains status=completed rows that cannot be moved without id loss, schema change, or deletion; or backup artifact missing/unreadable
@@ -90,3 +90,6 @@ You are the Executor for this tangent. Rules:
 - what remains: <or "nothing — done-when fully met">
 - rescope note: <only if bailing>
 run_started: 2026-09-05T21:15:45-05:00
+
+## Assessor verdict
+=== VERDICT: DONE === Backup tangents.json.20260906T020828Z.bak present; live parse shows pending=0, completed=74 (all completed), 0 completed-in-pending, 74 unique ids matching backup exactly, valid JSON, last_updated/_note document the reconciliation — verified directly, not from executor claims.
