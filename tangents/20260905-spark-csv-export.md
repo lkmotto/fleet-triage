@@ -1,6 +1,7 @@
 ---
 id: 20260905-spark-csv-export
-status: assess
+status: approved
+assessor_session: c8ce88e5-9d8e-42d1-b962-87570e153a80 assess
 priority: high
 budget_cycles: 4
 escalate_if: any zero-turn/permission launch fail (stop environmental immediately); or 2 live Stage 3 cycles still ending all_download_strategies_failed after one focused export patch
@@ -72,3 +73,6 @@ You are the Executor for this tangent. Rules:
 - what remains: <or "nothing — done-when fully met">
 - rescope note: <only if bailing>
 run_started: 2026-09-05T23:17:27-05:00
+
+## Assessor verdict
+=== VERDICT: RELOOP === Zero-turn permission-gate failure on session 05da7f92 was environmental and now-remediated (live Stage 3 CSV success on 308 Big Sky 2026-09-06 09:45, 0/5 done-when met, first failure, 3/4 cycles left)
