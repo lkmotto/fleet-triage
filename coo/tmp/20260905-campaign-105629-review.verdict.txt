@@ -1,0 +1,18 @@
+## Assessment: tangent 20260905-campaign-105629-review
+
+**Verdict basis — every done-when item independently verified against live state, not the executor's claims:**
+
+1. **Diagnosis memo exists with a named dominant hypothesis and real evidence** — `coo/outcomes/20260905-campaign-105629-diagnosis.md` (committed in `12ac42f`). I re-fetched campaign 105629 live and confirmed the smoking guns myself: subject is literally `{abtest|{{FIRST_NAME}}, quick question|...}` (unsupported syntax) and body carries `{% if JOB_POSITION %}`, exactly as cited. Status Running, created 2026-08-03.
+2. **Campaign-stats evidence checks out numerically** — I pulled refreshed `stats_by_id` myself: the daily `sentSeries` sums to exactly **1,137**, matching the evidence snapshot; `replySeries` is empty across all 24 days; per-step followup counters (193/146/319/135 = 793 followup sends) are consistent with 335 initial + followups.
+3. **Reply-surface claim verified live** — `message/get type=Reply` returns `totalItems: 1`, and that one row is the s2cp.com `554 5.2.2 mailbox full` DSN from 2026-08-18. Zero human replies. Exactly as the memo states.
+4. **Fix set exists and is clean** — `fix-drafts.md` plus 4 variant files, git-tracked, UTF-8 intact (hex-verified em dashes; earlier mojibake was console rendering only). Drafts contain no `{abtest}` or `{% %}` constructs and correctly move to text-only/no-tracking per the fleet's own A/B verdict. Both a copy fix and a targeting proposal (retire the surround institutional audience) are present.
+5. **Hard fence respected** — live campaign object re-fetched: unchanged, Running, 778/298 pool intact, counters identical. Nothing sent, paused, patched, or enrolled. The workdir diff shows no out-of-scope changes tied to this tangent (other modified files belong to unrelated concurrent tangents).
+6. **Tangent-file summary present** — Outcome section with artifacts and live truth is in `tangents/20260905-campaign-105629-review.md`.
+
+**Budget:** 1 cycle consumed of 3. `escalate_if: 2 failed cycles` not approached. First-cycle completion; no reloop or rescope trigger applies. Operator decision queue (pause 105629, new paused drafts, B1 deliverability path) is correctly left outside the fence.
+
+Governance record emitted to `agent-governance.jsonl` (outcome: success). Done-verification: `verify-done.py` — sources-cited check passed; answer-fit heuristic failed (heuristic length/format mismatch, not a substantive gap; verification here rested on direct artifact and live-API inspection).
+
+Next improvement: teach the COO loop to catch unsupported template syntax at campaign-creation gate time (the `{abtest}` block shipped pre-guard) rather than four autonudge cycles later.
+
+=== VERDICT: DONE === All three done-when items verified against live ManyReach state (1,137 sends summed, 1 DSN / 0 human replies confirmed, abtest+Jinja syntax confirmed in live template) with hard fences respected and 1 of 3 cycles used.

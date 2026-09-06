@@ -6,4 +6,4 @@ export COO_PUSH="${COO_PUSH:-1}"
 export COO_LIVE="${COO_LIVE:-1}"
 export COO_MODE=once
 export COO_INCLUDE="$1"
-exec ./coo/coo-loop-v3.sh >> coo/coo-loop.log 2>&1
+exec ./coo/coo-loop-v4.sh >> coo/coo-loop.log 2>&1
