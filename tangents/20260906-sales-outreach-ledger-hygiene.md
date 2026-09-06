@@ -1,0 +1,81 @@
+---
+id: 20260906-sales-outreach-ledger-hygiene
+status: queued
+priority: medium
+budget_cycles: 2
+escalate_if: 2 failed cycles
+origin: coo-scoper replacement stub (spawned when 20260905-sdr-9800-recovery closed UNSCOPABLE)
+---
+
+# Close stale sales-outreach sdr-9800 blocker as retired (K1)
+
+## Why
+`project-ledger.json` still shows core project `sales-outreach` blocked on `sdr-9800`
+("needs Docker deploy") and `workstream-registry.json` still marks `sales_emails`
+`partially_broken` with the same framing. Scoping of `20260905-sdr-9800-recovery`
+(2026-09-05/06) proved the stack is retired, not broken: motto-sales-engine
+kill-list **K1** (2026-09-01) dispositioned `motto-sdr-agent` + the dead :9800
+service + the n8n SDR runner for archive (superseded by motto-sales-engine); the
+GitHub repo is archived (`isArchived: true`, 2026-08-19); the workspace copy was
+archived 2026-09-01; ms01 (192.168.1.120) is offline for hardware repair. Because
+sales-outreach is core-tier, its stale blocker distorts COO dispatch decisions.
+This tangent corrects the record; it recovers nothing.
+
+## Done when
+- [ ] `C:\Users\lkmot\.factory\knowledge\project-ledger.json`: step
+      `sales-outreach:sdr-9800` no longer `proposed` with recover wording — flipped
+      to a closed/done state with outcome text citing kill-list K1
+      (`C:\Users\lkmot\factory-context\motto-sales-engine\docs\kill-list.md`), the
+      archived repo, and engine supersession; blocker `sdr-9800` removed from the
+      project's blockers array or re-worded `closed/retired` with the evidence pointer.
+- [ ] `C:\Users\lkmot\.factory\knowledge\workstream-registry.json`: `sales_emails`
+      entry no longer claims ":9800 dead (needs Docker deploy)"; entry records the
+      stack retirement per K1 and the remaining live blockers (e.g. manyreach-auth
+      token cadence status), and `last_checked` is the edit date.
+- [ ] `C:\Users\lkmot\.factory\knowledge\decisions.jsonl` gains one appended
+      single-line JSON entry recording the retire/close decision with artifact paths.
+- [ ] All three files still parse (`python -c "import json;json.load(open(p))"`)
+      after editing, and a before/after diff (against the .bak copies) shows changes
+      ONLY in the named entries.
+
+## Out of scope — HARD FENCE
+- Sending any email, cold or mass (safety rule 2a).
+- Starting or rebuilding any Docker service; deploying :9800 anywhere
+  (production-deploy fence).
+- ms01 repair work or any ms01 mutation (host offline; `ms01-reverification` owns
+  return checks, including K12 n8n runner deactivation).
+- Archiving/unarchiving GitHub repos or deactivating n8n workflows — Tier-B queued
+  items requiring operator approval.
+- Any change to motto-sales-engine code, ManyReach/Tomba credentials, or prospect
+  data (data-deletion fence).
+
+## Context (verified during scoping)
+- Verdict + full evidence trail:
+  `C:\Users\lkmot\.factory\specs\2026-09-06-unscopable-do-not-recover-9800.md`
+- Kill-list K1 + execution record:
+  `C:\Users\lkmot\factory-context\motto-sales-engine\docs\kill-list.md`
+  (K1 workspace archive executed 2026-09-01, cinderpaths cross-check PASS;
+  GH archival was Tier-B queued — repo now shows `isArchived: true` via gh api,
+  repo last updated 2026-08-19).
+- Reconciliation report:
+  `C:\Users\lkmot\factory-context\motto-sales-engine\docs\reconciliation-2026-09-01.md`
+  (163 entries, zero orphans; K12 n8n SDR-runner cleanup blocked on ms01).
+- Ledger today: `project-ledger.json` projects[] `sales-outreach` — blocker
+  `sdr-9800` since 2026-07-15, step `sales-outreach:sdr-9800` status `proposed`;
+  sibling steps `manyreach-auth` and `manyreach-refresh-cadence` are done.
+- Registry today: `workstream-registry.json` workstream `sales_emails` — status
+  `partially_broken`, last_checked 2026-07-15, blockers cite :9800 dead + n8n
+  runner; `infrastructure_health` entry lists image
+  `ghcr.io/lkmotto/motto-sdr-agent:latest` on HOLD (cold-email safety rule).
+- Supersession: `C:\Users\lkmot\.factory\knowledge\context-packs\motto-sales-engine.json`
+  (engine is the canonical, gated cold-email surface).
+- ms01 connectivity: ping/SSH/:9800/:9300/:5678 all unreachable from Legion
+  (checked 2026-09-05) — nothing on ms01 can be verified or deployed right now.
+
+## Approach sketch
+1. Timestamped `.bak` copies of both JSON files beside the originals.
+2. Edit `project-ledger.json` step + blocker per Done-when (preserve 2-space indent
+   style of the file).
+3. Edit `workstream-registry.json` `sales_emails` entry; bump `last_checked`.
+4. Append the `decisions.jsonl` entry as one line, UTF-8 without BOM.
+5. `json.load` all three; diff vs `.bak` to confirm only intended entries changed.
