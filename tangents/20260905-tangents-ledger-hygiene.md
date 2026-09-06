@@ -1,6 +1,6 @@
 ---
 id: 20260905-tangents-ledger-hygiene
-status: running
+status: assess
 priority: medium
 budget_cycles: 2
 escalate_if: Verification fails and pending again contains status=completed rows that cannot be moved without id loss, schema change, or deletion; or backup artifact missing/unreadable
