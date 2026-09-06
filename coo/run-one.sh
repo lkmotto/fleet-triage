@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
-# Launch one pinned pipeline instance: run-one.sh <tangent-filename-glob>
+# Launch one pinned pipeline instance.
+# Usage: run-one.sh "tangent-file.md tangent2.md ..."   (space-separated, quoted whole)
+#        run-one.sh ""                                   (full sweep, all tangents)
 cd "$(dirname "$0")/.." || exit 1
 export COO_APPROVAL="${COO_APPROVAL:-blanket}"
 export COO_PUSH="${COO_PUSH:-1}"

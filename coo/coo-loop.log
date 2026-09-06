@@ -503,3 +503,18 @@ To https://github.com/lkmotto/fleet-triage.git
  2 files changed, 2 insertions(+), 2 deletions(-)
 /c/Users/lkmot/factory-context/code/fleet-triage/coo/coo-loop-v4.sh: line 255: syntax error near unexpected token `('
 /c/Users/lkmot/factory-context/code/fleet-triage/coo/coo-loop-v4.sh: line 255: `[ -f "$BREAKER" ] && { log "BREAKER TRIPPED - paused (delete coo/.breaker)"; exit 0; }'
+[2026-09-05T23:41:35-05:00] SCOPE claim 20260905-ntreis-fm23
+/c/Users/lkmot/factory-context/code/fleet-triage/coo/coo-loop-v4.sh: line 26: flock: command not found
+[2026-09-05T23:41:35-05:00] WARN gitlock timeout in commit
+[feature/coo-loop d958cb9] coo: 20260905-ntreis-fm23 claim-scope
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+[2026-09-06T00:01:36-05:00] UNSCOPABLE 20260905-ntreis-fm23
+/c/Users/lkmot/factory-context/code/fleet-triage/coo/coo-loop-v4.sh: line 26: flock: command not found
+[2026-09-06T00:01:36-05:00] WARN gitlock timeout in commit
+[feature/coo-loop 41af3e9] coo: 20260905-ntreis-fm23 parked-unscopable
+ 2 files changed, 42964 insertions(+), 1 deletion(-)
+/c/Users/lkmot/factory-context/code/fleet-triage/coo/coo-loop-v4.sh: line 35: flock: command not found
+[2026-09-06T00:01:40-05:00] WARN gitlock timeout in push
+To https://github.com/lkmotto/fleet-triage.git
+   bf4299c..41af3e9  feature/coo-loop -> feature/coo-loop
+[2026-09-06T00:01:42-05:00] ===== sweep end =====

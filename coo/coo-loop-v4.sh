@@ -16,41 +16,42 @@ BREAKER="$REPO_ROOT/coo/.breaker"
 LOG="$REPO_ROOT/coo/coo-loop.log"
 FAILS_FILE="$REPO_ROOT/coo/.consec_fails"
 LIVE_DIR="$REPO_ROOT/coo/live"
-GITLOCK="$REPO_ROOT/coo/.git.lock"
 mkdir -p coo/tmp "$LIVE_DIR"
 
 log() { echo "[$(date -Iseconds)] $*" >> "$LOG"; }
-# git operations serialized across parallel instances (index.lock contention killed an executor)
+# git operations serialized across parallel instances (index.lock contention killed an executor).
+# Portable lock: Git Bash on Windows has no flock(1) — mkdir is our atomic primitive.
+GITLOCK="$REPO_ROOT/coo/.git.lock.d"
+acquire_lock() { # $1 = max wait seconds
+  local n=0
+  while ! mkdir "$GITLOCK" 2>/dev/null; do
+    n=$((n + 1)); [ "$n" -ge "$1" ] && return 1
+    # steal a stale lock older than 120s (crashed holder)
+    local age=$(( $(date +%s) - $(stat -c %Y "$GITLOCK" 2>/dev/null || echo 0) ))
+    [ "$age" -gt 120 ] && rmdir "$GITLOCK" 2>/dev/null
+    sleep 1
+  done
+  return 0
+}
+release_lock() { rmdir "$GITLOCK" 2>/dev/null; }
 commit_f() {
-  (
-    flock -w 60 9 || log "WARN gitlock timeout in commit"
-    git add "$f" >/dev/null 2>&1
-    git add coo/probes coo/live coo/metrics.jsonl >/dev/null 2>&1
-    git commit -m "coo: $(basename "$f" .md) $1" >> "$LOG" 2>&1 || true
-  ) 9>> "$GITLOCK"
+  acquire_lock 60 || log "WARN gitlock timeout in commit"
+  git add "$f" >/dev/null 2>&1
+  git add coo/probes coo/live coo/metrics.jsonl >/dev/null 2>&1
+  git commit -m "coo: $(basename "$f" .md) $1" >> "$LOG" 2>&1 || true
+  release_lock
 }
 push() {
   if [ "$COO_PUSH" = "1" ]; then
-    (
-      flock -w 120 9 || log "WARN gitlock timeout in push"
-      git push >> "$LOG" 2>&1 || log "WARN push failed"
-    ) 9>> "$GITLOCK"
+    acquire_lock 120 || log "WARN gitlock timeout in push"
+    git push >> "$LOG" 2>&1 || log "WARN push failed"
+    release_lock
   fi
 }
 
-# observability: self-contained HTML board, refresh every 15s
+# observability: linked board + per-tangent view pages (gen-board.sh is the single writer)
 write_status() {
-  {
-    echo "<html><head><meta http-equiv='refresh' content='15'><title>COO Board</title><style>body{font-family:consolas;background:#111;color:#ddd;padding:16px}table{border-collapse:collapse}td,th{border:1px solid #444;padding:4px 10px}.done{color:#6f6}.running{color:#ff6}.scoping,.assess,.validating{color:#6cf}.parked,.rescope{color:#f66}</style></head><body>"
-    echo "<h3>COO Pipeline Board &mdash; $(date -Iseconds)</h3><table><tr><th>tangent</th><th>status</th></tr>"
-    for tf in tangents/2026*.md; do [ -f "$tf" ] || continue
-      n=$(basename "$tf" .md); s=$(grep -m1 '^status:' "$tf" | cut -d' ' -f2 | tr -d '\r')
-      echo "<tr><td>$n</td><td class='$s'>$s</td></tr>"
-    done
-    echo "</table><h4>recent loop events</h4><pre style='font-size:11px'>"
-    tail -20 "$LOG" 2>/dev/null | sed "s/</\&lt;/g"
-    echo "</pre></body></html>"
-  } > "$LIVE_DIR/status.html" 2>/dev/null
+  bash "$REPO_ROOT/coo/gen-board.sh" >> "$LOG" 2>&1 || log "WARN board gen failed"
 }
 
 status_of() { grep -m1 '^status:' "$f" | cut -d' ' -f2 | tr -d '\r'; }
@@ -63,12 +64,39 @@ run_droid() {
   # Native Factory UI surfacing: every pipeline session gets tags + a log
   # group, so the app's session list groups them (search tag "coo" or
   # tangent:<id> — the "folder in Factory UI", no custom UI required).
+  # IMPORTANT: --tag/--log-group-id are `droid exec` subcommand flags, NOT
+  # global droid flags — global placement silently drops into the interactive
+  # TUI (2026-09-06: scoper spun 20 min in a TUI, watchdog killed it).
+  local sub="$1"; shift
   local TAGS=(--tag coo --tag "tangent:$id" --tag "stage:$suffix" --log-group-id "coo/$id")
   if [ "$COO_LIVE" = "1" ]; then
-    timeout "$to" droid "${TAGS[@]}" "$@" 2>&1 | tee "$LIVE_DIR/$id.$suffix.live.log"
+    timeout "$to" droid "$sub" "${TAGS[@]}" "$@" 2>&1 | tee "$LIVE_DIR/$id.$suffix.live.log"
   else
-    timeout "$to" droid "${TAGS[@]}" "$@"
+    timeout "$to" droid "$sub" "${TAGS[@]}" "$@"
   fi
+}
+
+# extract result text + session id from a -o json stage log
+extract_stage() { # $1=tangent-id $2=stage-basename (scoped|verdict|validation)
+  python - "$1" "$2" <<'PYEOF'
+import json, sys
+base = f"coo/tmp/{sys.argv[1]}.{sys.argv[2]}"
+try:
+    d = json.load(open(base + ".json", encoding="utf-8", errors="replace"))
+    open(base + ".txt", "w", encoding="utf-8").write(str(d.get("result", "") or ""))
+    sid = str(d.get("session_id") or d.get("sessionId") or "")
+    open(base + ".sid", "w").write(sid)
+except Exception:
+    pass
+PYEOF
+}
+
+# record a stage session id in the tangent front-matter (session lineage)
+record_sid() { # $1=front-matter-key $2=stage-basename
+  local sid; sid=$(cat "coo/tmp/$(basename "$f" .md).$2.sid" 2>/dev/null)
+  [ -z "$sid" ] && return 0
+  sed -i "/^$1:/d" "$f"
+  sed -i "0,/^status:/s//status:/\n$1: $sid/" "$f"
 }
 
 # ---- stage: SCOPE -------------------------------------------
@@ -86,24 +114,38 @@ $(cat "$f")"
 STRICT RE-REQUEST: Your previous attempt performed WORK instead of returning a contract. You are the SCOPER. Return ONLY the === CONTRACT === block per the format above. Do not perform any work, write any files, or run any state-changing commands. Put everything you learned in the contract's Context section — the Executor will re-verify it."
   fi
   if [ -n "${COO_FAST_MODEL:-}" ]; then
-    run_droid scope exec --use-spec -o text --auto high -m "$COO_FAST_MODEL" "$PROMPT" > coo/tmp/"$id".scoped.txt 2>> "$LOG"
+    run_droid scope exec -o json --use-spec --auto high -m "$COO_FAST_MODEL" "$PROMPT" > coo/tmp/"$id".scoped.json 2>> "$LOG"
   else
-    run_droid scope exec --use-spec -o text --auto high "$PROMPT" > coo/tmp/"$id".scoped.txt 2>> "$LOG"
+    run_droid scope exec -o json --use-spec --auto high "$PROMPT" > coo/tmp/"$id".scoped.json 2>> "$LOG"
   fi
+  extract_stage "$id" scoped
+  record_sid scoper_session scoped
   local scope_rc=0
+  # sanitize: strip ANSI/TUI escape sequences; a TUI leak means the run went
+  # interactive by mistake — its output is spinner junk, never a contract
+  if [ -s "coo/tmp/$id.scoped.txt" ]; then
+    sed 's/\x1b\[[0-9;?]*[a-zA-Z]//g; s/\x1b\][^\x07]*\x07//g' "coo/tmp/$id.scoped.txt" > "coo/tmp/$id.scoped.clean"
+    mv "coo/tmp/$id.scoped.clean" "coo/tmp/$id.scoped.txt"
+    if grep -qE 'Press ESC to stop|Ctrl\+Enter to queue' "coo/tmp/$id.scoped.txt"; then
+      : > "coo/tmp/$id.scoped.txt"; scope_rc=1
+      log "TUI LEAK $id - scoper ran interactive; check run_droid flag order"
+    fi
+  fi
   [ ! -s "coo/tmp/$id.scoped.txt" ] && scope_rc=1
   if [ "$scope_rc" -ne 0 ]; then
     sed -i 's/^status:.*/status: parked/' "$f"
     echo "- scoper session failed, parked" >> "$f"
     log "SCOPER FAILED $id"; commit_f "parked-scoperfail"
-  elif grep -q '=== UNSCOPABLE:' coo/tmp/"$id".scoped.txt 2>/dev/null; then
+  elif [ -n "$(grep '=== UNSCOPABLE:' coo/tmp/"$id".scoped.txt 2>/dev/null | grep -v '<one-line reason>' | head -1)" ]; then
       sed -i 's/^status:.*/status: parked/' "$f"
-      echo "- parked by scoper: $(grep -m1 '=== UNSCOPABLE:' coo/tmp/"$id".scoped.txt)" >> "$f"
+      echo "- parked by scoper: $(grep '=== UNSCOPABLE:' coo/tmp/"$id".scoped.txt | grep -v '<one-line reason>' | head -1)" >> "$f"
       log "UNSCOPABLE $id"; commit_f "parked-unscopable"
     elif grep -q '=== CONTRACT ===' coo/tmp/"$id".scoped.txt; then
       awk '/=== CONTRACT ===/{flag=1;next}/=== END CONTRACT ===/{flag=0}flag' \
         coo/tmp/"$id".scoped.txt > coo/tmp/"$id".body.md
-      if grep -q '^---' coo/tmp/"$id".body.md; then
+      # hard gate: contract front-matter must carry THIS tangent's id (rejects
+      # prompt echoes / template examples masquerading as contracts)
+      if grep -qE "^id:[[:space:]]*$id([[:space:]]|$)" coo/tmp/"$id".body.md && grep -q '^---' coo/tmp/"$id".body.md; then
         cat coo/tmp/"$id".body.md > "$f"
         echo "" >> "$f"; cat coo/mandates/executor-addendum.md >> "$f"
         if [ "$COO_APPROVAL" = "blanket" ]; then
@@ -172,12 +214,15 @@ do_assess() {
 $(cat "$f")"
   local scope_rc2=0
   if [ -n "${COO_FAST_MODEL:-}" ]; then
-    run_droid assess exec -o text --auto medium -m "$COO_FAST_MODEL" "$PROMPT" > coo/tmp/"$id".verdict.txt 2>> "$LOG" || scope_rc2=$?
+    run_droid assess exec -o json --auto medium -m "$COO_FAST_MODEL" "$PROMPT" > coo/tmp/"$id".verdict.json 2>> "$LOG" || scope_rc2=$?
   else
-    run_droid assess exec -o text --auto medium "$PROMPT" > coo/tmp/"$id".verdict.txt 2>> "$LOG" || scope_rc2=$?
+    run_droid assess exec -o json --auto medium "$PROMPT" > coo/tmp/"$id".verdict.json 2>> "$LOG" || scope_rc2=$?
   fi
+  extract_stage "$id" verdict
+  record_sid assessor_session verdict
   if [ "$scope_rc2" -eq 0 ]; then
-    local V; V=$(grep -m1 '=== VERDICT:' coo/tmp/"$id".verdict.txt || echo "=== VERDICT: RESCOPE === no verdict line")
+    local V; V=$(grep '=== VERDICT:' coo/tmp/"$id".verdict.txt 2>/dev/null | grep -v '<one-line reason>' | head -1 || true)
+    [ -z "$V" ] && V="=== VERDICT: RESCOPE === no verdict line"
     echo "" >> "$f"; echo "## Assessor verdict" >> "$f"; echo "$V" >> "$f"
     case "$V" in
       *DONE*)   sed -i 's/^status:.*/status: validating/' "$f"; log "VERDICT $id DONE -> validating" ;;
@@ -200,12 +245,15 @@ do_validate() {
 $(cat "$f")"
   local scope_rc3=0
   if [ -n "${COO_FAST_MODEL:-}" ]; then
-    run_droid validate exec -o text --auto medium -m "$COO_FAST_MODEL" "$PROMPT" > coo/tmp/"$id".validation.txt 2>> "$LOG" || scope_rc3=$?
+    run_droid validate exec -o json --auto medium -m "$COO_FAST_MODEL" "$PROMPT" > coo/tmp/"$id".validation.json 2>> "$LOG" || scope_rc3=$?
   else
-    run_droid validate exec -o text --auto medium "$PROMPT" > coo/tmp/"$id".validation.txt 2>> "$LOG" || scope_rc3=$?
+    run_droid validate exec -o json --auto medium "$PROMPT" > coo/tmp/"$id".validation.json 2>> "$LOG" || scope_rc3=$?
   fi
+  extract_stage "$id" validation
+  record_sid validator_session validation
   if [ "$scope_rc3" -eq 0 ]; then
-    local VL; VL=$(grep -m1 '=== VALIDATION:' coo/tmp/"$id".validation.txt || echo "=== VALIDATION: FAIL === no validation line")
+    local VL; VL=$(grep '=== VALIDATION:' coo/tmp/"$id".validation.txt 2>/dev/null | head -1 || true)
+    [ -z "$VL" ] && VL="=== VALIDATION: FAIL === no validation line"
     awk '/=== PROBE ===/{flag=1}/=== END PROBE ===/{flag=0}flag' \
       coo/tmp/"$id".validation.txt > "coo/probes/$id.probe.md"
     echo "" >> "$f"; echo "## Validator" >> "$f"; echo "$VL" >> "$f"
@@ -248,10 +296,13 @@ fi
 [ -f "$BREAKER" ] && { log "BREAKER TRIPPED - paused (delete coo/.breaker)"; exit 0; }
 
 CYCLE_FAILURES=0
-INCLUDE="${COO_INCLUDE:-*.md}"
-for tf in tangents/$INCLUDE; do
+# COO_INCLUDE = space-separated tangent FILENAMES (quoted whole at launch).
+# No brace globs: bash does not re-expand braces from parameter results, so
+# "20260905-{a,b}.md" silently matched nothing (2026-09-06 sweep skipped 4 tangents).
+if [ -n "${COO_INCLUDE:-}" ]; then TFS="$COO_INCLUDE"; else TFS="tangents/2026*.md"; fi
+for tf in $TFS; do
   case "$(basename "$tf")" in TEMPLATE.md|EXAMPLE-*) continue;; esac
-  f="$tf"
+  f="tangents/$(basename "$tf")"
   st=$(status_of)
   case "$st" in
     queued|scoped|approved|assess|validating|rescope) advance "$f" ;;

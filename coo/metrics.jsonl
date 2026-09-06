@@ -19,3 +19,4 @@
 {"id":"20260905-spark-csv-export","stage":"assess","secs":1184,"ts":"2026-09-05T23:09:08-05:00"}
 {"id":"20260905-spark-csv-export","stage":"scope","secs":494,"ts":"2026-09-05T23:17:25-05:00"}
 {"id":"20260905-spark-csv-export","stage":"execute","secs":163,"ts":"2026-09-05T23:20:09-05:00"}
+{"id":"20260905-ntreis-fm23","stage":"scope","secs":1202,"ts":"2026-09-06T00:01:37-05:00"}

@@ -1,10 +1,10 @@
 <html><head><meta http-equiv='refresh' content='5'><title>20260905-scout-consumer-wiring</title><style>body{font-family:consolas;background:#111;color:#ddd;padding:16px}table{border-collapse:collapse}td,th{border:1px solid #444;padding:4px 10px}a{color:#6cf}.done{color:#6f6}.running{color:#ff6}.scoping,.assess,.validating{color:#6cf}.parked,.rescope{color:#f66}pre{font-size:11px;white-space:pre-wrap}h4{margin:14px 0 4px}</style></head><body>
 <p><a href='status.html'>&larr; board</a></p>
 <h2>20260905-scout-consumer-wiring</h2><table><tr><th>status</th><th>priority</th><th>budget_cycles</th><th>executor session</th></tr>
-<tr><td class='scoping'>scoping</td><td>medium</td><td>3</td><td>none yet</td></tr></table>
-<h4>tangent file (contract + outcomes + verdicts, updates as stages complete)</h4><pre>---
+<tr><td class='queued'>queued</td><td>medium</td><td>3</td><td>none yet</td></tr></table>
+<h4>tangent file (contract + outcomes + verdicts, updates as stages complete)</h4><pre>﻿---
 id: 20260905-scout-consumer-wiring
-status: scoping
+status: queued
 priority: medium
 budget_cycles: 3
 escalate_if: 1 failed cycle
@@ -14,7 +14,7 @@ origin: project-ledger proposed step (memory-knowledge:scout-consumer)
 # Wire scout.candidate events into ledger blockers refresh
 
 ## Why
-scout.candidate events die in the orphan event stream — opportunities never surface
+scout.candidate events die in the orphan event stream â€” opportunities never surface
 as ledger blockers. Closing this makes the strategic layer's signal actually consumable.
 
 ## Done when
@@ -24,7 +24,8 @@ as ledger blockers. Closing this makes the strategic layer's signal actually con
 
 ## Out of scope
 - Redesigning the event schema
-- Touching strategic_review.py proposals logic</pre>
+- Touching strategic_review.py proposals logic
+- scoper session failed, parked</pre>
 <h4>live log tail (coo/live/20260905-scout-consumer-wiring.scope.live.log)</h4><pre></pre><p><a href="file:///C:/Users/lkmot/factory-context/code/fleet-triage/coo/live/20260905-scout-consumer-wiring.scope.live.log">open raw log</a></p>
 <p><a href="file:///C:/Users/lkmot/.factory/sessions/-C-Users-lkmot-factory-context-code-fleet-triage">session transcripts folder (newest jsonl = live session)</a></p>
 </body></html>

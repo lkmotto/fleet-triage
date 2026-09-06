@@ -1,10 +1,10 @@
 <html><head><meta http-equiv='refresh' content='5'><title>20260905-ntreis-fm23</title><style>body{font-family:consolas;background:#111;color:#ddd;padding:16px}table{border-collapse:collapse}td,th{border:1px solid #444;padding:4px 10px}a{color:#6cf}.done{color:#6f6}.running{color:#ff6}.scoping,.assess,.validating{color:#6cf}.parked,.rescope{color:#f66}pre{font-size:11px;white-space:pre-wrap}h4{margin:14px 0 4px}</style></head><body>
 <p><a href='status.html'>&larr; board</a></p>
 <h2>20260905-ntreis-fm23</h2><table><tr><th>status</th><th>priority</th><th>budget_cycles</th><th>executor session</th></tr>
-<tr><td class='assess'>assess</td><td>high</td><td>6</td><td>none yet</td></tr></table>
-<h4>tangent file (contract + outcomes + verdicts, updates as stages complete)</h4><pre>---
+<tr><td class='queued'>queued</td><td>high</td><td>6</td><td>none yet</td></tr></table>
+<h4>tangent file (contract + outcomes + verdicts, updates as stages complete)</h4><pre>﻿---
 id: 20260905-ntreis-fm23
-status: assess
+status: queued
 priority: high
 budget_cycles: 6
 escalate_if: 2 failed cycles
@@ -15,23 +15,23 @@ scoped_at: 2026-09-06
 # Fix/verify NTREIS fm23 comps blocker (radius/type controls unavailable)
 
 ## Why
-Comps is Stage 3 of the core revenue pipeline (project-ledger `appraisal-pipeline`, tier: core, primary measure orders_fully_processed_per_week). The fm23 rollout hard-blocked every comps run Aug 12–19 (`radius_control_unavailable;type_control_unavailable`), stalling orders at comps. A context-implied adapter fix has since landed and is producing SUCCESS pulls, but the ledger step is still `proposed`/still-live and several blocked orders were never re-run. This tangent closes the loop with live proof artifacts so the blocker can be cleared fleet-wide.
+Comps is Stage 3 of the core revenue pipeline (project-ledger `appraisal-pipeline`, tier: core, primary measure orders_fully_processed_per_week). The fm23 rollout hard-blocked every comps run Aug 12â€“19 (`radius_control_unavailable;type_control_unavailable`), stalling orders at comps. A context-implied adapter fix has since landed and is producing SUCCESS pulls, but the ledger step is still `proposed`/still-live and several blocked orders were never re-run. This tangent closes the loop with live proof artifacts so the blocker can be cleared fleet-wide.
 
 ## Done when
-- [ ] One real order workfile contains BOTH `comps/matrix_search_results.jpg` AND `comps/spark_export.csv` (or equivalent comps CSV, ≥1 data row) produced by a run executed during this tangent — primary target `308_big_sky_circle_northlake_tx_76226` (previously fm23-blocked, has tax+diagnostics on disk); fallback targets `3504_silverado_trail_fort_worth_tx_76262` or `564_havencrest_ln_coppell_tx_75019`.
+- [ ] One real order workfile contains BOTH `comps/matrix_search_results.jpg` AND `comps/spark_export.csv` (or equivalent comps CSV, â‰¥1 data row) produced by a run executed during this tangent â€” primary target `308_big_sky_circle_northlake_tx_76226` (previously fm23-blocked, has tax+diagnostics on disk); fallback targets `3504_silverado_trail_fort_worth_tx_76262` or `564_havencrest_ln_coppell_tx_75019`.
 - [ ] That run's metadata contains a filter_context / form_version artifact showing `form_version: fm23` with NO `radius_control_unavailable` or `type_control_unavailable` in blocked_reason (i.e. the mandatory-coverage gate passed).
 - [ ] `tangents.json` and `project-ledger.json` updated: comps outcome recorded for the run and `appraisal-pipeline:ntreis-fm23` marked resolved (or evidence-attached) with the artifact paths.
 
 ## Out of scope
-- Spark CSV download-strategy bug (`all_download_strategies_failed`) — ledger step `appraisal-pipeline:spark-csv` is its own tangent. If search succeeds but export alone fails, capture the error screenshot and record PARTIAL; do NOT debug download plumbing here.
+- Spark CSV download-strategy bug (`all_download_strategies_failed`) â€” ledger step `appraisal-pipeline:spark-csv` is its own tangent. If search succeeds but export alone fails, capture the error screenshot and record PARTIAL; do NOT debug download plumbing here.
 - NTREIS/Clareity auth or session rearchitecture (only permitted: the existing auto-refresh/persisted-state path in `agent/portal_auth.py` already used by runs).
-- Any spend, bulk portal actions, or mass email — hard fence per safety rules.
+- Any spend, bulk portal actions, or mass email â€” hard fence per safety rules.
 - Changes to diagnostics, sfrep, or TrueTracts stages.
 
 ## Context (verified during scoping)
-- Stub evidence confirmed: `tangents.json` shows comps FAILED 2026-08-12 (4206 Randel), 2026-08-13 (3504 Silverado), 2026-08-19 (308 Big Sky), plus additional blocked runs (564 Havencrest, 6105 Meadowside, 7121 Dunster, 8720 Lariat, 4717 Baytree, 6561 Alta Vista) — each with `artifact_mandatory_coverage_blocked_*.json` in `workfiles/by_address/&lt;slug&gt;/metadata/`, all `form_version: fm23`, `unavailable_mandatory: radius, sfr_type`.
-- Precedent check — what is different this time: the blocker was already FIXED on 2026-08-25/26. `agent/matrix_form_adapter.py` (branch `droid/appraisal-pipeline-v1-forms`, commit lineage `f57db70 → 99bb570 → 50f36e9 → 1e6234c → 4b8cc8f → 8c1ae3e → 838ef9f`) adds `FormVersion.FM23`, `FM23_CONTEXT_IMPLIED` (sfr_type context-implied; radius removed from that tuple 2026-08-29 because `#Fm23_Ctrl19_Radius` was live-captured), JumpToLocation handling, and a strict-Fm23 no-hard-block gate. `agent/stages/stage3_matrix_spark.py` consumes it. Post-fix SUCCESS comps runs (6 consecutive): 15060 Cactus Blossom (08-26, first), 1433 Thistlewood (08-26), 2000 Brazos (08-26), 5205 Brookside (08-27), 2010 Glenhaven (08-29), 3808 Denham (08-31) — each produced spark_export.csv + matrix_search_results.jpg with "fm23 context-implied path working". This is why a live verify run should now pass; if it does not, the fm23 surface has changed again and that is a new discovery cycle, not a repeat.
-- Repo note: working tree at `C:\Users\lkmot\factory-context\code\github\lkmotto\motto-appraisal-pipeline` is dirty (many modified/untracked files — executor must not revert or clean; run from the current tree state).
+- Stub evidence confirmed: `tangents.json` shows comps FAILED 2026-08-12 (4206 Randel), 2026-08-13 (3504 Silverado), 2026-08-19 (308 Big Sky), plus additional blocked runs (564 Havencrest, 6105 Meadowside, 7121 Dunster, 8720 Lariat, 4717 Baytree, 6561 Alta Vista) â€” each with `artifact_mandatory_coverage_blocked_*.json` in `workfiles/by_address/&lt;slug&gt;/metadata/`, all `form_version: fm23`, `unavailable_mandatory: radius, sfr_type`.
+- Precedent check â€” what is different this time: the blocker was already FIXED on 2026-08-25/26. `agent/matrix_form_adapter.py` (branch `droid/appraisal-pipeline-v1-forms`, commit lineage `f57db70 â†’ 99bb570 â†’ 50f36e9 â†’ 1e6234c â†’ 4b8cc8f â†’ 8c1ae3e â†’ 838ef9f`) adds `FormVersion.FM23`, `FM23_CONTEXT_IMPLIED` (sfr_type context-implied; radius removed from that tuple 2026-08-29 because `#Fm23_Ctrl19_Radius` was live-captured), JumpToLocation handling, and a strict-Fm23 no-hard-block gate. `agent/stages/stage3_matrix_spark.py` consumes it. Post-fix SUCCESS comps runs (6 consecutive): 15060 Cactus Blossom (08-26, first), 1433 Thistlewood (08-26), 2000 Brazos (08-26), 5205 Brookside (08-27), 2010 Glenhaven (08-29), 3808 Denham (08-31) â€” each produced spark_export.csv + matrix_search_results.jpg with "fm23 context-implied path working". This is why a live verify run should now pass; if it does not, the fm23 surface has changed again and that is a new discovery cycle, not a repeat.
+- Repo note: working tree at `C:\Users\lkmot\factory-context\code\github\lkmotto\motto-appraisal-pipeline` is dirty (many modified/untracked files â€” executor must not revert or clean; run from the current tree state).
 - Execution entry points: `tools/run_stage3_single_case.py --subject-file &lt;json&gt;` (used by 2000 Brazos/Brookside/Glenhaven/Denham successes) or `tools/_autonudge_run_stage.py`; browser context storage_key `ntreis_matrix` via `agent/browser.py`/`agent/portal_auth.py`; auth wrapper convention `/ auth-userpass-prd` used by all prior stage runs.
 - The 3 originally-blocked orders still lack comps (workfiles verified: only subject/tax/sketch + blocked artifact present), so they are valid verify targets.
 - Runner guidance (tools/run_stage3_single_case.py): `WORKFILE_DIR` env or `--workfile-root` controls workfiles root; prior runs used the repo `workfiles/` root successfully.
@@ -50,7 +50,7 @@ Comps is Stage 3 of the core revenue pipeline (project-ledger `appraisal-pipelin
 
 You are the Executor for this tangent. Rules:
 
-1. Work ONLY toward the "Done when" items. The "Out of scope" fence is HARD — if the
+1. Work ONLY toward the "Done when" items. The "Out of scope" fence is HARD â€” if the
    real path crosses it, STOP and write a rescope note instead of improvising.
 2. If you discover the contract itself is wrong (goal unachievable as written, a
    context pointer doesn't resolve), do a MID-FLIGHT BAIL: stop, write the rescope
@@ -63,13 +63,64 @@ You are the Executor for this tangent. Rules:
 - status: success | partial | failed (environmental: yes/no)
 - artifacts: &lt;paths produced&gt;
 - what was done: &lt;2-4 lines&gt;
-- what remains: &lt;or "nothing — done-when fully met"&gt;
+- what remains: &lt;or "nothing â€” done-when fully met"&gt;
 - rescope note: &lt;only if bailing&gt;
 run_started: 2026-09-05T21:27:40-05:00
 
 ## Assessor verdict
 === VERDICT: RELOOP === Executor never ran a turn (permission-gate exit, num_turns:0, zero artifacts repo-wide; live log coo/live/20260905-ntreis-fm23.execute.live.log); cycle 1/6, targets + FM23 adapter verified intact on disk.
-run_started: 2026-09-05T21:38:02-05:00</pre>
-<h4>live log tail (coo/live/20260905-ntreis-fm23.assess.live.log)</h4><pre></pre><p><a href="file:///C:/Users/lkmot/factory-context/code/fleet-triage/coo/live/20260905-ntreis-fm23.assess.live.log">open raw log</a></p>
+run_started: 2026-09-05T21:38:02-05:00
+
+## Assessor evidence (cycle 2 of 6)
+- Run 2 verified directly: comps/ for 308 Big Sky is EMPTY; metadata/ still holds only `artifact_mandatory_coverage_blocked_20260819_070729.json` (8/19); zero new files in pipeline workfiles since 2026-09-05. Done-when 0/3.
+- Executor exited `num_turns: 0` after 388.8s with "insufficient permission to proceed. Re-run with --auto medium or --auto high" (coo/live/20260905-ntreis-fm23.execute.live.log; exec.log lines 1-2, sessions 5634a6ec / 514c7e4b) â€” identical signature to cycle 1. Environmental, not a plan/artifact failure. Scope adherence: clean.
+- **escalate_if: 2 failed cycles â€” MET.** Shared root cause is OUTSIDE the contract: coo-loop-v3.sh/v4.sh launch the executor with no `--auto` flag (`run_droid execute exec -o json ...`) while scope/assess/validate all pass `--auto medium|high`; the executor's own error names the fix. A re-scoped contract cannot fix this; the next execute launch fails identically. Secondary harness bug: RELOOP continuity greps `"sessionId"` but droid JSON emits `"session_id"`, so `executor_session:` is never persisted.
+- Contract path re-verified intact for eventual re-run: `FM23_CONTEXT_IMPLIED` + `#Fm23_Ctrl19_Radius` present in agent/matrix_form_adapter.py and agent/stages/stage3_matrix_spark.py; fallback comps dirs (3504 Silverado, 564 Havencrest) empty/available. Contract itself needs NO rewrite.
+- RECOMMENDATION to operator (lkmot) per escalate_if: park this tangent, add `--auto medium` (or high) to the execute invocations in coo-loop-v3.sh/v4.sh and fix the session_id capture, then un-park. Re-scoping before that fix burns cycles deterministically.
+
+## Assessor verdict
+=== VERDICT: RESCOPE === Done-when 0/3 with zero artifacts (308 Big Sky comps/ empty, only 8/19 blocked artifact in metadata/); second consecutive num_turns:0 permission-gate failure is harness-caused (execute launched without --auto in coo-loop-v3/v4.sh), and escalate_if "2 failed cycles" is met â€” evidence block appended to tangents/20260905-ntreis-fm23.md for the Scoper.
+- scoper session failed, parked
+- parked by scoper:    exactly `=== UNSCOPABLE: &lt;one-line reason&gt; ===` instead.</pre>
+<h4>live log tail (coo/live/20260905-ntreis-fm23.scope.live.log)</h4><pre>      workfiles/by_address/308_big_sky_circle_northlake_tx_76226/comps/ and
+      run metadata (filter_context / form_version artifact, no radius/type in
+       blocked_reason).
+   5. If CSV missing but search jpg present with
+      all_download_strategies_failed only: record PARTIAL with recommendation
+       to appraisal-pipeline:spark-csv (fence), then retry once with a
+      fallback target (3504 Silverado or 564 Havencrest) before consuming
+      more budget.
+   6. If the mandatory gate trips again on fm23: capture the coverage
+      artifact + screenshot as evidence of a NEW surface change, then
+      escalate (2 failed cycles) rather than re-deriving the adapter.
+   7. Write back: append comps outcome to
+      C:\Users\lkmot\.factory\knowledge\tangents.json completed entries; flip
+       project-ledger.json step appraisal-pipeline:ntreis-fm23
+      outcome/completed_at fields (ledger is propose-only — this write-back
+      is the loop's own convention) and leave a note for operator review.
+
+   === END CONTRACT ===
+
+ ⡆ Streaming...  (Press ESC to stop)
+
+ Auto (High) · allow all commands                           glm-5.3-flash - ZAI
+
+ &gt; Enter to steer · Ctrl+Enter to queue
+
+[⏱ 6m 37s] 18 config issues — /diagnostics | MCP ✗
+[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[G
+ ⢰ Streaming...  (Press ESC to stop)
+
+ Auto (High) · allow all commands                           glm-5.3-flash - ZAI
+
+ &gt; Enter to steer · Ctrl+Enter to queue
+
+[⏱ 6m 37s] 18 config issues — /diagnostics | MCP ✗
+[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[G
+ Auto (High) · allow all commands                           glm-5.3-flash - ZAI
+
+ &gt;
+
+[⏱ 6m 38s] 18 config issues — /diagnostics | MCP ✗</pre><p><a href="file:///C:/Users/lkmot/factory-context/code/fleet-triage/coo/live/20260905-ntreis-fm23.scope.live.log">open raw log</a></p>
 <p><a href="file:///C:/Users/lkmot/.factory/sessions/-C-Users-lkmot-factory-context-code-fleet-triage">session transcripts folder (newest jsonl = live session)</a></p>
 </body></html>

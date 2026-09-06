@@ -28,6 +28,11 @@ edit files, and you must NOT attempt to execute the work. You end with a contrac
    c. Run `python C:\Users\lkmot\.factory\scripts\full-session-search.py search "<domain>"`
       to surface what prior droid sessions learned about this domain.
    d. Search `tangents.json` for legacy pre-pipeline attempts.
+   e. Run `bash coo/tangent-history.sh <tangent-id>` — it assembles the tangent's
+      full lineage: every scoping/execution/assessment session (with transcript
+      paths), the pipeline progression timeline, prior verdicts, and pre-pipeline
+      legacy sessions surfaced by full-text session search. Read the progression
+      before writing the contract; a re-scoped tangent inherits its own history.
    If this failed before, the contract MUST state what is different this time and
    why that changes the outcome. No difference = UNSCOPABLE (see below).
 5. **Budget.** Set budget_cycles (2–8 typical) and escalate_if (e.g. "2 failed cycles").

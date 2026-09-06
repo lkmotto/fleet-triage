@@ -1,10 +1,10 @@
 <html><head><meta http-equiv='refresh' content='5'><title>20260905-sdr-9800-recovery</title><style>body{font-family:consolas;background:#111;color:#ddd;padding:16px}table{border-collapse:collapse}td,th{border:1px solid #444;padding:4px 10px}a{color:#6cf}.done{color:#6f6}.running{color:#ff6}.scoping,.assess,.validating{color:#6cf}.parked,.rescope{color:#f66}pre{font-size:11px;white-space:pre-wrap}h4{margin:14px 0 4px}</style></head><body>
 <p><a href='status.html'>&larr; board</a></p>
 <h2>20260905-sdr-9800-recovery</h2><table><tr><th>status</th><th>priority</th><th>budget_cycles</th><th>executor session</th></tr>
-<tr><td class='scoping'>scoping</td><td>medium</td><td>3</td><td>none yet</td></tr></table>
+<tr><td class='parked'>parked</td><td>medium</td><td>3</td><td>none yet</td></tr></table>
 <h4>tangent file (contract + outcomes + verdicts, updates as stages complete)</h4><pre>---
 id: 20260905-sdr-9800-recovery
-status: scoping
+status: parked
 priority: medium
 budget_cycles: 3
 escalate_if: 1 failed cycle
@@ -23,7 +23,23 @@ reach it. Sales outreach pipeline surface.
 
 ## Out of scope — HARD FENCE
 - Sending any cold email or mass outreach (safety rule 2a; the warm send pipe stays gated)
-- Deploying to production surfaces beyond the local :9800 service</pre>
-<h4>live log tail (coo/live/20260905-sdr-9800-recovery.scope.live.log)</h4><pre></pre><p><a href="file:///C:/Users/lkmot/factory-context/code/fleet-triage/coo/live/20260905-sdr-9800-recovery.scope.live.log">open raw log</a></p>
+- Deploying to production surfaces beyond the local :9800 service
+- parked by scoper: === UNSCOPABLE: :9800 recovery contradicts motto-sales-engine kill-list K1 (2026-09-01) archive disposition — stack superseded by motto-sales-engine (GitHub repo archived 2026-08-19) and ms01 (192.168.1.120) is offline for repair; no new recovery angle ===</pre>
+<h4>live log tail (coo/live/20260905-sdr-9800-recovery.scope.live.log)</h4><pre>All work is complete and verified. Summary of what was done:
+
+**Verdict:** The `:9800` recovery tangent is unscopable. Grounding showed the stub's premise ("needs Docker deploy") is stale: `motto-sales-engine` kill-list K1 (2026-09-01) retired the `motto-sdr-agent` stack in favor of the engine, the GitHub repo is archived (2026-08-19), the workspace copy was archived 2026-09-01, and ms01 (192.168.1.120) is offline for hardware repair (ping/SSH/:9800/:9300/:5678 all unreachable). No prior recovery attempts exist; the precedent is the kill trail itself, so no new angle.
+
+**Implemented per approved plan:**
+- Spawned replacement tangent `tangents/20260906-sales-outreach-ledger-hygiene.md` (committed `a7b9dcc` on `feature/coo-loop`, no push; the loop owns pushes): closes ledger step `sales-outreach:sdr-9800` and registry `sales_emails` as retired per K1, with JSON-parse and diff checks as done-when.
+- Appended decision record to `~/.factory/knowledge/decisions.jsonl` (verified: 51 lines parse).
+- Appended governance record to `agent-governance.jsonl` (verified: 470 lines parse).
+- UNSCOPABLE evidence with paths written to `coo/tmp/20260905-sdr-9800-recovery.scoped.txt`; the live COO loop will park `20260905-sdr-9800-recovery` with that reason on its next read.
+- Verification: `verify-done.py` research check passed (2/2). No file edits to engine or ms01; nothing sent; nothing deployed.
+
+Gap observed: kill-list K1's stack retirement never flowed back into `project-ledger.json`/`workstream-registry.json`, so the COO dispatch layer kept treating a retired stack as recoverable.
+
+Next improvement: auto-sync kill-list executions into project-ledger/workstream-registry as part of the reconciliation feature, so retired-surface blockers close at kill time instead of surfacing as stubs.
+
+=== UNSCOPABLE: :9800 recovery contradicts motto-sales-engine kill-list K1 (2026-09-01) archive disposition — stack superseded by motto-sales-engine (GitHub repo archived 2026-08-19) and ms01 (192.168.1.120) is offline for repair; no new recovery angle ===</pre><p><a href="file:///C:/Users/lkmot/factory-context/code/fleet-triage/coo/live/20260905-sdr-9800-recovery.scope.live.log">open raw log</a></p>
 <p><a href="file:///C:/Users/lkmot/.factory/sessions/-C-Users-lkmot-factory-context-code-fleet-triage">session transcripts folder (newest jsonl = live session)</a></p>
 </body></html>
