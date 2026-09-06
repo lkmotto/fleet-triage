@@ -1,6 +1,6 @@
 ---
 id: 20260905-ms01-scripts-inventory
-status: approved
+status: running
 priority: low
 budget_cycles: 3
 escalate_if: 1 failed cycle OR any non-inventory mutation of code/ ms01-* files
@@ -126,3 +126,4 @@ run_started: 2026-09-05T21:24:15-05:00
 
 ## Assessor verdict
 === VERDICT: RELOOP === Root cause was the harness permission-gate launch defect, now verified fixed in coo-loop-v3.sh:118/v4.sh:138 (--auto medium); executor produced zero work (execute.live.log num_turns:0), mutation guard clean (0 ms01-* in git status, 65-script recount matches), first failure with 2 cycles remaining.
+run_started: 2026-09-05T22:28:06-05:00
