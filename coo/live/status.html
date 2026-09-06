@@ -1,20 +1,35 @@
-<html><head><meta http-equiv='refresh' content='15'><title>COO Board</title><style>body{font-family:consolas;background:#111;color:#ddd;padding:16px}table{border-collapse:collapse}td,th{border:1px solid #444;padding:4px 10px}.done{color:#6f6}.running{color:#ff6}.scoping,.assess,.validating{color:#6cf}.parked,.rescope{color:#f66}</style></head><body><h3>COO Pipeline Board - 2026-09-05T21:33:57.0532698-05:00</h3><table><tr><th>tangent</th><th>status</th></tr><tr><td>20260905-campaign-105629-review</td><td class='validating'>validating</td></tr><tr><td>20260905-glenhaven-harvest-verify</td><td class='done'>done</td></tr><tr><td>20260905-gmail-intake-repair</td><td class='validating'>validating</td></tr><tr><td>20260905-ms01-scripts-inventory</td><td class='assess'>assess</td></tr><tr><td>20260905-ntreis-fm23</td><td class='assess'>assess</td></tr><tr><td>20260905-strategic-outcomes-verify</td><td class='scoping'>scoping</td></tr><tr><td>20260905-tangents-ledger-hygiene</td><td class='done'>done</td></tr></table><h4>recent loop events</h4><pre style='font-size:11px'> create mode 100644 coo/live/20260905-gmail-intake-repair.validate.live.log
-[2026-09-05T21:27:39-05:00] EXECUTE claim 20260905-ntreis-fm23 (continuity_sid=none reloop=0)
-[feature/coo-loop 6eaa203] coo: 20260905-ntreis-fm23 claim-execute
- 1 file changed, 2 insertions(+), 1 deletion(-)
-[2026-09-05T21:29:19-05:00] EXECUTOR exited nonzero 20260905-ms01-scripts-inventory
-[feature/coo-loop 154ccde] coo: 20260905-ms01-scripts-inventory executed
- 3 files changed, 2 insertions(+), 1 deletion(-)
- create mode 100644 coo/live/20260905-ntreis-fm23.execute.live.log
-[2026-09-05T21:29:19-05:00] ASSESS 20260905-ms01-scripts-inventory
-[2026-09-05T21:31:13-05:00] VALIDATION 20260905-tangents-ledger-hygiene PASS -> done
-[feature/coo-loop ebbc765] coo: 20260905-tangents-ledger-hygiene validated
- 3 files changed, 61 insertions(+), 1 deletion(-)
- create mode 100644 coo/probes/20260905-tangents-ledger-hygiene.probe.md
-To https://github.com/lkmotto/fleet-triage.git
-   4e6b629..ebbc765  feature/coo-loop -> feature/coo-loop
-[2026-09-05T21:31:15-05:00] ===== sweep end =====
-[2026-09-05T21:31:31-05:00] EXECUTOR exited nonzero 20260905-ntreis-fm23
-[feature/coo-loop 2102a4c] coo: 20260905-ntreis-fm23 executed
- 2 files changed, 2 insertions(+), 1 deletion(-)
-[2026-09-05T21:31:31-05:00] ASSESS 20260905-ntreis-fm23</pre></body></html>
+<html><head><meta http-equiv='refresh' content='15'><title>COO Board</title><style>body{font-family:consolas;background:#111;color:#ddd;padding:16px}table{border-collapse:collapse}td,th{border:1px solid #444;padding:4px 10px}.done{color:#6f6}.running{color:#ff6}.scoping,.assess,.validating{color:#6cf}.parked,.rescope{color:#f66}</style></head><body>
+<h3>COO Pipeline Board &mdash; 2026-09-05T21:52:49-05:00</h3><table><tr><th>tangent</th><th>status</th></tr>
+<tr><td>20260905-campaign-105629-review</td><td class='done'>done</td></tr>
+<tr><td>20260905-glenhaven-harvest-verify</td><td class='done'>done</td></tr>
+<tr><td>20260905-gmail-intake-repair</td><td class='done'>done</td></tr>
+<tr><td>20260905-kb-gmail-crossref</td><td class='scoping'>scoping</td></tr>
+<tr><td>20260905-ms01-scripts-inventory</td><td class='assess'>assess</td></tr>
+<tr><td>20260905-ntreis-fm23</td><td class='assess'>assess</td></tr>
+<tr><td>20260905-scout-consumer-wiring</td><td class='scoping'>scoping</td></tr>
+<tr><td>20260905-sdr-9800-recovery</td><td class='scoping'>scoping</td></tr>
+<tr><td>20260905-spark-csv-export</td><td class='approved'>approved</td></tr>
+<tr><td>20260905-strategic-outcomes-verify</td><td class='assess'>assess</td></tr>
+<tr><td>20260905-tangents-ledger-hygiene</td><td class='done'>done</td></tr>
+</table><h4>recent loop events</h4><pre style='font-size:11px'>
+Untracked files:
+  (use "git add &lt;file>..." to include in what will be committed)
+	coo/.git.lock
+
+no changes added to commit (use "git add" and/or "git commit -aOn branch feature/coo-loop
+Changes not staged for commit:
+  (use "git add &lt;file>..." to update what will be committed)
+  (use "git restore &lt;file>..." to discard changes in working directory)
+	modified:   coo/coo-loop.log
+
+Untracked files:
+  (use "git add &lt;file>..." to include in what will be committed)
+	coo/.git.lock
+
+no changes added to commit (use "git add" and/or "git commit -a")
+[2026-09-05T21:52:49-05:00] CONTRACT 20260905-spark-csv-export scoped+approved
+/c/Users/lkmot/factory-context/code/fleet-triage/coo/coo-loop-v4.sh: line 26: flock: command not found
+[2026-09-05T21:52:49-05:00] WARN gitlock timeout in commit
+[feature/coo-loop 713f15e] coo: 20260905-spark-csv-export scoped
+ 1 file changed, 53 insertions(+), 9 deletions(-)
+</pre></body></html>
