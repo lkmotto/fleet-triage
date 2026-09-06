@@ -1,6 +1,6 @@
 ---
 id: 20260905-strategic-outcomes-verify
-status: assess
+status: rescope
 priority: medium
 budget_cycles: 2
 escalate_if: 1 failed cycle OR any patch beyond append/lines-only verification is attempted without a new tangent
@@ -127,3 +127,6 @@ run_started: 2026-09-05T22:30:03-05:00
 ## Assessor verdict
 === VERDICT: RESCOPE === Cycles exhausted 2/2 on a second consecutive pre-turn permission-gate death (coo/tmp/20260905-strategic-outcomes-verify.exec.log num_turns:0 session dac3138a, 0 artifacts; no run.log, strategic_outcomes.jsonl still absent) — environmental but second-failure bars RELOOP and escalate_if was already spent on it.
 run_started: 2026-09-05T22:46:52-05:00
+
+## Assessor verdict
+=== VERDICT: RESCOPE === Done-when 0/6, third consecutive pre-turn permission-gate death (exec.log session 74b7e17c num_turns:0, no run.log, strategic_outcomes.jsonl absent) — root cause is stale pre-patch loop processes (started 21:18/21:45 vs 22:17 patch), so rescope must gate on a harness restart before any new executor cycle.

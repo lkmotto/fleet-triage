@@ -1,0 +1,29 @@
+Assessment complete. I verified every claim against live artifacts rather than the executor's outcome block (which was never written this cycle).
+
+## Assessment — 20260905-strategic-outcomes-verify (cycle started 22:46:52, rescoped contract)
+
+**Done-when: 0 of 6 verified.**
+
+| Item | Reality check |
+|---|---|
+| Append-path citation in outcome note | Outcome note is still the pre-cycle partial (mtime 9:33 PM); nothing added this cycle. (Append code itself: I independently confirmed present — `OUTCOMES_PATH` L49, `_append_jsonl` L81–84, guard L295–297, unconditional append L350–357; file unmodified since 8/24 5:11 PM, 402 lines.) |
+| Proof run + run.log | `coo/tmp/20260905-strategic-outcomes-verify.run.log` **does not exist**. |
+| Post-run artifact | `strategic_outcomes.jsonl` **still absent** (Test-Path False). |
+| Guard-check artifacts | guard-check.py exists from prior cycle; no fresh `.out` this cycle. |
+| Final outcome note | Not written. |
+| Patch (conditional) | N/A — append code present; confirmed no patch was applied (no `~/.factory` changes in git status, mtime unchanged). |
+
+**Root cause of this cycle's failure — environmental, but NOT fixed by the on-disk patch:**
+- exec.log third entry: session `74b7e17c-c59e-4ef1-98fa-6ebc7cb0eb15`, `num_turns: 0`, "insufficient permission to proceed. Re-run with --auto medium or --auto high." Zero artifacts, ~3.7 min.
+- Process table: all COO loops started **before** the 22:17:38 patch — v3 loops (PIDs 34312, 44268) at 21:18:21, v4 loop (PID 36144) at 21:45:34. The running processes never loaded the patched launch lines, which I verified are correct on disk in both v4 (L139–147) and v3 (L116–122). The fix exists but is not executing.
+- Aggravating conditions observed: **three concurrent loops** (two v3 + one v4) plus a `flock: command not found` gitlock warning, and a verdict-accounting anomaly at 22:46:51 (coo-loop.log logged "RELOOP" while the tangent file records RESCOPE, yet an execute cycle ran anyway — one more dead cycle than the budget authorized).
+
+**Scope adherence:** clean — the executor produced nothing, so no out-of-scope mutations; git status shows only harness/coo churn.
+
+**Budget:** 1 of 2 cycles consumed on the rescoped contract, but the prior RELOOP verdict explicitly conditioned reloop on the `--auto` patch being effective and stated "next failure of any kind is RESCOPE." That condition has fired. Additionally, the same failure class has now killed cycles across two contract generations — the "first failure" bar for RELOOP cannot honestly be met.
+
+**To the Scoper (critical):** a fresh contract alone will not fix this. Any new executor cycle launched by the still-running stale loop processes will die identically at the permission gate. The rescope must be gated on an operational prerequisite outside this tangent's fence: **restart the COO loops (kill PIDs 34312, 44268, 36144; relaunch a single loop so the patched v3/v4 script loads; optionally set `COO_EXECUTE_AUTO=medium` explicitly)** and resolve the triple-loop concurrency. If the operator prefers not to restart, ESCALATE is the honest alternative — a third dead cycle would be pure spend.
+
+Verification: verify-done.py N/A for this task type — assessor role is judgment-only; all done-when items were checked directly via file reads, Test-Path, process listing, and git status above. Governance record appended to `agent-governance.jsonl`.
+
+=== VERDICT: RESCOPE === Done-when 0/6, third consecutive pre-turn permission-gate death (exec.log session 74b7e17c num_turns:0, no run.log, strategic_outcomes.jsonl absent) — root cause is stale pre-patch loop processes (started 21:18/21:45 vs 22:17 patch), so rescope must gate on a harness restart before any new executor cycle.
