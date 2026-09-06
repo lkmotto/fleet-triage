@@ -1,69 +1,49 @@
 ---
 id: 20260906-e2e-stage4-truetracts-repair
-status: scoping
-assessor_session: 38fe54ae-600f-4ffe-beef-a24312a796e0 assess
+status: approved
 priority: high
 budget_cycles: 6
-escalate_if: 2 failed live Stage-4 execute cycles after preflight (auth valid + subject JSON ready), OR google_secure_browser_block persists after one bounded reseed-refresh attempt, OR create-modal address bind fails the same way twice (address_not_committed) with no new selector evidence
-origin: pinned-session:c8b23b5d-e1be-452c-b9b4-3eb073b825e6
+escalate_if: 2 failed live Stage-4 execute cycles after preflight (auth valid + subject JSON ready + CSV gate green), OR google_secure_browser_block after one bounded reseed-refresh, OR address_not_committed twice with no new selector evidence, OR ss_not_defined twice after one bounded recovery fix, OR MLS attach still file_attached:false after one diagnostic + one bounded selector fix
+origin: pinned-session:c8b23b5d-e1be-452c-b9b4-3eb073b825e6; rescope-after-assessor:38fe54ae-600f-4ffe-beef-a24312a796e0; operator-addendum-20260906-1505-comp-carry
 scoped_by: coo-scoper
 scoped_at: 2026-09-06
 ---
-# e2e Stage 4: TrueTracts repair after site remodel
-
-## OPERATOR ADDENDUM 2026-09-06 15:05 — BINDING ON RE-SCOPE (comp-carry gate)
-
-Operator inspected today's TDCX exports and found improper addresses. Evidence: stage-4 acquisition
-artifacts (Report.tdcx + workfiles.zip) were written 12:21-14:24 against 5 orders —
-771_monticello_circle_allen_tx_75002, 4424_santa_fe_ln_mckinney_tx_75070, 3808_denham_way_plano_tx_75023,
-6804_richfield_dr_north_richland_hills_tx_76182, 308_big_sky_circle_northlake_tx_76226 — of which 4 had NO
-comps\spark_export.csv on disk (no stage-3 comp selection existed). Even the healthy-shape Brazos run shows
-`selected_comp_count: 0` — whenever the stage-3 CSV is not attached, TrueTracts picks its own comps.
-
-Binding contract changes on re-scope:
-1. HARD GATE: a live stage-4 run is FORBIDDEN on any order whose comps\spark_export.csv is missing or has
-   <1 data row. Wrong order chosen -> write a rescope note naming the order; do not run.
-2. COMP-CARRY PROOF (supersedes the opened:false tolerance): the proven order must reach
-   truetracts_mls_import_status.json with `file_attached: true` and, where the UI allows, non-empty
-   `selected_comp_ids` drawn from spark_export.csv. Discovery-only (csv_path set, opened:false) no longer
-   satisfies the handoff done-when. If MLS attach is technically blocked, that finding is the re-scope
-   outcome — stage 4 cannot claim comp-carry without it.
-3. Export provenance: any TDCX claimed as success must have comp addresses corresponding to the
-   spark_export.csv comp set; add a comp-address diff artifact to the outcome JSON.
-4. The 5 listed orders are contaminated for stage-4 evidence purposes until their CSVs exist and a gated
-   re-run succeeds. Big Sky re-run ban reaffirmed. DO NOT delete any artifacts — list paths in the outcome
-   note; cleanup is operator-approved only.
+# e2e Stage 4: TrueTracts repair after site remodel (comp-carry re-scope)
 
 ## Why
-Stage 4 is the next core revenue domino after Stage 3. TrueTracts remodeled its UI (operator pin 2026-08-31); Stage 3 is now in its best state (`appraisal-pipeline:ntreis-fm23` closed 2026-09-06 on 308 Big Sky). Post-remodel code already landed (08-31 → 09-05) and one same-day autonudge SUCCESS exists on Big Sky, but the COO-facing work is incomplete until (a) a contract-gated daemon/run path is proven on a Stage-3-ready order with non-empty Stage-4 artifacts, (b) the e2e UI chain doc reflects the *current* post-Saguaro flow (findings still contain stale OPEN notes), and (c) Stage 3 → Stage 4 handoff is artifact-verified (`spark_export.csv` discovered + MLS status/handoff fields).
+Stage 4 is the core revenue step after Stage 3. Cycle 1 proved session create + workflow navigation on Brazos but failed export (`ss_not_defined`) and never attached Stage-3 comps; operator review found improper TDCX addresses whenever `spark_export.csv` was missing or unused (TrueTracts auto-picks comps). Closing requires a CSV-gated, MLS-attached, provenance-checked live export on a geo-clean guinea pig, plus chain docs and write-backs — not another discovery-only run.
 
 ## Done when
-- [ ] **Live Stage-4 acquisition pass (no manual UI babysitting during the run)** on one Stage-3-ready guinea-pig order, producing runner stdout JSON (`status: success`) saved to `coo/outcomes/20260906-e2e-stage4-truetracts-repair-run.json` or order `metadata\stage4_*.json`, plus under the order's `subject\`: `truetracts_workflow_status.json` with all five workflow steps navigated/settled, at least one heavy export artifact (`Report.tdcx` or `workfiles.zip`, non-zero), and `truetracts_export_harvest.json` and/or `truetracts_export_verification.json` (fatal `export_subject_mismatch` = FAIL; `tdcx_subject_block_absent` tolerated). Primary guinea pigs (TT-absent + tax + CSV): `2000_brazos_ct_westlake_tx_76262` → `1433_thistlewood_ln_grapevine_tx_76051` → `15060_cactus_blossom_blvd_fort_worth_tx_76052`; reuse-path fallback only after one diagnostic capture; never re-run Big Sky for a second SUCCESS; never use 11452 Snyder (ban precedent).
-- [ ] **Stage 3 → Stage 4 handoff non-empty proof** on the same order: `comps\spark_export.csv` ≥1 data row AND `subject\truetracts_mls_import_status.json` (or equivalent) shows discovery with non-empty `csv_path` under that order's `comps\` (Big Sky shape). MLS in-UI attach staying `opened:false` is acceptable if discovery+CSV path is correct and Stage 4 otherwise succeeded.
-- [ ] **e2e chain document updated** at `tools\_exploration\e2e_stage4_ui_chain.md` (dated 2026-09-06+): entry URLs, `truetracts_portal` storage key, create-modal phases (Subject Property Info → Detached → features/`#gla`/`#stories` → 2055/Q4/C3 → Create Session), Google Places bind rule, Update Heatmap/`ss_not_defined` honesty, five workflow steps, export + subject-verification/ban list, harvest note, failure codes, runner entrypoints. Plus a 2026-09-06 header in `truetracts_findings.md` superseding stale OPEN sections (Saguaro/Glenhaven/Big Sky resolutions).
-- [ ] **Write-back**: tangent Outcome section; `tangents.json` completed row for the slug with artifact paths; ledger `appraisal-pipeline:truetracts-reseed` → verified/done with evidence if login was healthy (or operator reseeded mid-cycle); if auth-blocked, leave flagged and escalate.
+- [ ] **Live Stage-4 SUCCESS** on primary `1804_caladium_dr_corinth_tx_76210` (one local-geo fallback only if Caladium bails with artifacts): runner JSON `status: success` at `C:\Users\lkmot\factory-context\code\fleet-triage\coo\outcomes\20260906-e2e-stage4-truetracts-repair-run.json`; order `subject/truetracts_workflow_status.json` (5 steps navigated/settled); non-zero `Report.tdcx` and/or `workfiles.zip`; `truetracts_export_harvest.json` and/or `truetracts_export_verification.json`; fatal on `export_subject_mismatch` (`tdcx_subject_block_absent` tolerated); never Big Sky second SUCCESS; never 11452 Snyder.
+- [ ] **COMP-CARRY proof** on the same order: `comps/spark_export.csv` ≥1 data row; `subject/truetracts_mls_import_status.json` with non-empty order-local `csv_path` AND `file_attached: true` (plus non-empty `selected_comp_ids` where UI allows, from CSV `MLS#` / `selected_comps.json`); plus comp-address diff artifact at `coo/outcomes/20260906-e2e-stage4-truetracts-repair-comp-diff.json` (or order `subject/`) with `match_rate` + unmatched lists vs the `spark_export.csv` set. Discovery-only (`opened:false`, `file_attached:false`) does NOT satisfy. Attach technically blocked after one diag + one bounded fix → PARTIAL + rescope note, not SUCCESS.
+- [ ] **Docs**: `tools/_exploration/e2e_stage4_ui_chain.md` dated 2026-09-06+ (entry URLs, storage keys, create-modal phases, Google Places bind rule, MLS import open/attach selectors as found, Update Heatmap/`ss_not_defined` honesty + recovery limits, five workflow steps, export + subject-verification/ban list, harvest note, failure codes, runners, comp-carry gate, contaminated-order list); 2026-09-06+ header on `truetracts_findings.md` superseding stale OPEN sections and recording the Brazos recurrence + this cycle's result.
+- [ ] **Write-back**: mandatory `## Outcome` on `tangents/20260906-e2e-stage4-truetracts-repair.md` (missing Outcome = incomplete cycle); `tangents.json` completed row with absolute artifact paths; ledger `appraisal-pipeline:truetracts-reseed` verified if login healthy else flagged + escalated with exact reseed command; contaminated artifact paths listed; no artifact deletes (operator-approved cleanup only).
 
 ## Out of scope
-- Stage 3 comp-selection logic (sibling `20260906-e2e-stage3-comp-certainty`); Stage 5 SFREP assembly/delivery (sibling `20260906-e2e-stage5-sfrep-wiring`)
+- Stage 3 CSV geo/quality redesign and new Matrix pulls (`20260905-spark-csv-export`); Stage 3 comp-certainty sibling; Stage 5 SFREP sibling
 - TrueTracts account changes, purchases, plan upgrades, credential rotation (hard fence)
-- Google re-login beyond ONE bounded attempt via existing `refresh_truetracts_state_from_persistent_profile.py`; still blocked → stop with the exact reseed command
-- REST `/session/with-subject` API rewrite (pb-0064) — recommend-only
-- NTREIS fm23 / spark-csv redesign (fm23 verified; spark-csv stays on `20260905-spark-csv-export`)
-- Mass email, production deploys, DNS/network changes, data deletion (hard fences); multi-order campaigns (one guinea pig + one fallback max)
+- Google re-login beyond ONE bounded attempt via existing `tools/refresh_truetracts_state_from_persistent_profile.py`; still blocked → stop with the exact reseed command
+- REST `/session/with-subject` rewrite (pb-0064) — recommend-only; multi-order campaigns; Big Sky re-run; Snyder reuse
+- Mass email, production deploys, DNS/network changes, data deletion (hard fences); SFREP COM sessions (not authorized); killing arbitrary user apps to free RAM (environmental stop instead)
 
 ## Context (verified during scoping)
-- Repo `C:\Users\lkmot\factory-context\code\github\lkmotto\motto-appraisal-pipeline`; `agent\stages\stage4_truetracts.py` (`run()` ~L4982, `_type_address_and_pick_suggestion` ~L1191, `_wait_for_address_bind_evidence` ~L1557, `_commit_pending_heatmap` ~L3032, `_verify_export_artifacts_subject` ~L311, `#stories` ~L1821); runners `tools\_autonudge_stage4.py <subject.json> <workfile_root>` and `tools\run_stage4_single_case.py --subject-json … --workfile-root …`; subject JSON shape per `tools\_tmp_subject_denham.json`; defaults form 2055 / Q4 / C3; entry URL `https://truetracts.truefootage.tech`.
-- What is different this time: prior failure classes all have landed fixes (google_secure_browser_block → reseed path; modal timeout → cleared Glenhaven; shells/Places-bind → fixed live Saguaro 09-05; ss_not_defined → Update Heatmap commit; export_subject_mismatch → ban list + verification). Decisions 08-31/09-01/09-04/09-05 lock the flow. This tangent = COO-scorable proof + chain doc + handoff gate + write-back, not UI rediscovery.
-- Disk-verified Stage-3-ready orders: Brazos/Thistlewood/Cactus (tax + CSV + zero TT); Big Sky full TT suite incl. `truetracts_mls_import_status.json` `handoff.ready:true` + `csv_path` → `comps\spark_export.csv`. Storage `workfiles\browser_state\truetracts_portal.json` (mtime 08-10 on disk; Big Sky refreshed to 14 cookies / 31.7h age at runtime). Doppler `auth-userpass-prd` pattern; memory gate ≥8 GB free (Big Sky: 12.1 GB).
-- Precedent: `20260905-glenhaven-harvest-verify` (SUCCESS; TT re-run fenced there), `20260905-spark-csv-export` (stage4 consume path), `20260905-ntreis-fm23` (Stage 3 SUCCESS; harness `--auto` requirement). issue_funnel's "abandon TT for API" recommendation is NOT adopted here. Full lineage in `tangents/20260906-e2e-stage4-truetracts-repair.md` + spec copy `C:\Users\lkmot\.factory\specs\2026-09-06-contract-10.md`.
+- Repos: pipeline `C:\Users\lkmot\factory-context\code\github\lkmotto\motto-appraisal-pipeline`; COO `C:\Users\lkmot\factory-context\code\fleet-triage`.
+- Cycle-1 fail: `coo/tmp/stage4_brazos_run.log` + `workfiles/by_address/2000_brazos_ct_westlake_tx_76262/subject/truetracts_failure_metadata_20260906_194816.json` — `ss_not_defined` after heatmap commit + Qwen OK + 5 steps True; MLS `ready:true`, `opened:false`, `file_attached:false`, `selected_comp_count:0`; no heavy export. Assessor RESCOPE (not environmental).
+- Auth healthy: "Reused persisted TrueTracts session (login skipped)"; storage persisted to `C:\Users\lkmot\.motto-appraisal-pipeline\browser-state\truetracts_portal.json` (14:48 today); repo copy `workfiles\browser_state\` stale 08-10.
+- CSV geo (checked 2026-09-06): Brazos/Thistlewood/Cactus/Glenhaven polluted (Houston-area). Caladium = 100 local rows (60 Corinth/40 Denton, zip 76210), mtime 15:01, `MLS#` populated, `realist_tax.pdf` present, zero TT artifacts, subject JSON `tools/_tmp_subject_caladium.json`. Big Sky local but contaminated + re-run banned. Lark/Sundown/Parkmont have local CSVs but already carry TDCX (reuse-path diagnostic only).
+- Contaminated for stage-4 evidence (list, do not delete): 771 Monticello, 4424 Santa Fe, 3808 Denham, 6804 Richfield, 308 Big Sky.
+- Code: `agent/stages/stage4_truetracts.py` — `_apply_mls_import` ~L3289, `_resolve_mls_import_handoff` ~L3199, `_prime_selected_comp_ids` ~L3229, `_commit_pending_heatmap` ~L3032, SS gate ~L6546-6576, MLS status write ~L6102, optional `TRUETRACTS_REQUIRE_MLS_IMPORT` ~L6122; `agent/truetracts_context.py` builds `selected_comp_ids` from `selected_comps.json`/CSV `MLS#`. Runners `tools/_autonudge_stage4.py` / `tools/run_stage4_single_case.py`; Doppler `auth-userpass`/`prd`; RAM gate ≥8 GB (scope-time free ~3.4 GB — must clear).
+- What is different this time: geo-clean CSV-gated primary; comp-carry as hard done-when with diff artifact; `ss_not_defined` treated as open recurrence with bounded recovery then escalate; executor exit protocol (Outcome + named outcomes path) contract-mandatory after cycle-1 skipped both.
 
 ## Approach sketch
-1. Preflight (no portal): RAM ≥8 GB; storage-state cookie check; build `tools\_tmp_subject_brazos.json`; confirm CSV present / TT absent.
-2. Skim stage4 helpers + Big Sky success-shape JSONs as templates (no Stage 3 edits).
-3. One live run: `python tools/_autonudge_stage4.py tools\_tmp_subject_brazos.json workfiles` (Doppler auth-userpass-prd); capture stdout to `coo/outcomes/20260906-e2e-stage4-truetracts-repair-run.json`.
-4. Verify artifacts; on `address_not_committed`/`ss_not_defined` one diagnostic capture + one bounded fix (second identical failure → escalate); on `google_secure_browser_block` one reseed refresh then stop if blocked.
-5. Author `e2e_stage4_ui_chain.md`; supersede stale OPEN sections in findings.md.
-6. Write back tangent Outcome, tangents.json row, ledger reseed verify; recommend-only notes for MLS attach polish, Stage 5, API path, residual spark-csv orders.
+1. Append `run_started` + preflight note to the tangent BEFORE portal work; tee run log to the named outcomes path from the start.
+2. Preflight (no portal): RAM ≥8 GB; storage-state check; Caladium CSV row count + local-geo spot check; tax present; resolve `selected_comp_ids` (established `truetracts_context` path or minimal `selected_comps.json` input; if unresolvable, record and attempt full-CSV attach).
+3. Skim only: `_apply_mls_import`, `_commit_pending_heatmap`, SS recovery; Big Sky MLS JSON as anti-template.
+4. One live run: `doppler run --project auth-userpass --config prd -- python tools/_autonudge_stage4.py tools/_tmp_subject_caladium.json workfiles`; stdout to `coo/outcomes/20260906-e2e-stage4-truetracts-repair-run.json`.
+5. On `ss_not_defined`: one diagnostic package + one bounded recovery fix + one re-run; second identical fail → escalate.
+6. On MLS not attached: one selector diagnostic + one bounded `_apply_mls_import` fix; still blocked → PARTIAL + rescope note (no fake SUCCESS).
+7. On SUCCESS: comp-diff JSON, subject verification check, `e2e_stage4_ui_chain.md` + findings header, Outcome + tangents.json + ledger write-backs, governance record.
+8. On auth block: one bounded reseed via existing refresh script; still blocked → stop with exact command in Outcome.
 
 
 ## Executor instructions (pipeline section)
@@ -85,7 +65,3 @@ You are the Executor for this tangent. Rules:
 - what was done: <2-4 lines>
 - what remains: <or "nothing — done-when fully met">
 - rescope note: <only if bailing>
-run_started: 2026-09-06T14:26:08-05:00
-
-## Assessor verdict
-=== VERDICT: RESCOPE === Live run failed with status "failed" / ss_not_defined (coo/tmp/stage4_brazos_run.log + truetracts_failure_metadata_20260906_194816.json), no heavy export artifact, no chain doc, no write-backs, no executor Outcome; not environmental → fresh contract with attached evidence.
