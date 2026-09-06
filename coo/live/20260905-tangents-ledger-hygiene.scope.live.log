@@ -1,0 +1,17 @@
+Done. The contract was executed and all done-when items are verified.
+
+**What happened**
+- **Grounded first**: live `tangents.json` matched the stub exactly (47 pending rows, all `status="completed"` with `completed_at`; 27 completed; 1 recent; 74 unique ids, zero overlap). No prior hygiene attempt in tangents.json, sessions, or decisions.jsonl. Confirmed `business-state.py:gather_tangents()` reads only `pending` (so the misfile really did poison backlog), while `project_ledger.py` unions all buckets (safe under an intact move).
+- **Backup**: `C:\Users\lkmot\.factory\knowledge\tangents.json.20260906T020828Z.bak` — byte-identical to the pre-edit file (sha256 `03e15a7b…`), parse-verified with matching counts.
+- **Repair**: all 47 finished rows moved from `pending` to `completed` with fields untouched; `recent` untouched; `last_updated` → `2026-09-06T02:08:48Z`; `_note` now documents the writer intent plus the one-time reconciliation and names the backup. Wrote via temp file + atomic replace, UTF-8, no data deleted.
+- **Verified**: parse OK; `pending=0`, `completed=74`, total 74 unique ids, id multiset equals the backup's, backup unchanged. Downstream check: `gather_tangents()` now returns 0 rows — the queue no longer lies.
+- **Proof artifact**: `C:\Users\lkmot\factory-context\code\fleet-triage\coo\tmp\20260905-tangents-ledger-hygiene.verify.txt` (full transcript with counts, hashes, and consumer result).
+- **Records**: governance entry appended to `agent-governance.jsonl`; decision entry appended to `decisions.jsonl`.
+
+**verify-done.py**: config task-type — JSON syntax passed; the "service running" check failed only because `tangents-ledger` is a static knowledge file, not a Docker service (check not applicable to this artifact type).
+
+**Follow-up tangent recommended** (fenced from this contract): the writer bug that lands completed rows in `pending` (autonudge/HEARTBEAT completion path) is still unfixed and will re-misfile rows on the next dispatch cycle.
+
+Next improvement: file the writer-fix tangent so completed rows stop landing in `pending` at dispatch time.
+
+Gap observed: verify-done.py's config task-type assumes a running service; there is no fitting task-type for knowledge-file repairs (a "file" type exists but checks existence, not structure), so the service check noise is unavoidable.

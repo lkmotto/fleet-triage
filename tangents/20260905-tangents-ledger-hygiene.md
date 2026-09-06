@@ -1,6 +1,6 @@
 ---
 id: 20260905-tangents-ledger-hygiene
-status: scoping
+status: queued
 priority: medium
 budget_cycles: 2
 escalate_if: 1 failed cycle
