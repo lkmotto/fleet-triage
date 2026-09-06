@@ -1,0 +1,41 @@
+Assessment complete. All done-when items verified against real artifacts, including an independent reproduction of the scan. Findings:
+
+## Done-when verification
+
+**Item 1 — Repeatable scan path, verified, metadata-only, JSON-valid: VERIFIED**
+- Script on disk: `~/.factory/automations/autonudge-loop/gmail_intake_scan.py` — read in full; stdlib-only, makes one `GET /gmail/v1/users/me/messages` list call through the Composio REST proxy, persists only `id` + `threadId`.
+- Artifact: `coo/outcomes/20260905-gmail-intake-repair-scan.json` — valid JSON, `ok: true`, 201/5.
+- **Independent reproduction (assessor-run):** `SCAN_OK: resultSizeEstimate=201 listed=5`, `EXIT=0`, JSON parsed, message keys exactly `['id', 'threadId']`, privacy check passed. Output written to my temp file, executor artifact untouched.
+- Repeatable: HEARTBEAT.md lines 30–38 wire the exact command and exit-code semantics (0=use count, 2=stop and flag, 1=continue).
+
+**Item 2 — Operative path documented: VERIFIED**
+- `coo/outcomes/20260905-gmail-intake-repair-proof.md` names the Composio REST proxy path, root cause (`smithery-toolbox.disabled: true` in `~/.factory/mcp.json`), and how the heartbeat consumes it (Smart Gate Step 1 count from `memory\gmail-scan-latest.json`).
+
+**Item 3 — Zero sends; metadata only; no Doppler changes: VERIFIED**
+- Code review: no send/mark/label endpoints in the script.
+- `mcp.json` flat-diffed against backup: exactly one key changed (`smithery-toolbox.disabled: true → false`), both files JSON-valid, no BOM (first bytes `123,10,32`). Backup sha256 `A042000F...AB5DE` matches the proof doc's claim.
+- Doppler used read-only via `doppler run` env injection; no secret values printed or modified.
+
+## Scope adherence
+
+All changes land inside the fence: the mcp.json re-enable is the named root cause from the Why section, the scan script and heartbeat wiring are the contract deliverables, no email content read or persisted (verified by code + reproduction), no sends. Bookkeeping (parts-bin pb-0074, governance and decisions records) all confirmed present.
+
+## Process notes
+
+- Work was executed pre-contract by the scoping session. This post-hoc route was explicitly codified by operator dispatch (commit 12ac42f) and documented in the tangent header, so I treat it as approved process, not a violation. Worth keeping an eye on: pre-hoc contracts are the normal path going forward.
+- Budget: 4 cycles authorized, ~1 consumed (execute + assess), zero failed cycles. `escalate_if: 2 failed cycles` not met.
+- Honest caveats from the executor check out: the re-enabled MCP tool won't be loadable until a fresh session (deferred-tools are fixed at session start); intake no longer depends on it. The 201 unread estimate is query noise (generic "order" terms), correctly flagged out of scope. The KB gap (`credential "gmail"` empty; operative record under "composio") remains open, out of scope here.
+
+Verification: `verify-done.py --task-type code` passed (1/1). Governance record appended to `agent-governance.jsonl`.
+
+=== VERDICT: DONE === All three done-when items artifact-verified and independently reproduced (scan re-run exit 0, metadata-only, JSON-valid; mcp.json single-key diff vs sha256-matched backup); zero failed cycles.
+
+=== CONTRACT WITH OUTCOME ===
+---
+id: 20260905-gmail-intake-repair
+status: assess
+priority: high
+budget_cycles: 4
+escalate_if: 2 failed cycles
+origin: autonudge-carried-item (4 consecutive cycles, 20260904-05)
+---

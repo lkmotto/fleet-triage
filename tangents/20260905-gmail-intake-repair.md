@@ -1,6 +1,6 @@
 ---
 id: 20260905-gmail-intake-repair
-status: assess
+status: validating
 priority: high
 budget_cycles: 4
 escalate_if: 2 failed cycles
@@ -37,3 +37,6 @@ funnel.
 - Reading or sending email content; new secrets; automating sends
 
 [route: operator-formalized; status advanced to assess]
+
+## Assessor verdict
+=== VERDICT: DONE === All three done-when items artifact-verified and independently reproduced (scan re-run exit 0, metadata-only, JSON-valid; mcp.json single-key diff vs sha256-matched backup); zero failed cycles.
