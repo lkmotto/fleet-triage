@@ -1,6 +1,7 @@
 ---
 id: 20260906-e2e-stage3-comp-certainty
-status: validating
+status: done
+validator_session: 3d5e8415-63dc-4754-a880-b0c8b49e703c validating
 assessor_session: 430a3c5a-605b-41be-86eb-b60fc11312ea assess
 executor_session: 99741121-51dd-4187-88fa-5fdbca7f9366 running
 priority: high
@@ -161,3 +162,14 @@ run_started: 2026-09-06T16:01:23-05:00
 
 ## Assessor verdict
 === VERDICT: DONE === All 6 done-when items independently verified on disk (7 CERTIFIED rows machine-checked incl. Caladium+Big Sky min set, gate JSON cohort of 17 complete, trio+pb-0076 verified with amended citations at comp_selection.py L76/L485); scope fence and no-spend/attach fences honored; 2/6 cycles used.
+
+## Validation (coo-validator, 2026-09-06)
+- re-executed all done-when checks independently: 60/60 machine checks green (`coo\tmp\validate-20260906-e2e-stage3-comp-certainty.py`, exit 0)
+- gate JSON: 17-row cohort complete, 7 CERTIFIED / 10 BLOCKED consistent; every CERTIFIED row re-verified on disk (CSV data rows 93–199, handoff.ready=true, handoff.csv_path resolves to the order-local spark_export.csv, attach fields false)
+- min set: Caladium + Big Sky handoff IDs byte-equal to `selected_comps.json` picks (6+6); contaminated evidence workfiles (771 Monticello, 4424 Santa Fe, 3808 Denham, 6804 Richfield, Big Sky) preserved; no spend, no Stage-4 attach, no live Matrix run
+- trio + pb-0076 re-verified (Verify/Amend stanza dated; L76/L485 citations confirmed at source; MLS API bottom-row ranking confirmed); fence audit: only pre-run code mtimes; probe emitted at `coo\probes\20260906-e2e-stage3-comp-certainty.probe.md`
+- value: prevents_error (Stage-4 gate stops CSV-less/contaminated orders from re-running the TDCX failure mode); score 5/5
+=== VALIDATION: PASS === value:prevents_error; score:5; 60/60 machine checks green incl. min-set handoff-ID equality, gate cohort 17 complete, fences (no spend/attach/deletion) and amended citations verified at source
+
+## Validator
+=== VALIDATION: PASS === value:prevents_error; score:5; 60/60 machine checks green incl. min-set handoff-ID equality, 17-row gate cohort, no-spend/attach/deletion fences, and amended citations verified at source
