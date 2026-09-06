@@ -1,6 +1,6 @@
 ---
 id: 20260906-e2e-stage4-truetracts-repair
-status: queued
+status: scoping
 priority: high
 budget_cycles: 6
 escalate_if: 2 failed cycles
