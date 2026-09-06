@@ -1,6 +1,6 @@
 ---
 id: 20260906-e2e-stage4-truetracts-repair
-status: approved
+status: running
 priority: high
 budget_cycles: 6
 escalate_if: 2 failed live Stage-4 execute cycles after preflight (auth valid + subject JSON ready + CSV gate green), OR google_secure_browser_block after one bounded reseed-refresh, OR address_not_committed twice with no new selector evidence, OR ss_not_defined twice after one bounded recovery fix, OR MLS attach still file_attached:false after one diagnostic + one bounded selector fix
@@ -65,3 +65,4 @@ You are the Executor for this tangent. Rules:
 - what was done: <2-4 lines>
 - what remains: <or "nothing — done-when fully met">
 - rescope note: <only if bailing>
+run_started: 2026-09-06T15:15:43-05:00
