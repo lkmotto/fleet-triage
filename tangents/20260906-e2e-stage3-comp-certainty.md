@@ -1,6 +1,6 @@
 ---
 id: 20260906-e2e-stage3-comp-certainty
-status: running
+status: assess
 priority: high
 budget_cycles: 6
 escalate_if: 2 failed non-environmental cycles; or Caladium has usable spark_export.csv on disk but cannot be CERTIFIED after one bounded handoff/status write + one offline stage3b attempt; or repeat zero-turn launch
