@@ -1,6 +1,6 @@
 ---
 id: 20260905-kb-gmail-crossref
-status: validating
+status: done
 priority: low
 budget_cycles: 2
 escalate_if: live gmail credential query still empty after one verified repair cycle, or any need to touch secret values / non-kb_credentials tables
@@ -88,3 +88,6 @@ run_started: 2026-09-05T22:02:30-05:00
 
 ## Assessor verdict
 === VERDICT: DONE === Done-when fully met and independently verified — live queries pass, DB diff proves exactly one label-only kb_credentials change vs hash-matched backup, all fences intact (coo/outcomes/20260905-kb-gmail-crossref-proof.md)
+
+## Validator
+=== VALIDATION: PASS === value:kills_recurring_noise; score:3; live re-runs of all 4 queries pass; self-run read-only backup-vs-live diff shows exactly one label-only kb_credentials change (table has no secret column), all kb_* guidance tables identical, backup sha256 matches proof, fences intact; probe at coo/probes/20260905-kb-gmail-crossref.probe.md
