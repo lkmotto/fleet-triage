@@ -1,6 +1,7 @@
 ---
 id: 20260906-e2e-stage4-truetracts-repair
-status: assess
+status: rescope
+assessor_session: 38fe54ae-600f-4ffe-beef-a24312a796e0 assess
 priority: high
 budget_cycles: 6
 escalate_if: 2 failed live Stage-4 execute cycles after preflight (auth valid + subject JSON ready), OR google_secure_browser_block persists after one bounded reseed-refresh attempt, OR create-modal address bind fails the same way twice (address_not_committed) with no new selector evidence
@@ -85,3 +86,6 @@ You are the Executor for this tangent. Rules:
 - what remains: <or "nothing — done-when fully met">
 - rescope note: <only if bailing>
 run_started: 2026-09-06T14:26:08-05:00
+
+## Assessor verdict
+=== VERDICT: RESCOPE === Live run failed with status "failed" / ss_not_defined (coo/tmp/stage4_brazos_run.log + truetracts_failure_metadata_20260906_194816.json), no heavy export artifact, no chain doc, no write-backs, no executor Outcome; not environmental → fresh contract with attached evidence.
