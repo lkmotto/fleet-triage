@@ -1,6 +1,6 @@
 ---
 id: 20260906-e2e-stage4-truetracts-repair
-status: approved
+status: running
 assessor_session: a2102af8-d9db-4322-84ef-ae42d6eca794 assess
 priority: high
 budget_cycles: 6
@@ -81,3 +81,4 @@ run_started: 2026-09-06T15:15:43-05:00
 
 ## Assessor verdict
 === VERDICT: RELOOP === Executor stopped at the contract's own RAM gate (2.2-7.2 GB free vs ≥8 GB across three samples) before any portal work — environmental per verdict rules, first failure of this contract, 6/6 cycles remain, all other gates independently verified green (verdict.reloop.txt + tangent preflight note).
+run_started: 2026-09-06T15:47:06-05:00
