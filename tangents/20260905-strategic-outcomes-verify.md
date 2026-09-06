@@ -1,6 +1,6 @@
 ---
 id: 20260905-strategic-outcomes-verify
-status: running
+status: assess
 priority: medium
 budget_cycles: 2
 escalate_if: 1 failed cycle OR any patch beyond append/lines-only verification is attempted without a new tangent
