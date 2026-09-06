@@ -1,6 +1,6 @@
 ---
 id: 20260906-e2e-stage5-sfrep-wiring
-status: approved
+status: running
 priority: high
 budget_cycles: 6
 escalate_if: 2 failed live Stage-5 apply cycles after diagnosis memo + preflight (RAM gate + payload rebuild) with the same root cause class; OR free RAM cannot stay ≥8 GB around a single agent-owned SFREP session; OR Appraise-It/sfrep-mcp unavailable on Legion after one install/path check
@@ -73,3 +73,4 @@ You are the Executor for this tangent. Rules:
 - what was done: <2-4 lines>
 - what remains: <or "nothing — done-when fully met">
 - rescope note: <only if bailing>
+run_started: 2026-09-06T14:56:51-05:00
