@@ -1,6 +1,7 @@
 ---
 id: 20260906-sales-outreach-ledger-hygiene
-status: running
+status: assess
+executor_session: a804d7c4-03de-4be1-a3e4-4df18dc8513b running
 priority: medium
 budget_cycles: 2
 escalate_if: 2 failed cycles OR JSON parse failure after edit OR diff shows unintended keys/projects/workstreams changed
