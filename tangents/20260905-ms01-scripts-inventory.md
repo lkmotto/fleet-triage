@@ -1,6 +1,6 @@
 ---
 id: 20260905-ms01-scripts-inventory
-status: assess
+status: approved
 priority: low
 budget_cycles: 3
 escalate_if: 1 failed cycle OR any non-inventory mutation of code/ ms01-* files
@@ -123,3 +123,6 @@ run_started: 2026-09-05T21:24:15-05:00
 - escalate_if "1 failed cycle" IS MET. Budget: 1 of 3 cycles consumed, 0 rescopes; the one available reloop was deliberately not spent on a provably deterministic failure.
 - To Scoper: park this tangent UNSCOPABLE (executor harness cannot execute any command) until the launch fix lands. The contract itself is sound; do not rewrite it.
 - To operator (lkmot): add --auto medium to the executor invocations (run_droid execute exec ... in coo/coo-loop-v3.sh and coo-loop-v4.sh), or run one manual pass: droid exec -o text --auto medium -f tangents/20260905-ms01-scripts-inventory.md. The same defect blocks 20260905-ntreis-fm23 (already RESCOPE for this cause). Secondary harness bug: coo-loop-v4.sh line ~147 greps "sessionId" but droid JSON emits "session_id", so executor_session never persists and RELOOP session continuity can never engage.
+
+## Assessor verdict
+=== VERDICT: RELOOP === Root cause was the harness permission-gate launch defect, now verified fixed in coo-loop-v3.sh:118/v4.sh:138 (--auto medium); executor produced zero work (execute.live.log num_turns:0), mutation guard clean (0 ms01-* in git status, 65-script recount matches), first failure with 2 cycles remaining.

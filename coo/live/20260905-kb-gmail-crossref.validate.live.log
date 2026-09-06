@@ -1,0 +1,63 @@
+Validation complete. Every done-when item was re-proven independently; the tangents' claims held up under re-execution.
+
+## Check-by-check evidence (all self-run this session)
+
+| Done-when item | Result |
+|---|---|
+| `credential "gmail"` resolves to Composio custody | **PASS** — live query returned `Composio API (OAuth custody: Gmail x2, Sheets, Docs, LinkedIn)` / auth-api / prd / `COMPOSIO_API_KEY` |
+| `capability "gmail"` still routes to Composio proxy | **PASS** — `Gmail read/search (BOTH inboxes)` → `Composio proxy via smithery composio connection: tools.execute.proxy` |
+| Fence: `capability "email"` keeps Resend send path | **PASS** — `Send email` → Resend REST API row present (plus Tomba row, identical to baseline transcript) |
+| Fence: `credential "resend"` returns `RESEND_API_KEY` only | **PASS** — exactly one row, `Resend API` / auth-api / prd / `RESEND_API_KEY` |
+| Proof artifact present and current | **PASS** — `coo/outcomes/20260905-kb-gmail-crossref-proof.md` contains root cause, exact SQL, backup path + sha256, before/after/fence transcripts; content matches live behavior |
+| Single-row DB change, backup exists, no secrets altered | **PASS** — see below |
+
+## DB integrity (my strongest evidence, run independently)
+
+- Backup `C:\Users\lkmot\.factory\memory.db.bak-20260906T025300Z` exists; sha256 `993E64C3...72EAF` matches the proof byte-for-byte.
+- I wrote and ran my own read-only row diff (`coo/tmp/validate-20260905-kb-gmail-crossref-dbdiff.py`) between backup and live DB: **exactly one** `kb_credentials` row changed — the label rename `Composio API (OAuth custody)` → `...Gmail x2...`, with `doppler_project`/`doppler_config`/`key_name` identical. `kb_capabilities` (20 rows), `kb_services` (15), `kb_deprecations` (16), `kb_error_patterns` (10) are all **row-identical** to pre-fix.
+- The `kb_credentials` table schema is only `(what, doppler_project, doppler_config, key_name)` — it stores **no secret values at all**, so "no secret values altered" is structurally guaranteed and my full-row diff covered every column.
+- Only drift outside `kb_*` tables: `facts` grew 17820 → 17824, consistent with normal memory writes after the fix (memory.db mtime 10:14 PM, post-fix), all non-kb content.
+
+## Fence audit
+
+- Commit `578d54f` ("coo: 20260905-kb-gmail-crossref assessed") touched only the tangent file and two live logs. Working-tree dirt in `coo/` (ntreis-fm23, spark-csv-export, loop-script patches, status.html, metrics) belongs to other tangents/loop runtime, not this one.
+- `kb-query.py` untouched since 2026-08-07 (code fence respected); no `kb_capabilities` edits (diff-proven).
+- Decision-log entry confirmed by content search: 2026-09-06T02:57:30Z, exact rename decision with rejected alternatives, matching the contract's citation (entries carry no tangent-id field, hence the id grep miss).
+
+## Value scoring
+
+`kills_recurring_noise` — the fix ends a recurring scoping-session blind spot (`credential "gmail"` returning empty during intake diagnosis) rather than unblocking a live order or catching a runtime error. Gmail read/search is the order-intake path, so it's revenue-adjacent and load-bearing for scoping quality, but it remains a KB data fix — solidly useful, not critical-path. Budget was modest (2 cycles), so no hygiene-only flag applies. **Score: 3/5.**
+
+Probe written to `coo/probes/20260905-kb-gmail-crossref.probe.md`, following the existing probe convention, with a deep re-diff check against the backup as the regression catcher.
+
+Minor notes: `hostname` errored (exit 1) in this harness — non-material, `C:\Users\lkmot` paths confirm Legion. Governance record appended; `verify-done.py` on the probe artifact: 2/2 passed.
+
+Next improvement: add tangent-id fields to decisions.jsonl entries so decision-log citations can be grep-verified by id instead of by content.
+Gap observed: the contract cited `changes()==1` as evidence, but the DB exposes no way to re-verify that historical counter — validation required reconstructing it via backup diff; contracts should require a persisted diff artifact (now exists: `validate-20260905-kb-gmail-crossref-dbdiff.py`).
+
+=== VALIDATION: PASS === value:kills_recurring_noise; score:3; live re-runs of all 4 queries pass; self-run read-only backup-vs-live diff shows exactly one label-only kb_credentials change (table has no secret column), all kb_* guidance tables identical, backup sha256 matches proof, fences intact; probe at coo/probes/20260905-kb-gmail-crossref.probe.md
+
+=== PROBE ===
+# Probe: 20260905-kb-gmail-crossref
+revalidate_after: 2026-09-12 (weekly heartbeat probe cycle)
+checks:
+  - check: credential lookup for gmail resolves to Composio custody (the fixed blind spot)
+    command: python C:\Users\lkmot\.factory\scripts\kb-query.py credential "gmail"
+    expect: one row starting 'Composio API (OAuth custody: Gmail x2' with auth-api / prd / COMPOSIO_API_KEY (empty output = regression)
+  - check: gmail capability still routes read/search to Composio (not Resend)
+    command: python C:\Users\lkmot\.factory\scripts\kb-query.py capability "gmail"
+    expect: row 'Gmail read/search (BOTH inboxes)' -> 'Composio proxy via smithery composio connection: tools.execute.proxy'
+  - check: fence - resend credential row unchanged
+    command: python C:\Users\lkmot\.factory\scripts\kb-query.py credential "resend"
+    expect: exactly one row 'Resend API' / auth-api / prd / RESEND_API_KEY
+  - check: fence - email capability still shows Resend send path
+    command: python C:\Users\lkmot\.factory\scripts\kb-query.py capability "email"
+    expect: 'Send email' row -> 'Resend REST API (RESEND_API_KEY, Doppler auth-api/prd)'
+  - check: proof artifact still on disk and non-empty
+    command: Get-Item 'C:\Users\lkmot\factory-context\code\fleet-triage\coo\outcomes\20260905-kb-gmail-crossref-proof.md' | Select-Object Name,Length
+    expect: file exists, Length > 0
+  - check: deep re-diff vs pre-fix backup still shows exactly one label-only credential change
+    command: python C:\Users\lkmot\factory-context\code\fleet-triage\coo\tmp\validate-20260905-kb-gmail-crossref-dbdiff.py
+    expect: one REMOVED/ADDED pair ('Composio API (OAuth custody)' -> '...Gmail x2...'), changed row count: 2 (= one renamed row), kb_capabilities / kb_services / kb_deprecations / kb_error_patterns all 'identical'
+verdict_on_last_run: PASS 2026-09-06 (validator independently re-executed all four live queries and the backup-vs-live diff: exactly one label-only kb_credentials change, all guidance tables identical)
+=== END PROBE ===

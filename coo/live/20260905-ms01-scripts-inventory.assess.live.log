@@ -1,0 +1,28 @@
+Assessment complete. All cycle-1 evidence claims were independently re-verified against the filesystem, plus one material change since that evidence was written.
+
+## Verification results (cycle 1)
+
+| Done-when item | Verified state |
+|---|---|
+| 0. `coo/outcomes/ms01-scripts-inventory.md` | **Does not exist** (`Test-Path` → False). No inventory artifact anywhere. |
+| 1-3. Inventory content, completeness check, Outcome block | **Absent.** `tangents/20260905-ms01-scripts-inventory.md` ends at the cycle-1 assessor evidence block; no `## Outcome` section, no persisted `executor_session:` line. |
+| 4. Mutation guard | **CLEAN.** `git status --porcelain` shows zero `ms01-*` entries; recount of `C:\Users\lkmot\factory-context\code\` = 65 scripts (46 `.ps1` + 19 `.sh`) + 7 PNGs, mtimes 2026-07-15 / 2026-07-30 / PNGs 2026-08-08, matching scope-time ground truth exactly. |
+| Budget | 1 of 3 cycles consumed (executor: `num_turns: 0`, 269.9s, died at the permission gate per `coo/live/...execute.live.log`). 0 rescopes. Contract `escalate_if: 1 failed cycle` is technically met. |
+
+## Material change since the cycle-1 evidence
+
+The deterministic blocker the cycle-1 assessor flagged has been **fixed and I verified it in the file contents**, not just in git status: both `coo/coo-loop-v3.sh` (~line 118) and `coo/coo-loop-v4.sh` (~lines 138-157, including the RELOOP branch) now launch the executor with `--auto "$EXEC_AUTO"` (default `medium`), and the session-persistence grep now checks `"session_id"` first (with `sessionId` fallback). Backups `coo-loop-v3.sh.bak-20260906` / `coo-loop-v4.sh.bak-20260906` confirm a deliberate 2026-09-06 remediation. Scope observation for the record: these loop-script edits are outside this tangent's acceptable-writes whitelist, but they are harness work from another surface, not executor output (the executor performed literally nothing; no `ms01-*` file was touched).
+
+## Verdict reasoning
+
+- **RELOOP conditions all hold**: the failure was environmental (harness permission-gate abort before turn 1, analogous to a gate/watchdog failure — not a wrong plan, wrong artifacts, or wrong understanding); it is the first failure of this contract (the one reloop is unspent); and done-when remains plausibly achievable within the remaining 2 cycles since the harness fix has landed and the contract itself is sound.
+- **RESCOPE triggers do not apply**: the contract was correct, no fence blocked the path, done-when is verifiable, budget is not exhausted, and this is failure #1.
+- The cycle-1 recommendation to park UNSCOPABLE is moot as of the 2026-09-06 fix. Note for the loop: `executor_session` was never persisted (old `sessionId` grep bug), so the RELOOP continuity branch will not engage and the retry will run as a fresh execute with `--auto medium`, which is exactly what is needed. This spends the single reloop; any second failure of any kind mandates RESCOPE.
+
+Governance record appended to `~/.factory/knowledge/agent-governance.jsonl` (run_id `20260905-ms01-scripts-inventory-assess-c1`, outcome success). Verification: done-when items checked directly via filesystem inspection, recount, and git status; verify-done.py N/A for a verdict-only task.
+
+Next improvement: add a pre-execute harness self-check in the COO loop (verify `--auto` flag presence and `session_id` grep before claiming a cycle, so permission-gate deaths don't consume budget cycles).
+
+Gap observed: the contract's `escalate_if` ("1 failed cycle") conflicts with the assessor mandate's ESCALATE triggers (which require 2+ rescopes or a hard-fence crossing); the mandate should define how contract-level escalate_if maps to a verdict.
+
+=== VERDICT: RELOOP === Root cause was the harness permission-gate launch defect, now verified fixed in coo-loop-v3.sh:118/v4.sh:138 (--auto medium); executor produced zero work (execute.live.log num_turns:0), mutation guard clean (0 ms01-* in git status, 65-script recount matches), first failure with 2 cycles remaining.
