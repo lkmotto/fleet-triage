@@ -1,6 +1,7 @@
 ---
 id: 20260905-spark-csv-export
-status: validating
+status:
+validator_session: 8cbcdce4-c6b1-4e00-8674-038e806444e2 validating
 assessor_session: 78640f3a-634b-42e5-8a50-eae18751b37e assess
 executor_session: 37dce1c0-a301-4be6-a5d2-21aabc337703 running
 priority: high
