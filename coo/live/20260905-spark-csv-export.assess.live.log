@@ -1,0 +1,32 @@
+Error during droid execution: Assessment complete. All four done-when items were checked directly against the filesystem; none are met, and the executor logs reveal the run never actually started.
+
+## Done-when verification (checked, not trusted)
+
+| Item | Verified against | Result |
+|---|---|---|
+| `spark_export.csv` ≥1 data row for Caladium/Perdenalas/Companero | `comps/` listing for all three orders | FAIL — only `matrix_search_results.jpg` + `matrix_spark_error.jpg`, all dated 08-06/08-07/08-11. No `spark_export.csv` modified today anywhere under `workfiles\by_address\` |
+| Corroborating new comps artifacts, no `all_download_strategies_failed` | same dirs | FAIL — zero new artifacts post-relaunch (22:11:56) |
+| MLS no-CSV skip cleared | `truetracts_mls_import_status.json` for the 3 orders | FAIL — file does not exist for any of them |
+| Write-back (Outcome section, `tangents.json`, ledger flip) | tangent md, `tangents.json` grep, `project-ledger.json` | FAIL — no Outcome section, no `tangents.json` entry, ledger step `appraisal-pipeline:spark-csv` still `status: proposed`, `outcome: null` |
+
+## What actually happened
+
+`coo\tmp\20260905-spark-csv-export.exec.log` shows both executor invocations (matching the two `run_started` stamps) died at `num_turns: 0`: "Exec ended early: insufficient permission to proceed. Re-run with --auto medium or --auto high" (sessions `37dce1c0`, `02442482`). Zero turns means nothing was attempted; the 22:15:48 `stage3_matrix_spark.pyc` recompile is session-load collateral, not pipeline work. No out-of-scope changes occurred because nothing occurred at all.
+
+Root cause is the loop launcher, and it is already fixed: `coo-loop-v3.sh` (lines 114–122) and `coo-loop-v4.sh` (lines 139–147) now pass `--auto "$EXEC_AUTO"` (default `medium`) to executor launches, per `coo\tmp\patch_coo_loop_20260906.py` which cites identical num_turns:0 deaths on the FM23 verify cycles and `20260905-strategic-outcomes-verify` (same error, session `ff46aaab`).
+
+## Verdict reasoning
+
+- RELOOP is exhausted: the 21:52 non-start was relooped, and this is the **second failure of the contract** (environmental or otherwise), which mandates RESCOPE per the verdict rules.
+- ESCALATE is not warranted: escalate_if ("2 failed cycles") per the approach sketch means two *live post-patch NTREIS cycles* failing; no live Stage 3 run has ever reached the portal. Zero rescopes so far, no hard fence crossed.
+- The contract itself is sound (every context pointer resolved during this check), so this is a minimal re-issue, not a re-plan.
+
+**Rescope guidance:** re-issue the same contract unchanged, attaching: the two failed session ids above, the launcher fix lines (executor launches now carry `--auto medium` by default), and the identical-deaths precedent from FM23/strategic-outcomes-verify. Add one executor instruction: leave run artifacts (subject JSON, screenshots, run log tail) in the order's `comps/` or the tangent Outcome even on failure, so a future non-start is distinguishable from a portal failure. Budget: 2 of 4 cycles were burned by non-starts; the fresh contract should carry the remaining 2.
+
+Governance record appended to `agent-governance.jsonl`. Verification: verify-done.py N/A, this is an assessment task with artifact checks shown above.
+
+Gap observed: the contract header's `escalate_if: 2 failed cycles` conflicts with the verdict-rule definitions (ESCALATE requires 2 rescopes); it only resolved via the approach sketch's "post-patch" qualifier — contracts should phrase escalate_if in verdict-rule vocabulary.
+
+Next improvement: add a pre-execution canary to `do_execute` (trivial `--auto medium` command; abort the cycle before claiming it) so permission-gate deaths never consume a contract cycle again.
+
+=== VERDICT: RESCOPE === Second contract failure after the one permitted reloop: both executor invocations died num_turns:0 at the launcher permission gate (exec.log sessions 37dce1c0/02442482), zero artifacts; launcher fix verified in coo-loop-v3.sh/v4.sh, so re-issue same contract with remaining 2 cycles.
