@@ -27,3 +27,8 @@ Error during droid execution: Exec ended early: insufficient permission to proce
 [feature/coo-loop 674efb1] coo: claim 20260905-glenhaven-harvest-verify for execution
  1 file changed, 2 insertions(+), 1 deletion(-)
 [2026-09-05T19:32:11-05:00] EXECUTOR exited 0 20260905-glenhaven-harvest-verify
+[feature/coo-loop a693b50] coo: 20260905-glenhaven-harvest-verify executed, awaiting assessment
+ 3 files changed, 41 insertions(+), 1 deletion(-)
+ create mode 100644 coo/tmp/20260905-glenhaven-harvest-verify.exec.log
+[2026-09-05T19:32:11-05:00] ASSESS 20260905-glenhaven-harvest-verify
+[2026-09-05T19:38:08-05:00] VERDICT 20260905-glenhaven-harvest-verify -> done

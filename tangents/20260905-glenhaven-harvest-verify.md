@@ -1,6 +1,6 @@
 ---
 id: 20260905-glenhaven-harvest-verify
-status: assess
+status: done
 priority: medium
 budget_cycles: 2
 escalate_if: 1 failed cycle
@@ -74,3 +74,6 @@ run_started: 2026-09-05T19:24:51-05:00
 - what was done: Static artifact verification on Legion, no browser/COM session opened. Diffed early `subject\truetracts_workflow_status.json` (stale gated-page harvest: ok=false, 229 chars, both flags) vs final `subject\truetracts_export_harvest.json` (garage_rate $6,000, boundary.ok true with 4 edge streets, flags []), confirmed templates carry garage $6,000 + four-street boundary with zero verify-markers, six boundary map/crop JPGs on disk, `truetracts_boundary_recovery.json` gate_cleared=true, Report.tdcx 13.65 MB + workfiles.zip 8.02 MB with 6 substantive PDFs. Verdicts: garage PASS, boundary PASS, package PASS, overall READY.
 - what remains: nothing — done-when fully met. Two non-blocking observations recorded in report §5: (1) export filter says garage "≤ 2" but narrative templates say "up to 3" — align before delivery; (2) `tdcx_subject_block_absent` residual (by design, not repaired). Follow-on harvest-bug tangent: **No** — final rerun harvest succeeded end-to-end; early flags are the designed gated-page degradation and workflow_status lag is cosmetic (documented in `tools\_exploration\truetracts_findings.md`).
 - rescope note: N/A — no bail.
+
+## Assessor verdict
+=== VERDICT: DONE === All five done-when items personally verified on disk (report present with PASS/PASS/PASS/READY verdicts; early-vs-final JSON inconsistency confirmed stale; harvest-bug tangent "No" correct; zero post-run repo writes prove no session opened), 1/2 cycles used, no fence violations.

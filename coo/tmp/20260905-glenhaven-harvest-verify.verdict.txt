@@ -1,0 +1,36 @@
+Assessment complete. Every done-when item was verified against disk by me personally, not from the executor's outcome block.
+
+## Done-when verification (assessor-run)
+
+| Item | My check | Result |
+|---|---|---|
+| Report at named path | Read `...\2010_glenhaven_street_arlington_tx_76010\metadata\glenhaven_export_gap_verification.md` (6,147 B, written 9/5 19:30, during run window) | ✅ |
+| Explicit verdicts | Report contains garage **PASS**, boundary **PASS**, core package **PASS**, overall **READY** | ✅ |
+| Early-vs-final citation | Verified both files myself: `subject\truetracts_workflow_status.json` → `Export.export.template_harvest` has `ok: false`, `text_chars: 229`, both flags verbatim, empty boundary streets, SS gate notice, `download_error: export_modal_not_shown`; final `truetracts_export_harvest.json` has `garage_rate: "$6,000"`, `boundary.ok: true` with all four edge streets, `flags: []`. Report cites both paths | ✅ |
+| Harvest-bug tangent yes/no | Report §6 says **No** with reasoning; final harvest is fully populated, so "No" is correct per the contract's step-7 condition (recommend only if the *final* harvest still lacked garage/boundary) | ✅ |
+| No Stage-4/SFREP/TrueTracts session | Repo-wide timestamp scan: the only file written in the entire pipeline repo after run start (19:00 cutoff) is the report itself. No file in `agent/`, `tools/`, or tests was touched post-start (sampled write times all 8/12–9/4). The dirty pipeline working tree is long-standing pre-existing state, not executor work | ✅ |
+
+## Supporting evidence spot-checks (all matched the report exactly)
+
+- Garage support block in `truetracts_export_harvest.txt` (37,352 B): "$6,000 per garage space", GAM $5,200–$6,900, peer $5,000–$10,000 — verbatim as reported.
+- Templates carry garage "$6,000 per space" and the four-street boundary line; grep for "verify" in templates = **0 matches** (no `[verify on map]` markers).
+- Six boundary map/crop JPGs on disk (9/5 04:21); `truetracts_boundary_recovery.json`: `gate_cleared: true`, `boundary_applied: true`, both downloads recorded.
+- `Report.tdcx` 13,653,547 B and `workfiles.zip` 8,020,796 B; zip members and byte sizes match the report's table exactly (6 substantive PDFs).
+- Residual `tdcx_subject_block_absent` (`checked: false`, `foreign_hits: {}`) correctly noted, not repaired.
+- Flag source confirmed: both flags verbatim in `~\.factory\automations\autonudge-loop\reports\20260905T090000Z-summary.md`.
+
+## Scope and budget
+
+- **Fence:** No violations. Workdir deltas = one new report file plus the pre-existing repo dirt (all timestamps predate the run). `truetracts_template_harvest.py` untouched (it remains untracked from earlier work). No COM/browser session evidence anywhere.
+- **Budget:** 1 of 2 cycles consumed, first attempt, succeeded — `escalate_if: 1 failed cycle` not triggered.
+
+## Minor notes (non-blocking)
+
+- The report's §5 observation that the export filter says garage "≤ 2" while templates say "up to 3" is a genuine catch; I confirmed both strings on disk. Correctly flagged for appraiser review, correctly not repaired (out of scope).
+- The executor's outcome block appears duplicated in the session transcript and the tangents file appears to already carry it; cosmetic, no bearing on the artifacts.
+
+Governance record appended to `~\.factory\knowledge\agent-governance.jsonl`. Verification: done-when items verified by direct artifact inspection (read/grep/timestamps) per contract procedure; `verify-done.py` N/A here since the assessor's own procedure is the verification standard.
+
+Next improvement: have the COO loop write the verdict into the contract file itself (a `verdict:` front-matter field) so tangents close atomically instead of relying on transcript plus a separately-staged stub file.
+
+=== VERDICT: DONE === All five done-when items personally verified on disk (report present with PASS/PASS/PASS/READY verdicts; early-vs-final JSON inconsistency confirmed stale; harvest-bug tangent "No" correct; zero post-run repo writes prove no session opened), 1/2 cycles used, no fence violations.
