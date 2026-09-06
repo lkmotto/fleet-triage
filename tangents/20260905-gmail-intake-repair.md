@@ -1,6 +1,6 @@
 ---
 id: 20260905-gmail-intake-repair
-status: scoping
+status: parked
 priority: high
 budget_cycles: 4
 escalate_if: 2 failed cycles
@@ -28,3 +28,4 @@ funnel.
   by a successful *scan* returning order metadata only
 - Changing any Doppler credentials; new secrets = stop and report
 - Automating sends (safety rule 2a — always fenced)
+- scoper returned no contract, parked
