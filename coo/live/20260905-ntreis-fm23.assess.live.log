@@ -1,0 +1,75 @@
+## Assessment — 20260905-ntreis-fm23
+
+**Done-when verification (all three items checked against disk, not claims):**
+
+1. ❌ **Not met.** `workfiles/by_address/308_big_sky_circle_northlake_tx_76226/comps/` is **empty**; fallbacks 3504 Silverado and 564 Havencrest `comps/` dirs are also empty. A repo-wide timestamp sweep (cutoff 2026-09-05 21:27) found **zero files created or modified** during the tangent window.
+2. ❌ **Not met.** The only metadata artifact is the pre-existing `artifact_mandatory_coverage_blocked_20260819_070729.json` (dated 8/19, the original blocker). No new filter_context/form_version artifact exists.
+3. ❌ **Not met.** `~/.factory/knowledge/tangents.json` (last write 21:08) and `~/.factory/knowledge/project-ledger.json` (last write 04:16) were both untouched after the executor claim.
+
+**What actually happened:** the executor session died at the harness permission gate — `coo/live/20260905-ntreis-fm23.execute.live.log` shows `"subtype":"failure","num_turns":0` with "insufficient permission to proceed" after 197s. It never executed a single command. Loop log confirms: claim 21:27:39 → `EXECUTOR exited nonzero` 21:31:31, `.consec_fails` = 0. This is the same launch failure that killed two scoper sessions tonight (19:04, 19:17) before a third attempt succeeded at 21:27.
+
+**Scope adherence:** no violation — the executor touched nothing, in or out of scope.
+
+**Budget:** failed cycle 1 of 6; `escalate_if: 2 failed cycles` **not** met.
+
+**RELOOP conditions — all hold:**
+- Environmental/transient: yes — permission-gate launch failure at `num_turns: 0`, not a wrong plan or wrong artifacts; the plan was never tested.
+- First failure of this contract: yes (reloop count 0).
+- Achievable within budget: yes — 5 cycles remain; verified prerequisites intact: FM23 adapter pieces present (`FM23_CONTEXT_IMPLIED`, `#Fm23_Ctrl19_Radius` in `agent/matrix_form_adapter.py` and `agent/stages/stage3_matrix_spark.py`), entry points exist (`tools/run_stage3_single_case.py`, pattern file `tools/_tmp_subject_denham.json`), target workfile exists with comps/ empty and the old blocked artifact in metadata/, ledger files resolvable.
+
+**Operator note (loop infra, not the tangent):** three sessions died at the permission gate tonight. The executor relaunch needs `--auto medium` (per the gate's own message) or the blanket-approval path the loop uses for scoping.
+
+Next improvement: coo-loop should auto-retry a droid session once with escalated `--auto` when the live log shows `num_turns: 0` permission-gate exit, instead of spending an assess cycle on a session that never ran.
+
+Gap observed: the loop treats any nonzero executor exit as "executed"; nothing distinguishes a never-started session (num_turns 0) from real work, so the assessor must reconstruct it by hand.
+
+Verification: verify-done.py N/A for verdict tasks — governance record emitted to agent-governance.jsonl.
+
+=== VERDICT: RELOOP === Executor never ran a turn (permission-gate exit, num_turns:0, zero artifacts repo-wide; live log coo/live/20260905-ntreis-fm23.execute.live.log); cycle 1/6, targets + FM23 adapter verified intact on disk.
+
+=== CONTRACT WITH OUTCOME ===
+---
+id: 20260905-ntreis-fm23
+status: execute (reloop 1 of 1)
+priority: high
+budget_cycles: 6
+cycles_consumed: 1 (launch failure, no work performed)
+escalate_if: 2 failed cycles
+origin: project-ledger proposed step (REVIEW-20260905)
+scoped_by: coo-scoper
+scoped_at: 2026-09-06
+---
+# Fix/verify NTREIS fm23 comps blocker (radius/type controls unavailable)
+
+## Assessor feedback for relaunch (read first)
+- Your previous session died at the Factory permission gate before executing any command (`num_turns: 0`). Nothing was done and nothing is broken. Relaunch with sufficient auto-approval and execute the plan below as written.
+- All prerequisites verified by assessor at 21:36: FM23 adapter pieces present in `agent/matrix_form_adapter.py` (`FM23_CONTEXT_IMPLIED`) and `agent/stages/stage3_matrix_spark.py` (`#Fm23_Ctrl19_Radius`); entry point `tools/run_stage3_single_case.py` and pattern file `tools/_tmp_subject_denham.json` exist; target workfile `308_big_sky_circle_northlake_tx_76226` present with `comps/` empty and only the old 8/19 blocked artifact in `metadata/`.
+- On exit you MUST fill the Outcome section below, even on failure.
+
+## Done when
+- [ ] One real order workfile contains BOTH `comps/matrix_search_results.jpg` AND `comps/spark_export.csv` (or equivalent comps CSV, ≥1 data row) produced by a run executed during this tangent — primary target `308_big_sky_circle_northlake_tx_76226`; fallback targets `3504_silverado_trail_fort_worth_tx_76262` or `564_havencrest_ln_coppell_tx_75019`.
+- [ ] That run's metadata contains a filter_context / form_version artifact showing `form_version: fm23` with NO `radius_control_unavailable` or `type_control_unavailable` in blocked_reason (i.e. the mandatory-coverage gate passed).
+- [ ] `tangents.json` and `project-ledger.json` (`~/.factory/knowledge/`) updated: comps outcome recorded for the run and `appraisal-pipeline:ntreis-fm23` marked resolved (or evidence-attached) with the artifact paths.
+
+## Out of scope
+- Spark CSV download-strategy bug (`all_download_strategies_failed`) — ledger step `appraisal-pipeline:spark-csv` is its own tangent. If search succeeds but export alone fails, capture the error screenshot and record PARTIAL; do NOT debug download plumbing here.
+- NTREIS/Clareity auth or session rearchitecture (only permitted: the existing auto-refresh/persisted-state path in `agent/portal_auth.py` already used by runs).
+- Any spend, bulk portal actions, or mass email — hard fence per safety rules.
+- Changes to diagnostics, sfrep, or TrueTracts stages.
+
+## Approach sketch
+1. Pre-flight: confirm `ntreis_matrix` storage state exists/fresh; adapter pieces already assessor-verified — skip re-derivation.
+2. Build subject JSON for 308 Big Sky from its existing `realist_tax.pdf`/subject data, mirroring `tools/_tmp_subject_denham.json`.
+3. Run one stage-3 comps pass via `tools/run_stage3_single_case.py --subject-file` with `WORKFILE_DIR` pointed at the repo workfiles root.
+4. Verify done-when artifacts in `workfiles/by_address/308_big_sky_circle_northlake_tx_76226/comps/`; if CSV missing but search jpg present with `all_download_strategies_failed` only, record PARTIAL with recommendation to `appraisal-pipeline:spark-csv`, then retry once with a different target order before consuming more budget.
+5. If the mandatory gate trips again on fm23, capture the coverage artifact + screenshot as evidence of a NEW surface change, then escalate (2 failed cycles) rather than re-deriving the whole adapter.
+6. Write back: append comps outcome to `~/.factory/knowledge/tangents.json` and flip `~/.factory/knowledge/project-ledger.json` step `appraisal-pipeline:ntreis-fm23` to resolved with outcome + artifact paths (propose-only write-back convention, note for operator review).
+
+## Outcome (filled by executor)
+- status: failed (environmental: yes)
+- artifacts: none — zero files created or modified in the pipeline repo during the run window (assessor-verified)
+- what was done: session terminated at harness permission gate before executing any command (num_turns: 0); no pipeline work attempted
+- what remains: entire contract — all three done-when items unattempted; retry via RELOOP with elevated auto-approval
+- rescope note: none — contract is sound, targets and entry points verified intact
+run_started: 2026-09-05T21:27:40-05:00
+---
