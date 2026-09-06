@@ -1,0 +1,31 @@
+Error during droid execution: Verification complete. All four done-when items checked against reality; every one unmet.
+
+## Done-when verification (artifact-inspected, not trusted from claims)
+
+1. **CSV with ≥1 data row** — FAIL. No `spark_export.csv` in `comps/` for Caladium (primary), Perdenalas, or Companero (both fallbacks confirmed absent by direct path test). Caladium `comps/` still holds only the 08-06 pair: `matrix_search_results.jpg` + `matrix_spark_error.jpg`.
+2. **Corroborating fresh artifacts, no `all_download_strategies_failed` ending** — FAIL. Recursive scan of the entire pipeline repo for files modified since 21:50 tonight found only `__pycache__` `.pyc` files (22:15:48, an import side-effect proving the run began and imported `stage3_matrix_spark`), zero new workfile artifacts. No Stage 3 run ever reached the export step.
+3. **MLS no-CSV skip cleared** — FAIL. No `truetracts_mls_import_status.json` exists for Caladium; no handoff/discovery evidence of any kind.
+4. **Write-back** — FAIL. No executor Outcome block was appended for either cycle (the file contains only loop-injected verdict text); ledger step `appraisal-pipeline:spark-csv` still reads `status: "proposed", "outcome": null, "completed_at": null`; no completed tangents entry (note: `tangents.json` was not found at the expected fleet-triage path at all — separate hygiene gap).
+
+## Scope adherence and budget
+
+- Scope: clean. No source edits (`stage3_matrix_spark.py` mtime 2026-08-30); the executor touched nothing.
+- Budget: 2 of 4 cycles consumed, both failures. The contract's `escalate_if: 2 failed cycles` is now literally satisfied.
+
+## Root cause (why not RELOOP)
+
+Both executor dispatches (21:52:51, session `37dce1c0`; 22:11:56, session `02442482`) died identically at the harness permission gate: `"Exec ended early: insufficient permission to proceed... Re-run with --auto medium or --auto high"` with `num_turns: 0` — zero commands executed. This is environmental, but it is the **second** failure after a reloop, which mandates RESCOPE under my verdict rules. Evidence for the next contract:
+
+- The launcher (`coo/coo-loop-v4.sh` L141-147) passes `--auto "$EXEC_AUTO"` (default `medium`), yet droid rejects it — while the scope stage's dispatch shape (`--auto high -m "$COO_FAST_MODEL"`, L85/L171) demonstrably works. Likely the executor argument ordering/shape differs, or `COO_EXECUTE_AUTO` was exported empty in the cron environment producing a bare `--auto`.
+- Sibling tangent `20260905-kb-gmail-crossref` died on the identical error at 22:13 (same `num_turns: 0` signature) — systemic, not tangent-specific. Two tangents are blocked on one launcher bug.
+- Do not resume session `02442482`: it is an empty failed session with nothing to continue.
+
+The fresh contract should either (a) fix the executor dispatch mechanism first (verify one smoke cycle with a working `--auto` invocation), or (b) re-dispatch this same spark-csv work under the proven scope/assess argument shape. Contract itself is sound: both entry points (`tools/run_stage3_single_case.py`, `tools/_autonudge_run_stage.py`) verified present.
+
+Verification: N/A for this task type — assessment role; all verification was direct artifact inspection as listed above.
+
+Next improvement: add a launch-time guard in `coo-loop-v4.sh` that fails fast (and logs the exact dispatch line) when the executor exits with `num_turns: 0`, instead of burning a full budget cycle per recurrence.
+
+Gap observed: the contract's `escalate_if: 2 failed cycles` conflicts with the assessor ESCALATE definition (which requires 2 rescopes); the loop should reconcile these so a 2-cycle systemic failure routes to operator rather than silently rescoping.
+
+=== VERDICT: RESCOPE === Second failure after reloop, environmental not transient-fixable: both executor dispatches died at harness permission gate num_turns:0 (coo/tmp/20260905-spark-csv-export.exec.log, sessions 37dce1c0/02442482), zero artifacts — Caladium comps/ still 08-06-only, no spark_export.csv on any target order, no MLS status, ledger step still proposed; sibling kb-gmail-crossref died identically, so the launcher's executor --auto dispatch (coo-loop-v4.sh L141-147) is the blocker, not the contract.
