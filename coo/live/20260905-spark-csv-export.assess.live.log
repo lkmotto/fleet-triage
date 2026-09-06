@@ -1,0 +1,21 @@
+Verdict recorded and governance log appended. Summary of what I verified and what I need from you, Luke:
+
+## Assessor outcome: ESCALATE → parked
+
+**Cycle 3 never reached the executor.** The loop's assessor phase failed twice for this tangent (`ASSESSOR FAILED 20260905-spark-csv-export` at 22:39:28 and 22:49:22 in `coo/coo-loop.log`), so the third dispatch cycle was consumed entirely by harness failure. `flock: command not found` fired again at 22:49:22, proving live loop instances (bash processes started 21:45:34, matching `coo/.git.lock` creation) are still running the broken v4 script. `coo-loop-v4.sh` is 272 lines vs 270 pre-patch — the in-place 22:17 patch half-applied to a live script.
+
+**Done-when: 0/4, verified directly at ~22:55.** All three orders still hold only the August `matrix_search_results.jpg` + `matrix_spark_error.jpg` pairs; no `spark_export.csv` anywhere; no `truetracts_mls_import_status.json`; ledger step `appraisal-pipeline:spark-csv` still `proposed`/`outcome: null`/`dispatched_at: null`; no entry in `~/.factory/knowledge/tangents.json`.
+
+**The contract itself is sound — do not rescope.** Every pointer now resolves: `stage3_matrix_spark.py` lives at `agent\stages\stage3_matrix_spark.py` (Strategy 1 `expect_download` at exactly L2211, `all_download_strategies_failed` at exactly L2301 — the scoping line refs were precise), `tangents.json` lives in `~/.factory/knowledge/`, and the spec file, both tool entry points, and both MLS consume-path files exist. Cycle 2's "unresolvable pointer" note was a false alarm.
+
+**Budget: 2/4 consumed, `escalate_if` (2 failed cycles) met as of cycle 2.** RELOOP is barred (second contract failure), RESCOPE is barred (the harness that would produce and run a fresh contract is itself failing). Status set to `parked`; full evidence appended to the tangent file.
+
+**What I need from you (or a mandate to a system-administrator droid):**
+1. Kill the live bash loop instances from 21:18/21:45.
+2. Fix the `flock` dependency at v4.sh line 26 (Git-Bash lacks it) and re-apply the patch against a clean checkout of v4.sh; `bash -n` before relaunch.
+3. Relaunch exactly one loop instance and confirm `--auto medium` appears in the execute launch line.
+4. Re-dispatch this contract unchanged.
+
+Verification: `verify-done.py` N/A — this is an assessment task, not a code/config/infra change; evidence above is the verification.
+
+Next improvement: make the loop's assessor-failure path surface the stderr in the board/log summary — two silent assessor failures burned a full cycle before anyone looked.

@@ -1,6 +1,6 @@
 ---
 id: 20260905-spark-csv-export
-status: assess
+status: rescope
 priority: high
 budget_cycles: 4
 escalate_if: 2 failed cycles
@@ -77,3 +77,16 @@ run_started: 2026-09-05T22:11:56-05:00
 - CAUTION: post-patch dispatch still failed (strategic-outcomes-verify ~22:30, `num_turns: 0`, session `dac3138a-064b-4443-97f3-adbe0ee1555a`), and coo-loop.log shows `coo-loop-v4.sh` bash syntax errors (line 255) + `flock: command not found` (line 26) after 22:17. The patch was applied in-place while loop instances were live — live loop processes are likely still executing pre-fix or byte-offset-corrupted code.
 - Budget: 2 of 4 cycles consumed (run 1 non-start 21:52, run 2 permission gate 22:11). **escalate_if "2 failed cycles": MET.** RELOOP barred (second failure of contract). Scope adherence: clean by vacuity — executor made no changes at all.
 - Recommendation (Scoper + lkmot): the contract itself is sound — all pointers re-resolved during this assessment (spec file exists; `tools/run_stage3_single_case.py`, `tools/_autonudge_run_stage.py`, all three workfile dirs, ledger keys verified). Do NOT rewrite the goal. Park until the COO loop is cleanly restarted (kill live v3/v4 instances, relaunch ONE instance of the patched script, confirm `--auto medium` in the execute launch), then dispatch the fresh contract. If cycle 3 fails for ANY reason, park and escalate to lkmot — no further reloop/rescope on this tangent.
+
+## Assessor evidence (cycle 3 assessment, 2026-09-05 ~22:55)
+- No cycle 3 execution occurred. Tangent file unchanged between 22:11 dispatch and this assessment (no new Outcome block, no third `run_started`); `coo/live/20260905-spark-csv-export.execute.live.log` still holds the run-2 failure JSON (470 B, `num_turns: 0`, permission gate, session `02442482-32c9-4f30-80b8-fa6c35634ad3`, 187.9 s), last write 22:15:49.
+- Root cause of the empty cycle 3: the loop's own assessor phase failed twice for this tangent — `ASSESSOR FAILED 20260905-spark-csv-export (retry next sweep)` at 22:39:28 and 22:49:22 in `coo/coo-loop.log` — so the executor was never re-launched. The broken harness, not the contract, is consuming cycles.
+- Harness still broken mid-flight: `flock: command not found` (v4.sh line 26) fired again at 22:49:22, and `gitlock timeout` warnings follow both assessor failures. Live bash processes started 21:45:34 (matching v4 launch + `coo/.git.lock` creation) are still running the pre-fix/broken script. coo-loop-v4.sh remains 272 lines (2 more than the 22:17:38 pre-patch size) — the in-place patch while live is confirmed corrupt.
+- Done-when re-verified 0/4 by direct inspection at ~22:55: Caladium `comps/` still only `matrix_search_results.jpg` + `matrix_spark_error.jpg` (8/6 04:10); no `spark_export.csv` for Caladium/Perdenalas/Companero; no `truetracts_mls_import_status.json` under any of the three; ledger step `appraisal-pipeline:spark-csv` still `status: proposed`, `outcome: null`, `dispatched_at: null`; no `spark-csv` entry in `C:\Users\lkmot\.factory\knowledge\tangents.json`.
+- Contract pointers ALL resolve on re-check (cycle-2 note's unresolved pointer was a false alarm): `stage3_matrix_spark.py` lives at `agent\stages\stage3_matrix_spark.py` (3703 lines; Strategy 1 expect_download at exactly L2211, `payload["reason"] = "all_download_strategies_failed"` at exactly L2301 — scoping's line refs precise); `tangents.json` lives at `C:\Users\lkmot\.factory\knowledge\tangents.json`; spec file, `tools/run_stage3_single_case.py`, `tools/_autonudge_run_stage.py`, `agent/truetracts_context.py`, `agent/pipeline.py` all exist.
+- Budget: 2 of 4 cycles consumed; **escalate_if "2 failed cycles" already MET as of cycle 2**. RELOOP barred (second contract failure). RESCOPE barred (no fresh contract may be produced while the Scoper/loop harness that would run it is itself failing — and the contract is verifiably sound).
+- Scope adherence: clean by vacuity (executor made zero changes in both cycles).
+- ESCALATE to operator (lkmot): park this tangent and repair the loop first. Concretely: (1) kill live bash instances from 21:18/21:45 running coo-loop v3/v4; (2) fix `flock` dependency on Git-Bash (line 26) and re-run `python coo/tmp/patch_coo_loop_20260906.py` against a CLEAN checkout of coo-loop-v4.sh (current file is 272 lines vs 270 pre-patch — the in-place patch half-applied); (3) bash -n the result; (4) relaunch ONE instance and confirm `--auto medium` lands in the execute launch line; (5) re-dispatch this unchanged contract. Do not rewrite the goal — it verified sound.
+
+## Assessor verdict
+=== VERDICT: RESCOPE === no verdict line
