@@ -1,6 +1,7 @@
 ---
 id: 20260906-e2e-stage5-sfrep-wiring
-status: assess
+status:
+assessor_session: d74bd8b8-f32d-4ce2-aa49-677c15d26dc7 assess
 executor_session: b3d46d2c-faca-424f-bb46-0f84c92e3240 running
 priority: high
 budget_cycles: 6
