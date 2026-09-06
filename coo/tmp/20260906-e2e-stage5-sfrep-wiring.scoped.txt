@@ -1,3 +1,46 @@
+# Contract: e2e Stage 5 SFREP wiring (workfile → real report fields)
+
+## Framing (verified)
+
+**Repo (execution surface):** `C:\Users\lkmot\factory-context\code\github\lkmotto\motto-appraisal-pipeline` (branch `droid/appraisal-pipeline-v1-forms`)
+
+**What "Stage 5" means in this pipeline (not Automax):**
+- `agent/pipeline.py` Stage 5 = `stage5_export_deliver` → sequential `stage8_workfile_aggregator` + `stage9_mismo_export` + `stage10_forms_prefill`
+- `stage5_automax.py` is removed/legacy; AGENTS.md correctly notes Automax/Titan skipped; AGENTS.md is **stale** where it still says TrueTracts is de-registered (live `STAGES` includes Stage 4 again)
+
+**Data path Stage 5 uses for field values:**
+1. Workfile artifacts under `workfiles/by_address/<slug>/` (subject/comps/metadata/cost_approach/…)
+2. `stage10` → `standardize_workfile_dir` → `run_comp_selection` → `generate_forms_prefill_bundle` (`agent/form_prefill_bridge.py`)
+3. Writes canonical dotted keys to `<wf>/sfrep/payload.json` (+ MISMO + TFF)
+4. Live Appraise-It fill only if **both**:
+   - `SFREP_APPLY_COMMAND` (e.g. `{python} tools/sfrep_apply.py --payload-path {payload_path} --mode apply`)
+   - `SFREP_ALLOW_LIVE_APPLY=1` (fail-closed; tested in `tests/test_pipeline_orchestration.py`)
+5. Bridge: `tools/sfrep_apply.py` → sfrep-mcp stdio → `sfrep_payload_fill` (not `ImportMismo` for comps/cost; migration doc + 2026-09-01 decision)
+
+**Why placeholders still show up (scoping hypothesis to prove/refute in diagnosis memo):**
+- Default e2e entrypoints (e.g. `tools/run_e2e_336_pinyon.py`) set `SFREP_APPLY_COMMAND` but **do not** set `SFREP_ALLOW_LIVE_APPLY` → bundle succeeds, apply status skipped, open report stays empty/template-looking
+- Misleading stage10 note when disabled: appends `sfrep_apply=… (SFREP_APPLY_COMMAND unset)` even when command is set and only the allow flag is missing
+- Payload coverage is thin vs form (example: latest `771_monticello…/sfrep/payload.json` = **64 keys**, zero empty/placeholder strings in JSON — but far short of full 1004 grid/narratives/images)
+- When TT market context missing, bridge degrades with `truetracts_context_missing: true` and market/defaults stay unset (not hard-block in current bridge)
+- Comp grid is **1-based**; `compIndex 0` writes vanish (binding decision 2026-09-01)
+- Image/map attach and some post-apply paths have known wiring gaps in `docs/sfrep-migration-progress.md` (in-scope only if they leave required form fields blank on the chosen guinea pig)
+
+**Precedent / what is different this time:**
+- 2026-09-01 decision: "stage5 live e2e demo succeeded"; unskipped in starred runner; live apply remains fail-closed
+- Pinned session `3c80cca2-…` already exercised MCP fill + PDF export on real orders (e.g. Sundown/Denham `sfrep/report_full.pdf`) — re-derive from code + one controlled re-run, not COM archaeology
+- Sibling tangents own Stage 3 certainty and Stage 4 TrueTracts repair; this tangent only consumes existing workfile data
+- Difference vs "demo once then drift": this contract requires a **diagnosis artifact + field checklist diff + safety-gated single session** written under fleet-triage outcomes, with explicit live-apply opt-in only for the one guinea-pig proof
+
+**Guinea-pig preference (executor picks first that is full-boat on disk):**
+1. `2460_winterstone_dr_plano_tx_75023` (migration reference; rich `sfrep/` + addenda)
+2. Else order with prior stages + existing `sfrep/payload.json` + comps (e.g. Sundown FW, Denham, Saguaro, Monticello)
+3. Avoid relying on Big Sky for Stage 5 proof until it has SFREP-ready subject/comps payload inputs (currently has stages 1–4-ish, **no `sfrep/` folder**)
+
+**Hard fences:** no `sfrep_report_deliver` / client delivery; no Stage 3/4 acquisition repairs; no form-software switch; no mass email; no DNS/deploys; no data deletion; no second concurrent agent-owned SFREP session.
+
+---
+
+=== CONTRACT ===
 ---
 id: 20260906-e2e-stage5-sfrep-wiring
 status: scoped
@@ -53,22 +96,4 @@ Stage 5 (Export & Deliver → forms prefill / SFREP apply) is the last core domi
 - Prefer existing tools: `generate_forms_prefill_bundle`, `tools/sfrep_apply.py`, `tools/e2e_validate.py` dry_run helpers, sfrep-mcp field get/PDF create.
 - If apply fails twice on the same class after diagnosis, stop and escalate with artifacts — no thrash loops.
 
-## Executor instructions (pipeline section)
-
-You are the Executor for this tangent. Rules:
-
-1. Work ONLY toward the "Done when" items. The "Out of scope" fence is HARD — if the
-   real path crosses it, STOP and write a rescope note instead of improvising.
-2. If you discover the contract itself is wrong (goal unachievable as written, a
-   context pointer doesn't resolve), do a MID-FLIGHT BAIL: stop, write the rescope
-   note, exit. Do not wander.
-3. Stay inside this repo's working area and the paths the contract names. SFREP COM
-   sessions are forbidden unless the contract explicitly authorizes them.
-4. Before exiting, append to THIS FILE (tangents/<id>.md):
-
-## Outcome (filled by executor)
-- status: success | partial | failed (environmental: yes/no)
-- artifacts: <paths produced>
-- what was done: <2-4 lines>
-- what remains: <or "nothing — done-when fully met">
-- rescope note: <only if bailing>
+=== END CONTRACT ===
