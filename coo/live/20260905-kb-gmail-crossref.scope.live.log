@@ -1,0 +1,29 @@
+Done. The KB blind spot is fixed and verified — one cycle used of two budgeted.
+
+**What was found vs the stub's premise**
+- Grounding showed the premise was half-stale: `capability "gmail"` already returned the Gmail→Composio row at baseline. The live defect was the credential side only: `credential "gmail"` returned nothing because the operative row's label (`Composio API (OAuth custody)`) contained no gmail token.
+- Contract scope reflected that: capability rows verified-only, credential row fixed.
+
+**The change**
+- Single-row UPDATE in `memory.db` `kb_credentials`: `Composio API (OAuth custody)` → `Composio API (OAuth custody: Gmail x2, Sheets, Docs, LinkedIn)`. Doppler coords/key name untouched, no secret values, `changes()==1` asserted before commit.
+- Pre-write safety: hash-verified byte-copy backup `memory.db.bak-20260906T025300Z`; `rg -F` scan confirmed zero exact-string consumers of the old label.
+
+**Verification (all passing, re-run in a fresh process)**
+- `credential "gmail"` → Composio row / `COMPOSIO_API_KEY` / Doppler `auth-api prd`
+- `capability "gmail"` → unchanged (Send email→Resend, Gmail read/search→Composio)
+- Fence checks unchanged: `capability "email"`, `credential "resend"`
+- `verify-done.py` (code): 1 passed, 0 failed
+
+**Artifacts**
+- Proof: `coo/outcomes/20260905-kb-gmail-crossref-proof.md` (before/after transcripts, exact SQL, backup + consumer-scan evidence)
+- Transcripts: `coo/tmp/20260905-kb-gmail-crossref.baseline.txt` / `.post.txt`
+- Tangent `20260905-kb-gmail-crossref.md`: status → done, done-when ticked, Outcome block appended
+- Write-backs: `decisions.jsonl` (+1), `agent-governance.jsonl` (+1), parts-bin `pb-0075`
+
+Non-blocking observation (fenced, for a future tangent): `kb_services` has no mail-transport row at all.
+
+Verification: verify-done.py `--task-type code` passed (note: for this data-hygiene task its checks are thin; the real proof is the re-run query transcripts above).
+
+Next improvement: add a `kb-update.py` managed writer (backup + assert + verify built in) so KB data fixes stop requiring ad-hoc sqlite scripts against memory.db.
+
+Gap observed: the scoper mandate requires done-when items be artifact-verifiable, but the stub's premise itself was unverified; nothing forces stubs to run even a single kb-query before filing. A 30-second grounding check at stub-authoring time would have caught the half-stale premise.
