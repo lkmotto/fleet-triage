@@ -1,6 +1,6 @@
 ---
 id: 20260906-e2e-stage3-comp-certainty
-status: scoping
+status: queued
 priority: high
 budget_cycles: 6
 escalate_if: 2 failed cycles
