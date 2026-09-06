@@ -1,0 +1,17 @@
+Error during droid execution: Verdict rendered and evidence block appended to the tangent file for the Scoper. Summary of what I verified directly (not trusting any outcome block — there was none for run 2):
+
+**Done-when: 0/4.** Caladium `comps/` still holds only the 08-06 artifacts (`matrix_search_results.jpg`, `matrix_spark_error.jpg`); no `spark_export.csv` for any of the three target orders; no `truetracts_mls_import_status.json` under the Caladium order; ledger step `appraisal-pipeline:spark-csv` still `status: proposed`, `outcome: null`; no `tangents.json` entry; no subject JSON built. Zero files traceable to this executor anywhere.
+
+**Failure signature:** `coo/live/20260905-spark-csv-export.execute.live.log` is a 470-byte failure JSON — `num_turns: 0`, "Exec ended early: insufficient permission to proceed. Re-run with --auto medium or --auto high" (session `02442482`). The executor took zero turns; the contract never ran.
+
+**Why RESCOPE, not RELOOP:** this is the second failed cycle (run 1: non-start; run 2: permission gate), and `escalate_if: 2 failed cycles` is met. The root cause is the same harness defect fm23 hit twice, and although the `--auto` patch landed at 22:17:38 (after run 2 died at 22:15:49), a post-patch dispatch for `strategic-outcomes-verify` still failed with the identical signature, and the live log shows bash syntax errors (`v4.sh` line 255) and missing `flock` after the in-place patch — the running loop instances are corrupted/stale. A third dispatch under the current loop would burn a cycle deterministically.
+
+**Operator note (lkmot):** kill the live coo-loop v3/v4 processes, relaunch one clean instance of the patched script (confirm `--auto medium` in the execute launch and `flock` availability or a stub), then re-dispatch. The contract itself needs no rewrite — all pointers re-resolved during this assessment. Two rescopes already sit behind this; if cycle 3 fails for any reason, this tangent should park.
+
+Verification: done-when items checked by direct file/ledger/log inspection as listed above; verdict rules per the Assessor mandate.
+
+Next improvement: add a loop-level health gate that verifies the patched script parses cleanly (`bash -n coo-loop-v4.sh`) before dispatching any tangent, so harness defects stop consuming tangent cycles.
+
+Gap observed: the Assessor mandate has no prescribed home for cross-tangent harness evidence (the fm23 diagnosis existed but no surface propagated it to sibling tangents), so each tangent independently rediscovered the same root cause at full assessment cost.
+
+=== VERDICT: RESCOPE === Done-when 0/4 with zero artifacts (Caladium comps/ unchanged since 08-06, no CSV, no MLS status, ledger step still proposed); second failed cycle via num_turns:0 permission-gate non-start (execute.live.log, session 02442482) meets escalate_if — evidence block appended to tangents/20260905-spark-csv-export.md for the Scoper.
