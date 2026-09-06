@@ -1,6 +1,6 @@
 ---
 id: 20260906-e2e-stage4-truetracts-repair
-status: rescope
+status: queued
 assessor_session: 1deb6346-c147-4ba1-9446-c48d7cdc9c2e assess
 executor_session: cfe1c166-6a58-4d63-9e5a-a3bab32194b4 running
 priority: high
