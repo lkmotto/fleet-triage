@@ -1,7 +1,7 @@
 ---
 id: 20260906-e2e-stage3-comp-certainty
-status: parked
-scoper_session: e2342232-60bd-4e04-9bb1-130acd338ab0 scoping
+status: queued
+park_note: un-parked by operator session 2026-09-06 15:2x - both scope failures were num_turns:0 exec crashes (e2342232 + prior), scoper never evaluated; requeue until a real verdict lands
 priority: high
 budget_cycles: 6
 escalate_if: 2 failed cycles
