@@ -1,0 +1,28 @@
+## Assessment: 20260905-spark-csv-export
+
+I verified every done-when item against the disk myself, independent of the executor's outcome block (which was never filled in). The verdict hinges on one finding: **the live Stage 3 run never produced anything.**
+
+### Done-when verification (all four items: NOT MET)
+
+| # | Claim to verify | Reality on disk |
+|---|---|---|
+| 1 | `spark_export.csv` ≥1 data row in a target order | Absent in all three orders. Caladium `comps/` contains only `matrix_search_results.jpg` + `matrix_spark_error.jpg`, both dated **2026-08-06 04:10** (pre-tangent). No `spark_export.csv` anywhere under `workfiles/by_address/` modified after 09-01. |
+| 2 | Corroborating artifacts from *this* run; no `all_download_strategies_failed` | No new comps artifacts in any of the three orders; newest file anywhere in the repo is 08-06-era. The fail-reason clause is unevaluable — no run occurred to end with any reason. |
+| 3 | MLS no-CSV skip cleared | No `truetracts_mls_import_status.json` exists in the Caladium order at all. The only recent one (09-05 04:06) belongs to `2010_glenhaven` — pre-tangent, different order. |
+| 4 | Write-back recorded | No Outcome section in `tangents/20260905-spark-csv-export.md` (only the unfilled template). No completed entry for this tangent in `C:\Users\lkmot\.factory\knowledge\tangents.json` (only the August PARTIAL precedents). Ledger `project-ledger.json` step unflipped; `spark-csv` still listed as a live blocker with 08-06 evidence. |
+
+### Process forensics
+- `run_started: 21:52:51`; it is now ~22:12. In that window: no subject JSON built, no logs, no executor processes. The 22:02 python/node/chrome stack I initially suspected is this session's own MCP servers (verified via command lines: opera-devtools, tomba, perplexity, chrome-devtools MCP).
+- Budget: **0 of 4 cycles demonstrably consumed** — no cycle produced even a failure artifact. `escalate_if` (2 failed cycles) not met.
+- Scope adherence: no changes made, so no fence violations. The pipeline working tree dirt is pre-existing (untouched, per contract).
+- Contract soundness: all named pointers resolve (`tools/run_stage3_single_case.py`, `tools/_autonudge_run_stage.py`, `agent/truetracts_context.py`, `_download_export_format` at `stage3_matrix_spark.py:2139`, fail reason at `:2301`). The contract is not wrong.
+
+### Verdict reasoning
+This is a first failure with zero evidence of a wrong plan, wrong understanding, or a broken contract — the executor simply never engaged (dispatch non-start). The contract is verified achievable and 4 cycles remain. That fits RELOOP: one continuation with the explicit feedback that claims require artifacts. If the reloop again produces **zero artifacts** (as opposed to a genuine failed cycle with screenshots/logs), that is a dispatch-mechanism problem, not a tangent problem — escalate at that point rather than burning cycles.
+
+Governance record appended to `~/.factory/knowledge/agent-governance.jsonl` (`20260905T2212Z-spark-csv-assess`, low risk, outcome success for the assessment itself).
+
+Next improvement: executor dispatches should heartbeat a run-log path into the tangent file so assessors can distinguish non-start from silent death.
+Gap observed: contract referenced "tangents.json per loop convention" without its actual path (`C:\Users\lkmot\.factory\knowledge\tangents.json`), which cost a search to resolve.
+
+=== VERDICT: RELOOP === First failure, contract verified sound, 0/4 cycles consumed — executor non-start produced no artifacts (Caladium comps/ still 08-06-only, no CSV, no MLS status, no write-back); relaunch with mandate to leave run artifacts as evidence.

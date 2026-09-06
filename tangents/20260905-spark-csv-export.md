@@ -1,6 +1,6 @@
 ---
 id: 20260905-spark-csv-export
-status: assess
+status: approved
 priority: high
 budget_cycles: 4
 escalate_if: 2 failed cycles
@@ -65,3 +65,6 @@ You are the Executor for this tangent. Rules:
 - what remains: <or "nothing — done-when fully met">
 - rescope note: <only if bailing>
 run_started: 2026-09-05T21:52:51-05:00
+
+## Assessor verdict
+=== VERDICT: RELOOP === First failure, contract verified sound, 0/4 cycles consumed — executor non-start produced no artifacts (Caladium comps/ still 08-06-only, no CSV, no MLS status, no write-back); relaunch with mandate to leave run artifacts as evidence.
