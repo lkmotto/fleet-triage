@@ -1,6 +1,7 @@
 ---
 id: 20260905-scout-consumer-wiring
-status: running
+status: assess
+executor_session: a30fae46-b542-4e9e-997e-27dd010fdff8 running
 priority: medium
 budget_cycles: 3
 escalate_if: 1 failed cycle
@@ -130,3 +131,33 @@ You are the Executor for this tangent. Rules:
 - what remains: <or "nothing — done-when fully met">
 - rescope note: <only if bailing>
 run_started: 2026-09-06T11:01:04-05:00
+
+## Outcome (filled by executor)
+- status: success
+- artifacts:
+  - `C:\Users\lkmot\.factory\scripts\project_ledger.py` (consumer path implemented)
+  - `C:\Users\lkmot\.factory\knowledge\project-ledger.json` (scout blockers + step outcome)
+  - `C:\Users\lkmot\.factory\knowledge\ledger-outcomes.jsonl` (two run lines 2026-09-06T16:08Z: initial consume + idempotent re-run)
+  - `C:\Users\lkmot\.factory\automations\project-ledger-daily\reports\REVIEW-20260906.md`
+- what was done: Implemented the scout→ledger consumer inside `project_ledger.py`'s
+  refresh path. `_collect_scout_candidates()` dedupes `scout.candidate` events by
+  candidate key `domain::opportunity_type` (keying reused from the archived
+  GH-issue consumer; no issue filing). `_refresh_scout_blockers()` idempotently
+  upserts `scout-<domain>` blockers under the owning project — `scout-ntreis` →
+  `appraisal-pipeline` (domain-mapped), `scout-timeout` and `scout-factory` →
+  `memory-knowledge` (default) — with evidence citing concrete `event_id`s
+  (`534afb77993a`, `58fa680c8052`, `6ee600d48573`, `d7b606140412`, `f82212d3178b`)
+  plus the `strategic_events.jsonl` path. When every candidate has a stamp,
+  `scout-orphan`'s blocker evidence is stamped cleared and
+  `metrics._last_evidence.scout_candidates_unconsumed` is now computed as true
+  unconsumed logic (true only when scout signal lacks a ledger stamp), so
+  historical events alone no longer keep it true — it is `false` as of this run.
+- verification commands:
+  - `python C:\Users\lkmot\.factory\scripts\project_ledger.py --dry-run` (planned upserts shown, no writes)
+  - `python C:\Users\lkmot\.factory\scripts\project_ledger.py --propose-only` (add `--force` only if the same-hour lock blocks)
+  - `python C:\Users\lkmot\.factory\scripts\project_ledger.py --print-review`
+  - Idempotency proof: a `--propose-only --force` re-run produced only
+    `scout-evidence-refreshed` lines (no duplicate blockers, `since` preserved
+    at 2026-07-28).
+- what remains: nothing — done-when fully met.
+- rescope note: n/a
