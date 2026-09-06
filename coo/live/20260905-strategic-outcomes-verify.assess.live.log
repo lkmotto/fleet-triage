@@ -1,0 +1,38 @@
+Error during droid execution: Governance record emitted. All evidence is in; here is the assessment.
+
+# Assessment — `20260905-strategic-outcomes-verify`
+
+## Verification performed (my own artifacts, not the executor's claims)
+
+| Check | Result |
+|---|---|
+| `strategic_outcomes.jsonl` exists | **False** (`Test-Path` → False, verified myself) |
+| `strategic_review.py` state | 402 lines, mtime 2026-08-24 17:11:47 — unmodified since the 08-24 land; no patch applied |
+| Append code (independent grep) | Present: `OUTCOMES_PATH` L49, `_append_jsonl` def L81, unconditional outcomes append call L352 — matches the contract's L350–357 citation (file grew by 1 line vs the scoped 401, shifting nothing material) |
+| Executor artifacts this cycle | **None produced.** No `run.log`, no `guard-check.out`, no Outcome section appended to the tangent file |
+| Done-when items 1–6 | **0 of 6 met this cycle** |
+| Scope adherence | Clean — the executor changed nothing, in or out of scope (git status shows only pipeline logs; `strategic_review.py` untouched) |
+
+## Failure analysis
+
+The executor session for this cycle **died at turn 0**: `coo/tmp/20260905-strategic-outcomes-verify.exec.log` shows `num_turns: 0`, `"Exec ended early: insufficient permission to proceed. Re-run with --auto medium or --auto high"`. No work was attempted; no LLM spend occurred; the failure is before any contract code ran.
+
+This is **systemic, not tangent-specific**: all four executor sessions tonight failed identically at turn 0 (`strategic-outcomes-verify`, `ms01-scripts-inventory`, `ntreis-fm23` twice, `tangents-ledger-hygiene`). Root cause is in the pipeline runner, outside this contract's fence:
+
+1. **`coo-loop-v4.sh` `do_execute` (L142/144) invokes the executor without any `--auto` flag**, while scope/assess/validate stages all pass `--auto high`/`--auto medium`. The permission gate is therefore deterministic, not transient — a reloop through the same invocation will fail identically.
+2. **Session continuity is broken**: `do_execute` greps the exec log for camelCase `"sessionId"` but the harness emits snake_case `"session_id"`, so `executor_session:` was never persisted (confirmed absent from the tangent file) — a RELOOP could not even resume the dead session.
+
+## Budget & escalation
+
+- Cycles consumed: **1 of 2** (a turn-0 harness failure, zero productive turns).
+- `escalate_if: 1 failed cycle` — **MET**. Per the contract header this warrants operator escalation: the fence correctly forbids touching `coo-loop-v4.sh` inside this tangent, so the only viable path to executing any work crosses out of the fence. Luke: the runner fix (add `--auto medium` to the execute stage; fix the session-id grep) needs its own micro-tangent before this contract can be re-executed.
+
+**To the Scoper (for the fresh contract):** attach this evidence — executor turn-0 permission gate, systemic 4/4, runner invocation defect cited above, prior cycle's outcome note at `coo/outcomes/20260905-strategic-outcomes-verify.md` remains the operative evidence base (append code present at L352; D1 `finish_reason=length`/`content_len:0` starvation measured; D1/D2 fix handoff already framed as `20260906-fix-strategic-review-llm-truncation`).
+
+Governance record appended to `agent-governance.jsonl` (coo-assessor, outcome: success).
+
+Gap observed: do_execute's session-persistence grep pattern (`"sessionId"`) cannot match the harness's `"session_id"` output, so executor session continuity silently never engages.
+
+Next improvement: add `--auto medium` to the executor invocations in `coo-loop-v4.sh` (L142/L144) to match the other three stages and eliminate the turn-0 permission gate.
+
+=== VERDICT: RESCOPE === Executor died at turn 0 on harness permission gate (exec.log `num_turns:0`, no run.log/guard-check.out/outcome note produced, outcomes file still absent); failure is deterministic and systemic (4/4 executor sessions tonight, `--auto` omitted at coo-loop-v4.sh:142-144) and the fix sits outside this contract's fence.
