@@ -1,6 +1,7 @@
 ---
 id: 20260906-e2e-stage5-sfrep-wiring
-status: running
+status: assess
+executor_session: b3d46d2c-faca-424f-bb46-0f84c92e3240 running
 priority: high
 budget_cycles: 6
 escalate_if: 2 failed live Stage-5 apply cycles after Phase A artifacts (diagnosis memo + payload-inventory.json) exist with the same root-cause class; OR free RAM cannot stay >= 8 GB around a single agent-owned SFREP session after one safe cleanup of agent-owned SfrepMcpServer processes only; OR Appraise-It/sfrep-mcp unavailable on Legion after one install/path check
