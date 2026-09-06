@@ -1,6 +1,6 @@
 ---
 id: 20260905-spark-csv-export
-status: rescope
+status: queued
 priority: high
 budget_cycles: 4
 escalate_if: 2 failed cycles
