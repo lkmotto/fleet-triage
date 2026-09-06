@@ -1,0 +1,13 @@
+VERIFY TRANSCRIPT 20260905-tangents-ledger-hygiene
+generated_utc: 2026-09-06T02:09:44Z
+backup_path: C:\Users\lkmot\.factory\knowledge\tangents.json.20260906T020828Z.bak | exists: True | sha256: 03e15a7b5049adab
+parse_ok: True
+pending_len: 0
+completed_len: 74
+total(pending+completed): 74 | unique_ids: 74
+id_multiset_equals_backup(pending+completed): True
+recent_untouched: True
+backup_unchanged_vs_preedit: True
+last_updated: 2026-09-06T02:08:48Z
+_note: Autonudge writes pending items when it spawns workers; workers mark items complete; the loop re-dispatches stale pending items. On 2026-09-06 a one-time reconciliation moved 47 status=completed rows out of pending into completed (backup: tangents.json.20260906T020828Z.bak); pending is live backlog only.
+consumer business-state.gather_tangents() rows now: 0
