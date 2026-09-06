@@ -1,6 +1,7 @@
 ---
 id: 20260906-e2e-stage3-comp-certainty
-status: running
+status: assess
+executor_session: 99741121-51dd-4187-88fa-5fdbca7f9366 running
 assessor_session: 29a8d67e-a2b8-49cf-a9b2-7c77d614a85e assess
 priority: high
 budget_cycles: 6
@@ -144,3 +145,16 @@ run_started: 2026-09-06T15:35:40-05:00
 ## Assessor verdict
 === VERDICT: RELOOP === Executor certified Caladium+Big Sky (handoffs verified on disk, 3:49 PM) then harness Execute/LS outage (exit 66, executor-shell-diag.txt, 0-byte exec.log/verdict.json) cut the run before gate JSON/Verify-Amend/Outcome write-backs — first environmental failure, 5/6 cycles remain.
 run_started: 2026-09-06T16:01:23-05:00
+
+## Outcome (filled by executor)
+- status: success
+- artifacts:
+  - C:\Users\lkmot\factory-context\code\fleet-triage\coo\outcomes\20260906-e2e-stage3-comp-certainty-stage4-gate.json
+  - C:\Users\lkmot\factory-context\code\fleet-triage\coo\outcomes\20260906-e2e-stage3-comp-certainty-stage4-gate.md
+  - C:\Users\lkmot\factory-context\code\fleet-triage\coo\outcomes\20260906-e2e-stage3-comp-certainty-gap-analysis.md (dated `## Verify/Amend` stanza appended; citations verified, 2 line cites + 1 filename typo amended)
+  - C:\Users\lkmot\factory-context\code\fleet-triage\coo\outcomes\20260906-e2e-stage3-comp-certainty-recycler.md + parts-bin pb-0076 (verified: verdict REUSE rapidfuzz, dated 2026-09-06T14:59:45)
+  - C:\Users\lkmot\factory-context\code\fleet-triage\coo\outcomes\20260906-e2e-stage3-comp-certainty-recommendation.md (verified: $200/mo MLS API ranked last-if-at-all)
+  - Verified from prior (outage-cut) run: C:\Users\lkmot\factory-context\code\github\lkmotto\motto-appraisal-pipeline\workfiles\by_address\1804_caladium_dr_corinth_tx_76210\subject\truetracts_mls_import_status.json and ...\308_big_sky_circle_northlake_tx_76226\subject\truetracts_mls_import_status.json (both `handoff.ready=true`, ids match selected_comps.json)
+- what was done: Confirmed prior-run certification survived the harness outage (Caladium + Big Sky handoffs on disk, 6+6 ids verified against picks). Re-verified research trio + pb-0076 against live code/disk and appended the Verify/Amend stanza. Scanned all 17 spark holders (plus full by_address cohort, read-only) and wrote stage4-gate.json: **7 CERTIFIED / 10 BLOCKED**, min set Caladium + Big Sky; Brazos BLOCKED via documented pool-contamination override (Houston-polluted pre-fm23 pool). No live Matrix run needed; no Stage-4 attach performed; contaminated evidence workfiles untouched.
+- what remains: nothing — done-when fully met (Stage-4 attach runs belong to the sibling tangent, which should now consume stage4-gate.json)
+- rescope note: none
