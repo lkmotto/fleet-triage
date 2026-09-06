@@ -51,7 +51,7 @@ for f in $(grep -l '^status: *queued$' tangents/*.md 2>/dev/null || true); do
 === STUB ===
 $(cat "$f")"
 
-  if droid exec --use-spec -o text "$PROMPT" > coo/tmp/"$id".scoped.txt 2>> "$LOG"; then
+  if droid exec --use-spec -o text --auto medium "$PROMPT" > coo/tmp/"$id".scoped.txt 2>> "$LOG"; then
     if grep -q '=== UNSCOPABLE:' coo/tmp/"$id".scoped.txt; then
       REASON=$(grep -m1 '=== UNSCOPABLE:' coo/tmp/"$id".scoped.txt)
       sed -i 's/^status:.*/status: parked/' "$f"
@@ -116,7 +116,7 @@ for f in $(grep -l '^status: *assess$' tangents/*.md 2>/dev/null || true); do
 === CONTRACT WITH OUTCOME ===
 $(cat "$f")"
 
-  if droid exec -o text "$PROMPT" > coo/tmp/"$id".verdict.txt 2>> "$LOG"; then
+  if droid exec -o text --auto medium "$PROMPT" > coo/tmp/"$id".verdict.txt 2>> "$LOG"; then
     V=$(grep -m1 '=== VERDICT:' coo/tmp/"$id".verdict.txt || echo "=== VERDICT: RESCOPE === assessor returned no verdict line")
     case "$V" in
       *DONE*)    NEW=done ;;

@@ -3,3 +3,8 @@
  1 file changed, 1 insertion(+), 1 deletion(-)
 Error during droid execution: Exec ended early: insufficient permission to proceed. Re-run with --auto medium or --auto high. For destructive commands, use --skip-permissions-unsafe.
 [2026-09-05T19:04:50-05:00] SCOPER FAILED 20260905-glenhaven-harvest-verify
+[feature/coo-loop d6f5e0b] coo: 20260905-glenhaven-harvest-verify scoped
+ 3 files changed, 7 insertions(+), 1 deletion(-)
+ create mode 100644 coo/coo-loop.log
+ create mode 100644 coo/tmp/20260905-glenhaven-harvest-verify.scoped.txt
+[2026-09-05T19:04:50-05:00] ===== cycle end =====
