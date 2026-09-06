@@ -1,6 +1,6 @@
 ---
 id: 20260905-spark-csv-export
-status: approved
+status: running
 priority: high
 budget_cycles: 4
 escalate_if: any zero-turn/permission launch fail (stop environmental immediately); or 2 live Stage 3 cycles still ending all_download_strategies_failed after one focused export patch
@@ -71,3 +71,4 @@ You are the Executor for this tangent. Rules:
 - what was done: <2-4 lines>
 - what remains: <or "nothing — done-when fully met">
 - rescope note: <only if bailing>
+run_started: 2026-09-05T23:17:27-05:00
