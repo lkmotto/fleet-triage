@@ -1,5 +1,5 @@
 <html><head><meta http-equiv='refresh' content='15'><title>COO Board</title><style>body{font-family:consolas;background:#111;color:#ddd;padding:16px}table{border-collapse:collapse}td,th{border:1px solid #444;padding:4px 10px}.done{color:#6f6}.running{color:#ff6}.scoping,.assess,.validating{color:#6cf}.parked,.rescope{color:#f66}</style></head><body>
-<h3>COO Pipeline Board &mdash; 2026-09-05T22:05:40-05:00</h3><table><tr><th>tangent</th><th>status</th></tr>
+<h3>COO Pipeline Board &mdash; 2026-09-05T22:11:55-05:00</h3><table><tr><th>tangent</th><th>status</th></tr>
 <tr><td>20260905-campaign-105629-review</td><td class='done'>done</td></tr>
 <tr><td>20260905-glenhaven-harvest-verify</td><td class='done'>done</td></tr>
 <tr><td>20260905-gmail-intake-repair</td><td class='done'>done</td></tr>
@@ -8,29 +8,29 @@
 <tr><td>20260905-ntreis-fm23</td><td class='scoping'>scoping</td></tr>
 <tr><td>20260905-scout-consumer-wiring</td><td class='parked'>parked</td></tr>
 <tr><td>20260905-sdr-9800-recovery</td><td class='parked'>parked</td></tr>
-<tr><td>20260905-spark-csv-export</td><td class='assess'>assess</td></tr>
+<tr><td>20260905-spark-csv-export</td><td class='approved'>approved</td></tr>
 <tr><td>20260905-strategic-outcomes-verify</td><td class='assess'>assess</td></tr>
 <tr><td>20260905-tangents-ledger-hygiene</td><td class='done'>done</td></tr>
 <tr><td>20260906-sales-outreach-ledger-hygiene</td><td class='queued'>queued</td></tr>
 </table><h4>recent loop events</h4><pre style='font-size:11px'>
-[feature/coo-loop 980fd0d] coo: 20260905-sdr-9800-recovery parked-unscopable
- 3 files changed, 18 insertions(+), 1 deletion(-)
- create mode 100644 coo/live/20260905-kb-gmail-crossref.execute.live.log
-/c/Users/lkmot/factory-context/code/fleet-triage/coo/coo-loop-v4.sh: line 35: flock: command not found
-[2026-09-05T22:02:44-05:00] WARN gitlock timeout in push
-To https://github.com/lkmotto/fleet-triage.git
-   9e88ef3..980fd0d  feature/coo-loop -> feature/coo-loop
-[2026-09-05T22:02:46-05:00] ===== sweep end =====
-[2026-09-05T22:05:18-05:00] EXECUTOR exited nonzero 20260905-kb-gmail-crossref
-/c/Users/lkmot/factory-context/code/fleet-triage/coo/coo-loop-v4.sh: line 26: flock: command not found
-[2026-09-05T22:05:19-05:00] WARN gitlock timeout in commit
-[feature/coo-loop ebe3019] coo: 20260905-kb-gmail-crossref executed
- 4 files changed, 17 insertions(+), 15 deletions(-)
-[2026-09-05T22:05:20-05:00] ASSESS 20260905-kb-gmail-crossref
 [2026-09-05T22:05:37-05:00] SCOPER FAILED 20260905-scout-consumer-wiring
 /c/Users/lkmot/factory-context/code/fleet-triage/coo/coo-loop-v4.sh: line 26: flock: command not found
 [2026-09-05T22:05:37-05:00] WARN gitlock timeout in commit
 [feature/coo-loop 5dfa174] coo: 20260905-scout-consumer-wiring parked-scoperfail
  4 files changed, 15 insertions(+), 13 deletions(-)
  create mode 100644 coo/live/20260905-kb-gmail-crossref.assess.live.log
+/c/Users/lkmot/factory-context/code/fleet-triage/coo/coo-loop-v4.sh: line 35: flock: command not found
+[2026-09-05T22:05:41-05:00] WARN gitlock timeout in push
+To https://github.com/lkmotto/fleet-triage.git
+   980fd0d..5dfa174  feature/coo-loop -> feature/coo-loop
+[2026-09-05T22:05:43-05:00] ===== sweep end =====
+[2026-09-05T22:07:32-05:00] ASSESSOR FAILED 20260905-strategic-outcomes-verify (retry next sweep)
+[feature/coo-loop eda7216] coo: 20260905-strategic-outcomes-verify assessfail
+ 2 files changed, 39 insertions(+), 9 deletions(-)
+[2026-09-05T22:07:32-05:00] ASSESS 20260905-strategic-outcomes-verify
+[2026-09-05T22:11:55-05:00] VERDICT 20260905-spark-csv-export RELOOP
+/c/Users/lkmot/factory-context/code/fleet-triage/coo/coo-loop-v4.sh: line 26: flock: command not found
+[2026-09-05T22:11:55-05:00] WARN gitlock timeout in commit
+[feature/coo-loop ae6c330] coo: 20260905-spark-csv-export assessed
+ 4 files changed, 33 insertions(+), 31 deletions(-)
 </pre></body></html>
