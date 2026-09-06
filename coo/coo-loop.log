@@ -46,3 +46,20 @@ Error during droid execution: Exec ended early: insufficient permission to proce
 [2026-09-05T20:03:42-05:00] SCOPE claim 20260905-campaign-105629-review
 [feature/coo-loop e740f07] coo: claim 20260905-campaign-105629-review for scoping
  1 file changed, 1 insertion(+), 1 deletion(-)
+[2026-09-05T20:27:16-05:00] SCOPE claim 20260905-campaign-105629-review
+[feature/coo-loop 575b526] coo: 20260905-campaign-105629-review claim-scope
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+[2026-09-05T20:39:30-05:00] NO CONTRACT 20260905-campaign-105629-review
+[feature/coo-loop efb14a9] coo: 20260905-campaign-105629-review parked-nocontract
+ 2 files changed, 55 insertions(+), 1 deletion(-)
+ create mode 100644 coo/live/20260905-campaign-105629-review.scope.live.log
+[2026-09-05T20:39:31-05:00] SCOPE claim 20260905-gmail-intake-repair
+[feature/coo-loop 3922f7d] coo: 20260905-gmail-intake-repair claim-scope
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+[2026-09-05T20:50:42-05:00] NO CONTRACT 20260905-gmail-intake-repair
+[feature/coo-loop 8858134] coo: 20260905-gmail-intake-repair parked-nocontract
+ 2 files changed, 20 insertions(+), 1 deletion(-)
+ create mode 100644 coo/live/20260905-gmail-intake-repair.scope.live.log
+To https://github.com/lkmotto/fleet-triage.git
+   19c4788..8858134  feature/coo-loop -> feature/coo-loop
+[2026-09-05T20:50:44-05:00] ===== sweep end =====

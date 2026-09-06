@@ -1,0 +1,135 @@
+{
+  "artifactType": "campaign_105629_diagnosis_evidence",
+  "capturedAt": "2026-09-05",
+  "capturedBy": "coo-scoper (read-only ManyReach MCP reads)",
+  "campaign": {
+    "campaignId": 105629,
+    "name": "SFR Buyers DFW \u2014 Batch 2 \u2014 Aug 3",
+    "status": "Running",
+    "createdAt": "2026-08-03T19:01:02.738Z",
+    "fromName": "Luke Motto",
+    "replyToEmail": "lkmotto@gmail.com",
+    "textOnlyEmails": false,
+    "trackOpens": true,
+    "trackClicks": true,
+    "dailyLimit": 300,
+    "dailyLimitPer": "Campaign",
+    "dailyLimitIncrease": true,
+    "dailyLimitIncreaseToMax": 300,
+    "dailyLimitIncreasePercent": 15,
+    "prospectCount": 778,
+    "activeProspectCount": 298,
+    "sentCount": 335,
+    "openCount": 15,
+    "clickCount": 12,
+    "bounceCount": 1,
+    "replyCount": 0,
+    "fromEmails": [
+      "luke@mottooutreach.com",
+      "james@mottooutreach.com",
+      "laura@mottooutreach.com",
+      "robert@mottooutreach.com",
+      "emily@mottooutreach.com",
+      "luke@txvalue.co",
+      "anna@txvalue.co",
+      "david@txvalue.co",
+      "michael@txvalue.co",
+      "sarah@txvalue.co",
+      "luke@appraisalval.co",
+      "laura@appraisalval.co",
+      "emily@appraisalval.co",
+      "robert@appraisalval.co",
+      "james@appraisalval.co"
+    ],
+    "subjectRaw": "{abtest|{{FIRST_NAME}}, quick question|{{FIRST_NAME}} \u2014 {{COMPANY}}|DFW appraisals \u2014 {{FIRST_NAME}}|}",
+    "subjectFlags": {
+      "unsupportedAbtestBlock": true,
+      "supportedSpintax": false
+    },
+    "bodyFlags": {
+      "supportedSpintax": true,
+      "unsupportedJinjaConditional": true,
+      "hasUnsubscribeLink": true,
+      "hasOperatorIdentification": true
+    }
+  },
+  "statsSeries": {
+    "window": "2026-08-03 .. 2026-09-04",
+    "sentSeriesSum": 1137,
+    "openSeriesSum": 18,
+    "replySeriesSum": 0,
+    "note": "headline sentCount 335 counts initial touches; 1137 = all message sends incl. followups"
+  },
+  "replySurface": {
+    "operation": "message/get type=Reply campaignId=105629",
+    "totalItems": 1,
+    "humanReplies": 0,
+    "rows": [
+      {
+        "createdAt": "2026-08-18T17:35:30.000Z",
+        "classification": "delivery_failure_notice",
+        "reason": "Undeliverable: recipient mailbox full (554 5.2.2)"
+      }
+    ]
+  },
+  "sequences": [
+    {
+      "sequenceId": 132731,
+      "name": "Follow-up sequence",
+      "followups": [
+        { "followupId": 202757, "sent": 193, "opens": 2, "clicks": 0, "bounces": 0, "replies": 0 },
+        { "followupId": 202758, "sent": 146, "opens": 1, "clicks": 2, "bounces": 0, "replies": 0 }
+      ]
+    },
+    {
+      "sequenceId": 133171,
+      "name": "Non-respondent (any)",
+      "followups": [
+        { "followupId": 203418, "sent": 319, "opens": 7, "clicks": 7, "bounces": 1, "replies": 0 },
+        { "followupId": 203419, "sent": 135, "opens": 0, "clicks": 4, "bounces": 0, "replies": 0 }
+      ]
+    }
+  ],
+  "sentSampleObservations": {
+    "pagesSampled": [1, 70, 75],
+    "totalSentMessages": 1137,
+    "subjectPattern": "Re: Appraisal coverage \u2014 <Company>",
+    "initialTouchSubjectInSamples": false,
+    "signatureLinkClicksObserved": ["https://gravatar.com/lkmotto"],
+    "recentBodyPreviewArtifact": "*``````* (API preview truncation on recent rows)",
+    "recipientsIncludeNationalInstitutionalSFR": [
+      "Invitation Homes",
+      "Progress Residential",
+      "Tricon Residential",
+      "Amherst",
+      "Home Partners of America",
+      "Roofstock",
+      "RangeWater",
+      "Second Avenue"
+    ]
+  },
+  "senderHealthContext": {
+    "source": "motto-sales-engine/data/reports/sender_report_2026-09-01_post.json + sender_report_warmup_off_check.json",
+    "liveSenderCount": 17,
+    "classifiedBounced": 15,
+    "healthy": 2,
+    "bounceAudit": "motto-sales-engine/data/audits/2026-09-01/sender_bounce_audit.json",
+    "campaignLocalBounces": 1
+  },
+  "complianceContext": {
+    "sweep": "motto-sales-engine/docs/compliance/compliance-sweep-2026-09-02.md",
+    "campaign105629Verdict": "pass",
+    "clientSuppression": "3 Renters Warehouse members; 2 deactivated 2026-09-02; 0 sendingActive",
+    "replyIcpFlags": 6
+  },
+  "hypothesisRanking": {
+    "dominant": "copy/template mechanics + presentation (inbox-ignore / low trust)",
+    "secondary": "audience/ICP misfit (national institutional SFR panels vs local direct appraiser offer)",
+    "contributing": "fleet deliverability headwind (15/17 senders bounced-class; shared bulk-mail pool; dailyLimit 300 vs warmup ceilings)"
+  },
+  "mutationAudit": {
+    "reads": "campaign/get_by_id, campaign/stats_by_id, campaign/get_sequences_by_id, sequence/get_followups_by_id x2, sender/get x2, message/get x4 (Sent/Reply)",
+    "writes": 0,
+    "sends": 0
+  }
+}

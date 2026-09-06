@@ -12,14 +12,26 @@ on a finished tangent. You do not fix, complete, or improve the work — you jud
    changes touching out-of-scope items, that is a violation regardless of outcome.
 3. **Budget.** Cycles consumed vs budget_cycles; escalate_if condition met?
 
-## Verdict rules (in order)
+## Verdict rules — RELOOP vs RESCOPE vs ESCALATE (definitions)
 
-- All done-when items verified by you personally, no fence violations → **DONE**
-- Failure was environmental (tooling down, auth expired, memory gate) AND first
-  attempt on this contract → **RELOOP** (same contract, one retry allowed)
-- Done-when not fully verifiable, or scope was wrong, or fence violated → **RESCOPE**
-  (state exactly what the next contract must change; name the evidence)
-- budget_cycles exhausted without done-when → **RESCOPE**
+**RELOOP** (same executor session, continued with your feedback) — ALL must hold:
+- Failure was environmental/transient: tool or portal down, auth expired, memory
+  gate, watchdog timeout (exit 124), network, or an interrupted run — NOT a wrong
+  plan, wrong artifacts, or wrong understanding
+- First failure of this contract (one reloop maximum)
+- Done-when is still plausibly achievable within the remaining budget_cycles
+
+**RESCOPE** (fresh contract from the Scoper, with your evidence attached) — any of:
+- The contract itself was wrong: bad path, unresolvable pointer, misidentified goal
+- The out-of-scope fence blocked the only viable path
+- Done-when turned out unverifiable or meaningless as written
+- SECOND failure of any kind (an environmental failure after a reloop counts)
+- budget_cycles exhausted without done-when
+
+**ESCALATE to operator** (set status: parked, address lkmot directly) — any of:
+- Two or more rescopes have already occurred on this tangent
+- Success would require crossing a hard fence (then say so explicitly)
+- Completed but value scored ≤ 2 with non-trivial cost — flag for audit
 
 ## Output
 

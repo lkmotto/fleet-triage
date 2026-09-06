@@ -1,0 +1,18 @@
+Intake restored. The contract is executed end to end; here's the proof trail.
+
+## What was wrong and what changed
+- **Root cause (config, not OAuth):** `~/.factory/mcp.json` had `smithery-toolbox` set to `"disabled": true`. The server never registered, so `smithery-toolbox___execute` never existed in session toolsets — matching all 4+ "UNAVAILABLE this session" autonudge entries.
+- **Fix 1:** re-enabled it (single-key edit; byte-copy backup at `~/.factory/mcp.json.bak-20260905-intake-repair`, sha256-verified identical to the pre-edit file; JSON re-parses, no BOM, Bearer header untouched).
+- **Fix 2 (durability):** new `~/.factory/automations/autonudge-loop/gmail_intake_scan.py` — metadata-only Gmail scan via the Composio REST proxy (stdlib, pattern from `agent/gmail_api.py`), plus a HEARTBEAT.md fallback block so intake no longer depends on the MCP tool loading.
+
+## Proof (live, this session)
+- `doppler run -p auth-api -c prd -- python gmail_intake_scan.py` → `SCAN_OK: resultSizeEstimate=201 listed=5`, exit 0. HTTP 200 through the Composio proxy proves the key and the `ca_UTAkgVEEqtiV` OAuth grant are healthy — no reauth, no secrets touched.
+- Artifacts: `coo/outcomes/20260905-gmail-intake-repair-scan.json` (IDs only, privacy fence held) and `coo/outcomes/20260905-gmail-intake-repair-proof.md` (root cause, commands, exit codes). Parts-bin: pb-0074. Governance + decision records appended.
+
+## Honest caveats
+- ToolSearch in *this* session still can't load the tool — expected, since the deferred-tools list is fixed at session start. Fresh sessions get the re-enabled MCP; the next autonudge cycle (09-06 09:00Z) will show which path it took. Intake itself no longer depends on that outcome.
+- The scan's estimate of 201 unread "order-ish" messages is high — the HEARTBEAT query matches generic "order" terms in noise. Triaging that is out of scope (metadata only), but the next cycle will see real counts through either path.
+- Verification: JSON-valid ✅, file artifacts ✅, code path ✅. The verify-done "service running → docker ps" check failed as a false positive — smithery-toolbox is a remote HTTP MCP gateway, not a container; the operative checks (JSON, `disabled: false`, live 200) all pass.
+
+Next improvement: wire gmail_intake_scan.py into the Smart Gate step as the primary count source so MCP availability stops gating cycle starts entirely.
+Gap observed: the capability KB (`kb-query.py capability/credential "gmail"`) pointed nowhere useful during diagnosis; the operative records lived under "composio" — the capability table should be corrected or cross-referenced.

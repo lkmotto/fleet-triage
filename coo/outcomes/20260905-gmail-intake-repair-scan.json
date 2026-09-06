@@ -1,0 +1,30 @@
+{
+  "ok": true,
+  "path": "composio-rest",
+  "account_id": "ca_UTAkgVEEqtiV",
+  "query": "is:unread newer_than:7d (appraisal OR inspection OR valuation OR order)",
+  "result_count": 201,
+  "messages": [
+    {
+      "id": "1a06f98ef9c40782",
+      "threadId": "1a06f98e7f4fe501"
+    },
+    {
+      "id": "1a06f98e7f4fe501",
+      "threadId": "1a06f98e7f4fe501"
+    },
+    {
+      "id": "1a06e0078db7bb82",
+      "threadId": "1a06dd5e499eb255"
+    },
+    {
+      "id": "1a06da5a07a7ea89",
+      "threadId": "1a06da5a07a7ea89"
+    },
+    {
+      "id": "1a06ccb46ec5e6a4",
+      "threadId": "1a06a11f173489e7"
+    }
+  ],
+  "checked_at": "2026-09-06T01:47:37.538030+00:00"
+}

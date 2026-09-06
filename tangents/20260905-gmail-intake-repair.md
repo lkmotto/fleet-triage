@@ -1,6 +1,6 @@
 ---
 id: 20260905-gmail-intake-repair
-status: parked
+status: assess
 priority: high
 budget_cycles: 4
 escalate_if: 2 failed cycles
@@ -28,4 +28,12 @@ funnel.
   by a successful *scan* returning order metadata only
 - Changing any Doppler credentials; new secrets = stop and report
 - Automating sends (safety rule 2a — always fenced)
-- scoper returned no contract, parked
+## Contract (formalized post-hoc — work executed by scoping session before contract extraction; routed to assessment under operator dispatch approval)
+- [ ] A repeatable order-intake scan path exists and is verified: scan script/config on disk, successful run returning order metadata only (no message bodies), JSON-valid
+- [ ] The operative path documented: which tool/MCP it uses and how the heartbeat consumes it
+- [ ] Zero sends; metadata only; no Doppler credential changes
+
+## Out of scope (unchanged hard fences)
+- Reading or sending email content; new secrets; automating sends
+
+[route: operator-formalized; status advanced to assess]

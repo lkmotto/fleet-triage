@@ -56,6 +56,11 @@ do_scope() {
 
 === STUB ===
 $(cat "$f")"
+  if [ -f "coo/tmp/$id.scopeRetry" ]; then
+    PROMPT="$PROMPT
+
+STRICT RE-REQUEST: Your previous attempt performed WORK instead of returning a contract. You are the SCOPER. Return ONLY the === CONTRACT === block per the format above. Do not perform any work, write any files, or run any state-changing commands. Put everything you learned in the contract's Context section — the Executor will re-verify it."
+  fi
   if run_droid scope exec --use-spec -o text --auto high "$PROMPT" > coo/tmp/"$id".scoped.txt 2>> "$LOG"; then
     if grep -q '=== UNSCOPABLE:' coo/tmp/"$id".scoped.txt; then
       sed -i 's/^status:.*/status: parked/' "$f"
@@ -79,9 +84,16 @@ $(cat "$f")"
         log "MALFORMED contract $id"; commit_f "parked-malformed"
       fi
     else
-      sed -i 's/^status:.*/status: parked/' "$f"
-      echo "- scoper returned no contract, parked" >> "$f"
-      log "NO CONTRACT $id"; commit_f "parked-nocontract"
+      if [ ! -f "coo/tmp/$id.scopeRetry" ]; then
+        touch "coo/tmp/$id.scopeRetry"
+        log "NO CONTRACT $id - strict scoper reloop (1 of 1)"
+        sed -i 's/^status:.*/status: queued/' "$f"; commit_f "scope-reloop"
+      else
+        rm -f "coo/tmp/$id.scopeRetry"
+        sed -i 's/^status:.*/status: parked/' "$f"
+        echo "- scoper returned no contract twice, parked for operator review" >> "$f"
+        log "NO CONTRACT x2 $id"; commit_f "parked-nocontract"
+      fi
     fi
   else
     sed -i 's/^status:.*/status: parked/' "$f"
@@ -189,7 +201,8 @@ fi
 [ -f "$BREAKER" ] && { log "BREAKER TRIPPED - paused (delete coo/.breaker)"; exit 0; }
 
 CYCLE_FAILURES=0
-for tf in tangents/*.md; do
+INCLUDE="${COO_INCLUDE:-*.md}"
+for tf in tangents/$INCLUDE; do
   case "$(basename "$tf")" in TEMPLATE.md|EXAMPLE-*) continue;; esac
   f="$tf"
   st=$(status_of)
