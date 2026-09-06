@@ -1,6 +1,6 @@
 ---
 id: 20260906-e2e-stage3-comp-certainty
-status: queued
+status: scoping
 scoper_session: 56f45d2e-8bf2-46b0-91c4-a221f206d0db scoped
 priority: high
 budget_cycles: 6
