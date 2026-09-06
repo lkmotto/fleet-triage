@@ -1,6 +1,6 @@
 ---
 id: 20260906-e2e-stage4-truetracts-repair
-status: running
+status: assess
 priority: high
 budget_cycles: 6
 escalate_if: 2 failed live Stage-4 execute cycles after preflight (auth valid + subject JSON ready + CSV gate green), OR google_secure_browser_block after one bounded reseed-refresh, OR address_not_committed twice with no new selector evidence, OR ss_not_defined twice after one bounded recovery fix, OR MLS attach still file_attached:false after one diagnostic + one bounded selector fix
@@ -66,3 +66,14 @@ You are the Executor for this tangent. Rules:
 - what remains: <or "nothing — done-when fully met">
 - rescope note: <only if bailing>
 run_started: 2026-09-06T15:15:43-05:00
+
+## Preflight note (executor, 2026-09-06T15:19-05:00, pre-portal)
+- Hostname: Legion (Legion-local paths valid; ms01 not involved).
+- RAM gate: RED — 2.2-2.3 GB free vs >=8 GB required. Top consumers are user-owned apps (Sfrep.AppraiseIt x3, chrome, alamode.WinTOTAL, MsMpEng); contract forbids killing user apps. Holding all portal work until free RAM clears 8 GB; if it cannot clear, outcome = failed (environmental: yes).
+- Storage state: PASS — `C:\Users\lkmot\.motto-appraisal-pipeline\browser-state\truetracts_portal.json` exists (6949 B, mtime 2026-09-06 14:48, today). Repo copy `workfiles\browser_state\` confirmed stale (08-10) and not relied on.
+- CSV gate: GREEN — `workfiles\by_address\1804_caladium_dr_corinth_tx_76210\comps\spark_export.csv` (352,257 B, mtime 2026-09-06 15:01), 100 data rows, 100/100 `MLS#` populated, 100/100 Postal Code 76210 (60 Corinth + 40 Denton), zero Houston-area rows. Archive copy present. No existing TrueTracts artifacts in order dir (clean guinea pig).
+- Subject JSON: PASS — `tools\_tmp_subject_caladium.json` = 1804 Caladium Dr, Corinth, TX 76210, Denton county.
+- Tax artifact: PASS — `subject\realist_tax.pdf` (258,109 B) + realist screenshot + taxnetusa details present.
+- selected_comp_ids resolution: no `matrix_comp_selection_session.json` / `matrix_comp_recommendations.json` / `selected_comps.json` in the Caladium order (Stage-3 ran pure spark export), so `truetracts_context` will resolve to empty list -> full-CSV attach attempt per contract fallback ("if unresolvable, record and attempt full-CSV attach"). Recorded here as the expected path.
+- Code skim done (no edits): `_apply_mls_import` (nav to Market Analysis -> two-pass open-button search -> `input[type='file']` attach -> `_prime_selected_comp_ids` -> import submit), `_commit_pending_heatmap` (Update Heatmap CTA), SS gate (export-gate check + one boundary re-draw recovery, fatal `ss_not_defined` if not cleared), subject verification gate, optional `TRUETRACTS_REQUIRE_MLS_IMPORT` env flag. Anti-template skim of Big Sky MLS JSON deferred to post-run if attach fails (one diagnostic allowed).
+- Plan: live run command per contract with stdout tee to `C:\Users\lkmot\factory-context\code\fleet-triage\coo\outcomes\20260906-e2e-stage4-truetracts-repair-run.json`, gated on RAM >= 8 GB.
