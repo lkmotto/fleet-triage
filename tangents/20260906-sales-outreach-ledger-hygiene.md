@@ -1,6 +1,7 @@
 ---
 id: 20260906-sales-outreach-ledger-hygiene
-status: assess
+status: validating
+assessor_session: 2564f2f0-570c-4133-8439-457982808827 assess
 executor_session: a804d7c4-03de-4be1-a3e4-4df18dc8513b running
 priority: medium
 budget_cycles: 2
@@ -71,3 +72,6 @@ You are the Executor for this tangent. Rules:
 - what remains: <or "nothing — done-when fully met">
 - rescope note: <only if bailing>
 run_started: 2026-09-06T15:24:37-05:00
+
+## Assessor verdict
+=== VERDICT: DONE === All four done-when items verified against live files by independent 42-check suite (coo/tmp/assess-20260906-sales-outreach-ledger-hygiene.py): narrow diff vs .bak shows only named entries, decisions line 57 appended, byte accounting exact, scope held, 1/2 cycles used.
