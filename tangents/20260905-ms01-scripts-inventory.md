@@ -1,6 +1,6 @@
 ---
 id: 20260905-ms01-scripts-inventory
-status: rescope
+status: queued
 assessor_session: 212b0ab9-ce97-4a59-95a8-82ee594866bd parked
 priority: low
 budget_cycles: 2
