@@ -1,4 +1,3 @@
-=== CONTRACT ===
 ---
 id: 20260905-strategic-outcomes-verify
 status: scoped
@@ -99,4 +98,3 @@ flowchart TD
   out --> stop[Stop at fence]
 ```
 
-=== END CONTRACT ===

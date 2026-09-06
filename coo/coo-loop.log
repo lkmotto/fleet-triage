@@ -132,3 +132,62 @@ remove the file manually to continue.
  3 files changed, 2 insertions(+), 1 deletion(-)
  create mode 100644 coo/live/20260905-ntreis-fm23.execute.live.log
 [2026-09-05T21:29:19-05:00] ASSESS 20260905-ms01-scripts-inventory
+[2026-09-05T21:31:13-05:00] VALIDATION 20260905-tangents-ledger-hygiene PASS -> done
+[feature/coo-loop ebbc765] coo: 20260905-tangents-ledger-hygiene validated
+ 3 files changed, 61 insertions(+), 1 deletion(-)
+ create mode 100644 coo/probes/20260905-tangents-ledger-hygiene.probe.md
+To https://github.com/lkmotto/fleet-triage.git
+   4e6b629..ebbc765  feature/coo-loop -> feature/coo-loop
+[2026-09-05T21:31:15-05:00] ===== sweep end =====
+[2026-09-05T21:31:31-05:00] EXECUTOR exited nonzero 20260905-ntreis-fm23
+[feature/coo-loop 2102a4c] coo: 20260905-ntreis-fm23 executed
+ 2 files changed, 2 insertions(+), 1 deletion(-)
+[2026-09-05T21:31:31-05:00] ASSESS 20260905-ntreis-fm23
+[2026-09-05T21:34:38-05:00] NO CONTRACT 20260905-strategic-outcomes-verify - strict scoper reloop (1 of 1)
+[feature/coo-loop 5ac8947] coo: 20260905-strategic-outcomes-verify scope-reloop
+ 6 files changed, 114 insertions(+), 1 deletion(-)
+ create mode 100644 coo/live/20260905-ntreis-fm23.assess.live.log
+ create mode 100644 coo/live/status.html
+ create mode 100644 coo/probes/20260905-campaign-105629-review.probe.md
+ create mode 100644 coo/probes/20260905-gmail-intake-repair.probe.md
+[2026-09-05T21:34:38-05:00] SCOPE claim 20260905-strategic-outcomes-verify
+[feature/coo-loop e369e37] coo: 20260905-strategic-outcomes-verify claim-scope
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+[2026-09-05T21:35:38-05:00] VALIDATION 20260905-campaign-105629-review PASS -> done
+[feature/coo-loop d0fd84f] coo: 20260905-campaign-105629-review validated
+ 4 files changed, 64 insertions(+), 32 deletions(-)
+To https://github.com/lkmotto/fleet-triage.git
+   ebbc765..d0fd84f  feature/coo-loop -> feature/coo-loop
+[2026-09-05T21:35:40-05:00] ===== sweep end =====
+[2026-09-05T21:35:45-05:00] VALIDATION 20260905-gmail-intake-repair PASS -> done
+[feature/coo-loop 9e88ef3] coo: 20260905-gmail-intake-repair validated
+ 3 files changed, 64 insertions(+), 4 deletions(-)
+To https://github.com/lkmotto/fleet-triage.git
+   d0fd84f..9e88ef3  feature/coo-loop -> feature/coo-loop
+[2026-09-05T21:35:47-05:00] ===== sweep end =====
+[2026-09-05T21:36:18-05:00] ASSESSOR FAILED 20260905-ms01-scripts-inventory (retry next sweep)
+[feature/coo-loop f32fd59] coo: 20260905-ms01-scripts-inventory assessfail
+ 1 file changed, 30 insertions(+)
+[2026-09-05T21:36:19-05:00] ASSESS 20260905-ms01-scripts-inventory
+[2026-09-05T21:38:01-05:00] VERDICT 20260905-ntreis-fm23 RELOOP
+[feature/coo-loop 03956e0] coo: 20260905-ntreis-fm23 assessed
+ 3 files changed, 79 insertions(+), 31 deletions(-)
+[2026-09-05T21:38:02-05:00] EXECUTE claim 20260905-ntreis-fm23 (continuity_sid=none reloop=1)
+[feature/coo-loop 280da40] coo: 20260905-ntreis-fm23 claim-execute
+ 1 file changed, 2 insertions(+), 1 deletion(-)
+[2026-09-05T21:39:28-05:00] CONTRACT 20260905-strategic-outcomes-verify scoped+approved
+[feature/coo-loop ea29f42] coo: 20260905-strategic-outcomes-verify scoped
+ 3 files changed, 208 insertions(+), 34 deletions(-)
+[2026-09-05T21:39:29-05:00] EXECUTE claim 20260905-strategic-outcomes-verify (continuity_sid=none reloop=0)
+[feature/coo-loop 3bb2b46] coo: 20260905-strategic-outcomes-verify claim-execute
+ 1 file changed, 2 insertions(+), 1 deletion(-)
+[2026-09-05T21:43:26-05:00] EXECUTOR exited nonzero 20260905-strategic-outcomes-verify
+[feature/coo-loop c8c9a7b] coo: 20260905-strategic-outcomes-verify executed
+ 2 files changed, 2 insertions(+), 1 deletion(-)
+ create mode 100644 coo/live/20260905-strategic-outcomes-verify.execute.live.log
+[2026-09-05T21:43:26-05:00] ASSESS 20260905-strategic-outcomes-verify
+[2026-09-05T21:45:05-05:00] EXECUTOR exited nonzero 20260905-ntreis-fm23
+[feature/coo-loop eee0faf] coo: 20260905-ntreis-fm23 executed
+ 3 files changed, 2 insertions(+), 1 deletion(-)
+ create mode 100644 coo/live/20260905-strategic-outcomes-verify.assess.live.log
+[2026-09-05T21:45:05-05:00] ASSESS 20260905-ntreis-fm23

@@ -81,8 +81,18 @@ $(cat "$f")"
 
 STRICT RE-REQUEST: Your previous attempt performed WORK instead of returning a contract. You are the SCOPER. Return ONLY the === CONTRACT === block per the format above. Do not perform any work, write any files, or run any state-changing commands. Put everything you learned in the contract's Context section — the Executor will re-verify it."
   fi
-  if run_droid scope exec --use-spec -o text --auto high "$PROMPT" > coo/tmp/"$id".scoped.txt 2>> "$LOG"; then
-    if grep -q '=== UNSCOPABLE:' coo/tmp/"$id".scoped.txt; then
+  if [ -n "${COO_FAST_MODEL:-}" ]; then
+    run_droid scope exec --use-spec -o text --auto high -m "$COO_FAST_MODEL" "$PROMPT" > coo/tmp/"$id".scoped.txt 2>> "$LOG"
+  else
+    run_droid scope exec --use-spec -o text --auto high "$PROMPT" > coo/tmp/"$id".scoped.txt 2>> "$LOG"
+  fi
+  local scope_rc=0
+  [ ! -s "coo/tmp/$id.scoped.txt" ] && scope_rc=1
+  if [ "$scope_rc" -ne 0 ]; then
+    sed -i 's/^status:.*/status: parked/' "$f"
+    echo "- scoper session failed, parked" >> "$f"
+    log "SCOPER FAILED $id"; commit_f "parked-scoperfail"
+  elif grep -q '=== UNSCOPABLE:' coo/tmp/"$id".scoped.txt 2>/dev/null; then
       sed -i 's/^status:.*/status: parked/' "$f"
       echo "- parked by scoper: $(grep -m1 '=== UNSCOPABLE:' coo/tmp/"$id".scoped.txt)" >> "$f"
       log "UNSCOPABLE $id"; commit_f "parked-unscopable"
@@ -115,11 +125,6 @@ STRICT RE-REQUEST: Your previous attempt performed WORK instead of returning a c
         log "NO CONTRACT x2 $id"; commit_f "parked-nocontract"
       fi
     fi
-  else
-    sed -i 's/^status:.*/status: parked/' "$f"
-    echo "- scoper session failed, parked" >> "$f"
-    log "SCOPER FAILED $id"; commit_f "parked-scoperfail"
-  fi
 }
 
 # ---- stage: EXECUTE (with session continuity on RELOOP) ------
@@ -157,7 +162,13 @@ do_assess() {
 
 === CONTRACT WITH OUTCOME ===
 $(cat "$f")"
-  if run_droid assess exec -o text --auto medium "$PROMPT" > coo/tmp/"$id".verdict.txt 2>> "$LOG"; then
+  local scope_rc2=0
+  if [ -n "${COO_FAST_MODEL:-}" ]; then
+    run_droid assess exec -o text --auto medium -m "$COO_FAST_MODEL" "$PROMPT" > coo/tmp/"$id".verdict.txt 2>> "$LOG" || scope_rc2=$?
+  else
+    run_droid assess exec -o text --auto medium "$PROMPT" > coo/tmp/"$id".verdict.txt 2>> "$LOG" || scope_rc2=$?
+  fi
+  if [ "$scope_rc2" -eq 0 ]; then
     local V; V=$(grep -m1 '=== VERDICT:' coo/tmp/"$id".verdict.txt || echo "=== VERDICT: RESCOPE === no verdict line")
     echo "" >> "$f"; echo "## Assessor verdict" >> "$f"; echo "$V" >> "$f"
     case "$V" in
@@ -179,7 +190,13 @@ do_validate() {
 
 === COMPLETED TANGENT WITH OUTCOME AND VERDICT ===
 $(cat "$f")"
-  if run_droid validate exec -o text --auto medium "$PROMPT" > coo/tmp/"$id".validation.txt 2>> "$LOG"; then
+  local scope_rc3=0
+  if [ -n "${COO_FAST_MODEL:-}" ]; then
+    run_droid validate exec -o text --auto medium -m "$COO_FAST_MODEL" "$PROMPT" > coo/tmp/"$id".validation.txt 2>> "$LOG" || scope_rc3=$?
+  else
+    run_droid validate exec -o text --auto medium "$PROMPT" > coo/tmp/"$id".validation.txt 2>> "$LOG" || scope_rc3=$?
+  fi
+  if [ "$scope_rc3" -eq 0 ]; then
     local VL; VL=$(grep -m1 '=== VALIDATION:' coo/tmp/"$id".validation.txt || echo "=== VALIDATION: FAIL === no validation line")
     awk '/=== PROBE ===/{flag=1}/=== END PROBE ===/{flag=0}flag' \
       coo/tmp/"$id".validation.txt > "coo/probes/$id.probe.md"

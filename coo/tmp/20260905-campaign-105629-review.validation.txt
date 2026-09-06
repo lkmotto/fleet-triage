@@ -1,0 +1,59 @@
+Verification complete. Full report:
+
+## Validator report — 20260905-campaign-105629-review
+
+### Done-when re-execution (all independently re-proven, not trusted)
+
+**1. Diagnosis memo with dominant hypothesis + campaign-stats evidence — PASS**
+- Memo exists, git-tracked, and names **copy/template mechanics + presentation** as dominant, with ranked secondary (audience) and contributing (deliverability) hypotheses.
+- Live `campaign/get_by_id`: subject is literally `{abtest|{{FIRST_NAME}}, quick question|...}` and the body contains `{% if JOB_POSITION %}...{% endif %}` — both flagged, exactly as claimed. `textOnlyEmails=false`, `trackOpens/trackClicks=true` confirmed.
+- Live `stats_by_id`: daily `sentSeries` sums to **exactly 1,137**; `replySeries` zero across all 24 days.
+- Live reply surface (`message/get type=Reply`): `totalItems: 1`, and the single row is the 2026-08-18 `pmiller@s2cp.com` "554 5.2.2 mailbox full" DSN. **0 human replies across 1,137 sends confirmed.**
+- Per-step counters match within ongoing-send drift (202757: 196 vs 193, 202758: 146 exact, 203418: 325 vs 319, 203419: 135 exact; all zero replies, 1 bounce on 203418).
+- Cross-repo citations verified: sender report `sender_report_2026-09-01_post.json` shows **bounced 15 / healthy 2 of 17**; the runbook confirms create-guards refuse `{abtest}`/`{% %}`; `quotas-live-calibration.json` shows 105629 at daily_cap 40 vs live dailyLimit 300.
+- Audience claim verified from deep Sent page 75: recipients include Home Partners of America, Amherst, Tricon, Progress Residential, RangeWater.
+
+**2. Drafted fix set, nothing live modified — PASS**
+- Decision pack (pause recommendation, audience retirement, ship checklist) + variants A and B all present. Variant A is **SHA256-identical** to the reviewed wave-1 first-touch template. Drafts contain no `{abtest}` or `{% %}` constructs.
+- Fence audit: campaign 105629 unchanged, still Running, template intact. All 36 campaigns inventoried — **zero campaigns created on the 2026-09-05 execution day**. My own session issued only read operations (0 writes).
+
+**3. Artifacts persisted and summarized — PASS**
+- All 7 artifacts git-tracked (commit 12ac42f). Tangent-file Outcome section matches live numbers, including the 1,137-vs-335 framing.
+
+### Caveats (non-blocking)
+- Per-step counters drift upward because the campaign is still Running — consistent, not contradictory.
+- The memo's "B3 rule" label on the evaluation gate was not traced; it's a low-stakes cross-reference.
+- Untracked `coo/tmp` validation files predate my run (loop bookkeeping, left untouched).
+
+### Value scoring
+- **Signal: `prevents_error`** (primary) — the diagnosis stops continued dripping of a template carrying syntax the platform's own create-path now refuses, into a pool that is 480/778 inactive; it also arms the operator to avoid re-burning the exhausted institutional audience. **`kills_recurring_noise`** (secondary) — ends a 4-cycle autonudge loop and corrects the recurring initial-only-counter misread (1,137 real sends vs 335 headline).
+- **Score: 4/5.** Revenue-facing surface, decision-ready output, ~1 of 3 budget cycles consumed. Not a 5 because it is analysis and drafts: actual value lands only when the operator approves the pause/draft-ship path.
+- Not hygiene_only; budget spent was proportionate.
+
+Governance record emitted to `agent-governance.jsonl`. Done-verification: verify-done.py research check passed 2/2 (first attempt's answer-fit heuristic failed on answer length; passed on retry with full answer). Probe written to `coo/probes/20260905-campaign-105629-review.probe.md`.
+
+Next improvement: have the COO loop surface live `dailyLimit` vs engine `daily_cap` disagreements (300 vs 40 on 105629) as a first-class drift check rather than a memo footnote.
+
+=== VALIDATION: PASS === value:prevents_error; score:4; Live re-reads re-proved every claim (1,137 sends summed, reply surface holds exactly 1 DSN / 0 human replies, {abtest}+{% if %} in the live template, 15/17 bounced senders cited correctly), fences intact (105629 untouched, no campaign created on execution day), all 7 artifacts git-tracked with variant A hash-identical to wave-1.
+
+=== PROBE ===
+# Probe: 20260905-campaign-105629-review
+revalidate_after: 2026-09-12
+checks:
+  - check: Diagnosis, evidence, and fix-draft artifacts are git-tracked in fleet-triage
+    command: git -C C:\Users\lkmot\factory-context\code\fleet-triage ls-files "coo/outcomes/*105629*" "coo/outcomes/fix-variant-*"
+    expect: 7 files listed (20260905-campaign-105629-diagnosis.md, -evidence.json, -fix-drafts.md, fix-variant-a.subject.txt, fix-variant-a.body.html, fix-variant-b.subject.txt, fix-variant-b.body.html)
+  - check: Diagnosis memo names the dominant failure hypothesis
+    command: Select-String -Path C:\Users\lkmot\factory-context\code\fleet-triage\coo\outcomes\20260905-campaign-105629-diagnosis.md -Pattern "Dominant failure hypothesis"
+    expect: Match on the "copy/template mechanics + presentation" heading
+  - check: Live campaign 105629 still carries the audited unsupported subject syntax (no pre-approval edit)
+    command: ManyReach MCP read campaign/get_by_id arguments {"id": 105629} -> subject field
+    expect: subject starts with "{abtest|" ; if the operator has since paused/rebuilt per the decision pack, expect status Paused or template replaced and re-interpret this check, not an automatic failure
+  - check: Reply surface still shows zero human replies (diagnosis numbers hold)
+    command: ManyReach MCP receive message/get arguments {"type": "Reply", "campaignId": 105629, "limit": 30}
+    expect: totalItems 1 and the single row is the 2026-08-18 pmiller@s2cp.com "554 5.2.2 mailbox full" DSN; any human reply appearing invalidates the 0-reply basis and fails the probe
+  - check: No unauthorized campaign writes on the tangent execution day
+    command: ManyReach MCP read campaign/get arguments {"pageQuery.page": 1, "pageQuery.limit": 30} (and page 2) -> scan createdAt
+    expect: no campaign with createdAt on 2026-09-05 (36 pre-existing campaigns inventoried at validation, newest 110740 from 2026-09-02)
+verdict_on_last_run: PASS 2026-09-05
+=== END PROBE ===
