@@ -1,6 +1,6 @@
 ---
 id: 20260906-sales-outreach-ledger-hygiene
-status: approved
+status: running
 priority: medium
 budget_cycles: 2
 escalate_if: 2 failed cycles OR JSON parse failure after edit OR diff shows unintended keys/projects/workstreams changed
@@ -69,3 +69,4 @@ You are the Executor for this tangent. Rules:
 - what was done: <2-4 lines>
 - what remains: <or "nothing — done-when fully met">
 - rescope note: <only if bailing>
+run_started: 2026-09-06T15:24:37-05:00
