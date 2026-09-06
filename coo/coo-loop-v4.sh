@@ -70,9 +70,11 @@ run_droid() {
   local sub="$1"; shift
   local TAGS=(--tag coo --tag "tangent:$id" --tag "stage:$suffix" --log-group-id "coo/$id")
   if [ "$COO_LIVE" = "1" ]; then
-    timeout "$to" droid "$sub" "${TAGS[@]}" "$@" 2>&1 | tee "$LIVE_DIR/$id.$suffix.live.log"
+    # -k 30: SIGTERM alone does not reap droid TUI processes — they ignore it
+    # and the pipeline hangs forever (2026-09-06: executor wedged past watchdog)
+    timeout -k 30 "$to" droid "$sub" "${TAGS[@]}" "$@" 2>&1 | tee "$LIVE_DIR/$id.$suffix.live.log"
   else
-    timeout "$to" droid "$sub" "${TAGS[@]}" "$@"
+    timeout -k 30 "$to" droid "$sub" "${TAGS[@]}" "$@"
   fi
 }
 
@@ -93,10 +95,12 @@ PYEOF
 
 # record a stage session id in the tangent front-matter (session lineage)
 record_sid() { # $1=front-matter-key $2=stage-basename
-  local sid; sid=$(cat "coo/tmp/$(basename "$f" .md).$2.sid" 2>/dev/null)
+  local sid; sid=$(tr -d ' \r\n' < "coo/tmp/$(basename "$f" .md).$2.sid" 2>/dev/null)
   [ -z "$sid" ] && return 0
   sed -i "/^$1:/d" "$f"
-  sed -i "0,/^status:/s//status:/\n$1: $sid/" "$f"
+  # & = the matched status line; broken s//<new>/ syntax silently broke
+  # session persistence from day one (2026-09-06)
+  sed -i "0,/^status:/s//&\n$1: $sid/" "$f"
 }
 
 # ---- stage: SCOPE -------------------------------------------
@@ -133,9 +137,20 @@ STRICT RE-REQUEST: Your previous attempt performed WORK instead of returning a c
   fi
   [ ! -s "coo/tmp/$id.scoped.txt" ] && scope_rc=1
   if [ "$scope_rc" -ne 0 ]; then
-    sed -i 's/^status:.*/status: parked/' "$f"
-    echo "- scoper session failed, parked" >> "$f"
-    log "SCOPER FAILED $id"; commit_f "parked-scoperfail"
+    # requeue-once: most scoper failures are environmental (watchdog, TUI leak,
+    # daemon death) — parking on first failure starves the pipeline. Park only
+    # after a second consecutive failure of the same kind.
+    if [ ! -f "coo/tmp/$id.scopeRetry" ]; then
+      touch "coo/tmp/$id.scopeRetry"
+      sed -i 's/^status:.*/status: queued/' "$f"
+      log "SCOPER FAILED $id - requeued for one retry"
+      commit_f "scope-retry"
+    else
+      rm -f "coo/tmp/$id.scopeRetry"
+      sed -i 's/^status:.*/status: parked/' "$f"
+      echo "- scoper session failed twice, parked for operator review" >> "$f"
+      log "SCOPER FAILED x2 $id"; commit_f "parked-scoperfail"
+    fi
   elif [ -n "$(grep '=== UNSCOPABLE:' coo/tmp/"$id".scoped.txt 2>/dev/null | grep -v '<one-line reason>' | head -1)" ]; then
       sed -i 's/^status:.*/status: parked/' "$f"
       echo "- parked by scoper: $(grep '=== UNSCOPABLE:' coo/tmp/"$id".scoped.txt | grep -v '<one-line reason>' | head -1)" >> "$f"
@@ -197,7 +212,7 @@ do_execute() {
   [ -z "$newsid" ] && newsid=$(grep -o '"sessionId"[[:space:]]*:[[:space:]]*"[^"]*"' coo/tmp/"$id".exec.log 2>/dev/null | head -1 | sed 's/.*:\s*"//;s/"$//')
   if [ -n "$newsid" ]; then
     sed -i '/^executor_session:/d' "$f"
-    sed -i "0,/^status:/s//status:/\nexecutor_session: $newsid/" "$f"
+    sed -i "0,/^status:/s//&\nexecutor_session: $newsid/" "$f"
     log "SESSION $id -> $newsid"
   fi
   [ "$rc" -eq 0 ] && log "EXECUTOR exited 0 $id" || log "EXECUTOR exited nonzero $id"
