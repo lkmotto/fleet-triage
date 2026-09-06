@@ -40,3 +40,4 @@
 {"id":"20260906-e2e-stage4-truetracts-repair","stage":"assess","secs":719,"ts":"2026-09-06T14:58:09-05:00"}
 {"id":"20260906-e2e-stage3-comp-certainty","stage":"scope","secs":1202,"ts":"2026-09-06T15:02:56-05:00"}
 {"id":"20260906-e2e-stage3-comp-certainty","stage":"scope","secs":144,"ts":"2026-09-06T15:05:20-05:00"}
+{"id":"20260905-spark-csv-export","stage":"execute","secs":709,"ts":"2026-09-06T15:06:36-05:00"}

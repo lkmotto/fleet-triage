@@ -1,8 +1,8 @@
 ---
 id: 20260905-spark-csv-export
-status: assess
+status: validating
+assessor_session: 78640f3a-634b-42e5-8a50-eae18751b37e assess
 executor_session: 37dce1c0-a301-4be6-a5d2-21aabc337703 running
-assessor_session: c8ce88e5-9d8e-42d1-b962-87570e153a80 assess
 priority: high
 budget_cycles: 4
 escalate_if: any zero-turn/permission launch fail (stop environmental immediately); or 2 live Stage 3 cycles still ending all_download_strategies_failed after one focused export patch
@@ -95,3 +95,6 @@ run_started: 2026-09-06T14:54:47-05:00
 - Storage state `ntreis_matrix.json` fresh (44 KB, today 14:18). Hot path confirmed (`_download_export_format` L2139 / fail reason L2301 / call site L3435).
 - Subject file `tools/_tmp_subject_caladium.json` created (Denham pattern). CSV mtime must beat this cycle's run_started 14:54:47-05:00.
 - Surface healthy today: 308 Big Sky `spark_export.csv` 411 KB at 09:45. Auth wrapper: `doppler run --project auth-userpass --config prd`. Launching Caladium primary now.
+
+## Assessor verdict
+=== VERDICT: DONE === All 5 done-when items independently verified: launch receipt (6 tool turns, no permission gate), live spark_export.csv (352,257 B, 100 data rows, mtime 15:01:11 > run_started 14:54:47), status=success run log with 0 all_download_strategies_failed hits, _mls_csv_path resolves the CSV exists=True, and ledger step done with spark-csv blocker cleared (0 quoted occurrences).
