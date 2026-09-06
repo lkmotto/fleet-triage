@@ -1,6 +1,6 @@
 ---
 id: 20260906-e2e-stage5-sfrep-wiring
-status: approved
+status: running
 assessor_session: 6ef7d716-b045-4769-9075-f618b114d90a assess
 priority: high
 budget_cycles: 6
@@ -78,3 +78,4 @@ run_started: 2026-09-06T14:56:51-05:00
 
 ## Assessor verdict
 === VERDICT: RELOOP === Executor never ran — nonzero exit after 1202s with 0-byte exec/live logs, zero of six done-when artifacts on disk, first failure, 5/6 cycles remain (same num_turns:0 crash class as d0871e0)
+run_started: 2026-09-06T15:24:30-05:00
