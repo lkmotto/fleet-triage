@@ -1,6 +1,7 @@
 ---
 id: 20260905-ms01-scripts-inventory
-status: assess
+status: rescope
+assessor_session: 212b0ab9-ce97-4a59-95a8-82ee594866bd parked
 priority: low
 budget_cycles: 2
 escalate_if: 1 failed cycle OR any non-inventory mutation of code/ ms01-* files OR execute stage hits wall timeout with zero inventory rows written
@@ -104,3 +105,17 @@ You are the Executor for this tangent. Rules:
 - what remains: <or "nothing — done-when fully met">
 - rescope note: <only if bailing>
 run_started: 2026-09-05T22:59:43-05:00
+
+## Assessor verdict — 2026-09-06T17:10-05:00 (assess-3)
+- Verdict: ESCALATE to operator (status: parked). Three executor attempts (cycle 1, cycle 2, this cycle) have all died with effectively zero inventory work; the blocking fix lies outside this contract's fence.
+- Done-when: 0/3 verified by assessor (not from executor claims):
+  1. `coo/outcomes/ms01-scripts-inventory.md` DOES NOT EXIST (ENOENT on direct read). Zero inventory rows written.
+  2. No Outcome block in this tangent file (file ends at executor-instructions template; unchanged since scoping 22:59:43).
+  3. Mutation guard holds vacuously — executor ran 0 turns. Independent recount (Get-ChildItem): 65 scripts (46 .ps1 / 19 .sh), 7 PNGs, zero mtimes after 2026-09-05. Note: `code\` is not a git repo, so git cannot prove this guard; mtime + turn-count evidence is the proof.
+- Root cause (coo/tmp/20260905-ms01-scripts-inventory.exec.log + live execute log): two executor sessions (561dd6d8, b1526404) both ended "insufficient permission to proceed. Re-run with --auto medium or --auto high", num_turns:0, after 270s/249s. The contract premise "--auto medium present" is falsified — the executor stage still launches without the permission bypass it needs to read C:\Users\lkmot\factory-context\code\ outside the repo. Same failure class as cycle 1 (RELOOP'd 22:28) and cycle 2 (RESCOPE'd 22:55): persistent launch/permission defect, not transient.
+- Escalation grounds (hard fence): the actual fix — correcting EXEC_AUTO/permission bypass in the coo-loop executor stage (coo-loop-v3.sh/v4.sh, operator/loop-owned, fenced out of this contract) and/or raising COO_STAGE_TIMEOUT (also fenced) — cannot be done by scoping or executing this tangent again. A fourth identical contract will fail identically.
+- Budget: 3 of 2 cycles consumed (cycle1 RELOOP, cycle2 RESCOPE, rescope cycle 3 failed identically at 0 turns). escalate_if "1 failed cycle" exceeded.
+- To operator (lkmot): (1) fix executor launch perms so --auto medium reaches the executor stage, or grant the executor read scope over C:\Users\lkmot\factory-context\code\; (2) set COO_STAGE_TIMEOUT>=2400 for inventory-class tangents; (3) then unpark (status: assess) — the contract's done-when remains valid and needs no rewrite; (4) also today's assessor stage itself failed twice on harness plumbing (coo-loop-v4.sh line 98: missing .verdict.sid; 0-byte .verdict.json written 17:01) — same sweep/assess plumbing touched by the fix should cover it.
+
+## Assessor verdict
+=== VERDICT: ESCALATE === Done-when 0/3 verified (outcome file ENOENT, no Outcome block, guard vacuous — 0-turn executor): third identical zero-work failure on falsified "--auto medium" premise (exec.log sessions 561dd6d8/b1526404, num_turns:0); fix requires operator/loop-owned launch config fenced out of contract; tangent parked.
