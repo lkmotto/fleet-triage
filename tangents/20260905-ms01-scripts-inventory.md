@@ -1,6 +1,7 @@
 ---
 id: 20260905-ms01-scripts-inventory
-status: validating
+status: done
+validator_session: 2ad9e8d7-f60c-4444-bb46-06945bc4cd67 validating
 assessor_session: cb4479f0-c0ed-416e-a214-e53a4a35ed18 assess
 executor_session: 561dd6d8-ecb2-495a-badd-5b5880047452 running
 priority: low
@@ -94,3 +95,6 @@ run_started: 2026-09-06T17:28:39-05:00
 
 ## Assessor verdict
 === VERDICT: DONE === All 3 done-when items independently verified: 65-row inventory matches live recount (72 files, newest mtime 2026-08-08), counts keep=4/archive=61/total=65 consistent across outcome artifacts, mutation guard proven by fresh mtime spot-check.
+
+## Validator
+=== VALIDATION: PASS === value:hygiene_only; score:3; all 3 done-when items independently re-proven (65/65 rows counted, keep=4/archive=61/unknown=0 in both artifacts, 72-file freeze diff=0, newest mtime 2026-08-08 predates run, zero fenced mutations); hygiene_only work that consumed 4 cycles due to 3 prior zero-work failures.
