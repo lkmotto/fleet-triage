@@ -1,6 +1,6 @@
 ---
 id: 20260906-e2e-stage5-sfrep-wiring
-status: rescope
+status: queued
 assessor_session: 0a6ed110-0c0a-43fa-837f-e502cc910c1f rescope
 priority: high
 budget_cycles: 6
