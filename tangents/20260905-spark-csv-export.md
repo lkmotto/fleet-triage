@@ -1,6 +1,7 @@
 ---
 id: 20260905-spark-csv-export
-status: running
+status: assess
+executor_session: 37dce1c0-a301-4be6-a5d2-21aabc337703 running
 assessor_session: c8ce88e5-9d8e-42d1-b962-87570e153a80 assess
 priority: high
 budget_cycles: 4
@@ -76,4 +77,21 @@ run_started: 2026-09-05T23:17:27-05:00
 
 ## Assessor verdict
 === VERDICT: RELOOP === Zero-turn permission-gate failure on session 05da7f92 was environmental and now-remediated (live Stage 3 CSV success on 308 Big Sky 2026-09-06 09:45, 0/5 done-when met, first failure, 3/4 cycles left)
+
+## Outcome (filled by executor)
+- status: success
+- artifacts:
+  - `C:\Users\lkmot\factory-context\code\github\lkmotto\motto-appraisal-pipeline\workfiles\by_address\1804_caladium_dr_corinth_tx_76210\comps\spark_export.csv` (352,257 bytes, 101 lines = header + 100 data rows, mtime 2026-09-06 15:01:11 CT, beats cycle run_started 14:54:47)
+  - Same-run corroboration: `comps\matrix_search_results.jpg` (15:00:58, 166,504 B), `comps\matrix_export_page.jpg` (15:01:11, 48,749 B), `comps\spark_export_archive_20260906_150111.csv`, `metadata\artifact_matrix_comp_filter_context_presubmit_20260906_150011.json`, `metadata\artifact_matrix_comp_filter_context_postexport_20260906_150111.json`
+  - Run receipt: `C:\Users\lkmot\factory-context\code\fleet-triage\coo\tmp\20260905-spark-csv-export.cycle3.launch_receipt.json`; run log: `C:\Users\lkmot\factory-context\code\fleet-triage\coo\tmp\20260905-spark-csv-export.cycle3.caladium.log`
+  - Subject file: `tools\_tmp_subject_caladium.json`
+- what was done: Launch gate passed (no zero-turn permission gate; executor took real tool turns; receipt written). Preflight (storage state fresh 14:18, hot path confirmed) then ONE live Stage 3 run on primary Caladium via `doppler run --project auth-userpass --config prd -- python tools/run_stage3_single_case.py --subject-file tools/_tmp_subject_caladium.json --workfile-root workfiles`. Run JSON: `status=success`, `message="Spark export complete: 100 rows, 218 columns"`, 137.5s, exit 0; results scope verified 50 closed rows (count hint 203), URL-based Export dialog (pool=100), CSV validated all checks passed, SHA-256 c9d9452799fc1325... — no `all_download_strategies_failed`. Stage 4 discovery proven disk-only: `agent.truetracts_context._mls_csv_path(_candidate_workfile_roots(root))` resolves exactly `...\comps\spark_export.csv`, `exists=True`; no `truetracts_mls_import_status.json` exists for the order (no missing-CSV skip). Write-back done: `tangents.json` completed entry `20260906T201000Z-1804_caladium_dr_corinth_tx_76210-comps`; ledger step `appraisal-pipeline:spark-csv` status done with outcome + absolute paths; blocker `spark-csv` cleared from project blockers (CSV success proven).
+- what remains: nothing — done-when fully met. (Out-of-scope observations, not blockers: exports are POOL-scoped at 100 rows, so full-coverage needs the price-band merge work already fenced to a separate concern; one sibling order, 801 Lark, hit the Closed-only scope-verification refusal — different failure mode, also fenced.)
+- rescope note: none
 run_started: 2026-09-06T14:54:47-05:00
+
+### Cycle 3 executor preflight (2026-09-06 ~15:05 CT, Legion)
+- Launch gate PASSED: zero-turn permission gate not hit; executor took 6+ tool turns. Receipt: `C:\Users\lkmot\factory-context\code\fleet-triage\coo\tmp\20260905-spark-csv-export.cycle3.launch_receipt.json`.
+- Storage state `ntreis_matrix.json` fresh (44 KB, today 14:18). Hot path confirmed (`_download_export_format` L2139 / fail reason L2301 / call site L3435).
+- Subject file `tools/_tmp_subject_caladium.json` created (Denham pattern). CSV mtime must beat this cycle's run_started 14:54:47-05:00.
+- Surface healthy today: 308 Big Sky `spark_export.csv` 411 KB at 09:45. Auth wrapper: `doppler run --project auth-userpass --config prd`. Launching Caladium primary now.
