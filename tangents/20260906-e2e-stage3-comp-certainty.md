@@ -34,3 +34,16 @@ marginal improvement over the UI).
   investment"
 - Legacy session transcript:
   C:\Users\lkmot\.factory\sessions\-C-Users-lkmot-factory-context-code\3e537a32-6724-4d54-ba73-7157d4dce57f.jsonl
+
+## OPERATOR ADDENDUM 2026-09-06 15:05 — BINDING ON RE-SCOPE (handoff artifact)
+
+Today's evidence: stage-4 ran against 5 orders, 4 of which had NO comps\spark_export.csv — TrueTracts
+self-picked comps and the operator found improper addresses in the resulting TDCX. Stage 3 is the source
+of the comp set; without its artifact stage 4 must not run.
+
+Binding additions on re-scope:
+1. Done-when: for every order stage 3 certifies, EMIT the handoff artifact in the Big Sky shape:
+   `comps\spark_export.csv` (>=1 data row) + `subject\truetracts_mls_import_status.json` (discovery fields).
+2. Done-when: an explicit stage-4 gate list — orders certified (CSV emitted) vs orders BLOCKED for
+   stage 4 (no CSV) — recorded in the outcome artifact so the sibling stage-4 tangent consumes it.
+3. Recycler-first ordering and the no-spend fence (MLS API $200/mo) are unchanged.

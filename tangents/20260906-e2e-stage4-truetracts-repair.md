@@ -10,6 +10,29 @@ scoped_at: 2026-09-06
 ---
 # e2e Stage 4: TrueTracts repair after site remodel
 
+## OPERATOR ADDENDUM 2026-09-06 15:05 — BINDING ON RE-SCOPE (comp-carry gate)
+
+Operator inspected today's TDCX exports and found improper addresses. Evidence: stage-4 acquisition
+artifacts (Report.tdcx + workfiles.zip) were written 12:21-14:24 against 5 orders —
+771_monticello_circle_allen_tx_75002, 4424_santa_fe_ln_mckinney_tx_75070, 3808_denham_way_plano_tx_75023,
+6804_richfield_dr_north_richland_hills_tx_76182, 308_big_sky_circle_northlake_tx_76226 — of which 4 had NO
+comps\spark_export.csv on disk (no stage-3 comp selection existed). Even the healthy-shape Brazos run shows
+`selected_comp_count: 0` — whenever the stage-3 CSV is not attached, TrueTracts picks its own comps.
+
+Binding contract changes on re-scope:
+1. HARD GATE: a live stage-4 run is FORBIDDEN on any order whose comps\spark_export.csv is missing or has
+   <1 data row. Wrong order chosen -> write a rescope note naming the order; do not run.
+2. COMP-CARRY PROOF (supersedes the opened:false tolerance): the proven order must reach
+   truetracts_mls_import_status.json with `file_attached: true` and, where the UI allows, non-empty
+   `selected_comp_ids` drawn from spark_export.csv. Discovery-only (csv_path set, opened:false) no longer
+   satisfies the handoff done-when. If MLS attach is technically blocked, that finding is the re-scope
+   outcome — stage 4 cannot claim comp-carry without it.
+3. Export provenance: any TDCX claimed as success must have comp addresses corresponding to the
+   spark_export.csv comp set; add a comp-address diff artifact to the outcome JSON.
+4. The 5 listed orders are contaminated for stage-4 evidence purposes until their CSVs exist and a gated
+   re-run succeeds. Big Sky re-run ban reaffirmed. DO NOT delete any artifacts — list paths in the outcome
+   note; cleanup is operator-approved only.
+
 ## Why
 Stage 4 is the next core revenue domino after Stage 3. TrueTracts remodeled its UI (operator pin 2026-08-31); Stage 3 is now in its best state (`appraisal-pipeline:ntreis-fm23` closed 2026-09-06 on 308 Big Sky). Post-remodel code already landed (08-31 → 09-05) and one same-day autonudge SUCCESS exists on Big Sky, but the COO-facing work is incomplete until (a) a contract-gated daemon/run path is proven on a Stage-3-ready order with non-empty Stage-4 artifacts, (b) the e2e UI chain doc reflects the *current* post-Saguaro flow (findings still contain stale OPEN notes), and (c) Stage 3 → Stage 4 handoff is artifact-verified (`spark_export.csv` discovered + MLS status/handoff fields).
 
