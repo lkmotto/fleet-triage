@@ -1,0 +1,56 @@
+Validation complete. All checks re-executed independently; evidence below.
+
+## Re-verification of done-when items (my evidence, not the executor's claims)
+
+1. **Preflight harness** — `coo-loop-v4.sh` L202 (`EXEC_AUTO="${COO_EXECUTE_AUTO:-medium}"`), L206/L208 (`run_droid execute exec -o json --auto "$EXEC_AUTO"`), plus the L200–201 num_turns:0 comment, all read live. Final `exec.log` entry is `"subtype":"success","num_turns":14`, session `0de2aed0`, dated after the three pre-rescope `num_turns:0` rows (sessions ff46aaab/dac3138a/74b7e17c). **PASS.**
+2. **Append code line cites** — `strategic_review.py` re-read: L48–49 paths, L57 `max_tokens: 4096`, L81–84 `_append_jsonl`, L96–98 `_same_day_run_exists`, L295–297 same-day gate, L309–330 early exits (`--dry-run`, missing key, `if not result: return 1`), L349–356 unconditional `_append_jsonl(OUTCOMES_PATH, …)`. All match. File mtime 2026-08-24 17:11:47, 16054 bytes (zero drift). **PASS.**
+3. **Controlled proof run** — `run.log` read: snapshot 3619 chars, prompt 8540 chars, 2 priors, `Calling deepseek-v4-pro...` → `read operation timed out` → `ERROR: LLM call failed` → exit 1. **PASS.**
+4. **Post-run artifact check** — `Test-Path …\strategic_outcomes.jsonl` → **False** (re-measured myself). Upstream proof re-read: `strategic_agents.py` L161 `urlopen(req, timeout=60)` (D3) and `diagnostic-rerun.out`: `finish_reason length`, completion 4096 with `reasoning_tokens: 4096`, `content_len 0`, `JSONDecodeError` (D1+D2). Failure demonstrably lands before the append block. **PASS.**
+5. **Guard check** — `guard-check.py` source is genuinely read-only (no writes); `guard-check.out`: `20260809 → True`, `20260906 → False`, filed_runs 1, priors 2, hypotheses 6, loader parses 3 of 4 (BOM). Correctly no full-run skip claimed. **PASS.**
+6. **Outcome note** — scoreboard, root-cause class `upstream-LLM` (schedule-never-ran correctly applied to history only), spend disclosure, ledger fairness, follow-up tangent `20260906-fix-strategic-review-llm-truncation` all present. **PASS.**
+7. **Patch branch** — correctly N/A; git diff confirms zero code changes anywhere (only this tangent's own artifacts + loop bookkeeping). **PASS.**
+
+**Spend:** two `$0.35` `strategic-review-20260906` rows in spend-ledger.jsonl (02:25 budgeted proof, 17:30 diagnostic); matches disclosure.
+
+## Fence audit
+Git status shows only tangent-owned files modified; all `.factory/scripts` mtimes pre-date the cycle (strategic_review 08-24, strategic_agents 08-09, safety_gate/spend_budget 07-24/25). Ledger untouched. No code changes, no scheduler changes, no LLM-client hardening. **Clean.**
+
+## Value scoring
+The executor could have quietly claimed "done" like the phantom 08-24 append fix; instead the cycle proved the ledger claim was fair and pinned the real defect (D1/D2/D3) with a concrete follow-up. Class **`prevents_error`** — it stops a false-done from compounding into a dead measure loop. Score **4/5** (not 5 only because the outcomes file itself remains absent; value is realized when the follow-up tangent lands).
+
+**Probe:** written to `coo/tmp/20260905-strategic-outcomes-verify.validation-probe.md` (verify-done: 2 passed). Governance record appended.
+
+Verification: verify-done.py passed for the probe file; all other validation was direct artifact re-execution per the Validator mandate.
+
+Next improvement: file `20260906-fix-strategic-review-llm-truncation` now — max_tokens 8192 + timeout ≥180s are two-line changes that convert this proven classification into a real outcomes file.
+Gap observed: the Assessor verdict block cited "strategic_review.py L349-356" while the contract said L350-357; the pipeline should pin line-cites to a checksummed anchor rather than raw line numbers, which drift with edits.
+
+=== VALIDATION: PASS === value:prevents_error; score:4; all 7 done-when items independently re-executed (exec.log num_turns:14 final, append code live at L349-356, run.log + diagnostic prove upstream-LLM D1/D3 before append, guard True/False, outcomes file absent as classified, fence intact, spend recorded)
+
+=== PROBE ===
+# Probe: 20260905-strategic-outcomes-verify
+revalidate_after: 2026-09-13
+checks:
+  - check: Unconditional outcomes append still present in strategic_review.py
+    command: Select-String -Path C:\Users\lkmot\.factory\scripts\strategic_review.py -Pattern '_append_jsonl\(OUTCOMES_PATH'
+    expect: one match (append block ~L352). Absent = append-fix regression; ledger outcomes-always-write claim becomes unfair.
+  - check: Same-day guard logic still behaves (known id True, unknown id False)
+    command: python C:\Users\lkmot\factory-context\code\fleet-triage\coo\tmp\20260905-strategic-outcomes-verify.guard-check.py
+    expect: "guard_20260809_expected_True: True" and "guard_20260906_expected_False: False"
+  - check: Proof-run log still shows upstream timeout failure (D3 evidence)
+    command: Select-String -Path C:\Users\lkmot\factory-context\code\fleet-triage\coo\tmp\20260905-strategic-outcomes-verify.run.log -Pattern 'read operation timed out'
+    expect: at least one match; proves the failure landed upstream of the append block (not append-missing).
+  - check: Diagnostic still shows D1 starvation (finish_reason length, empty content)
+    command: Select-String -Path C:\Users\lkmot\factory-context\code\fleet-triage\coo\tmp\20260905-strategic-outcomes-verify.diagnostic-rerun.out -Pattern 'finish_reason length|content_len 0'
+    expect: both patterns match; upstream-LLM root-cause evidence intact.
+  - check: D1/D3 markers still unfixed while follow-up tangent 20260906-fix-strategic-review-llm-truncation is open
+    command: Select-String -Path C:\Users\lkmot\.factory\scripts\strategic_review.py -Pattern '"max_tokens": 4096'; Select-String -Path C:\Users\lkmot\.factory\scripts\strategic_agents.py -Pattern 'timeout=60'
+    expect: both match while follow-up is open. If either is gone, the follow-up landed, then the outcomes-file check must flip to True.
+  - check: Outcomes file existence state matches classification
+    command: Test-Path C:\Users\lkmot\.factory\knowledge\strategic_outcomes.jsonl
+    expect: False while follow-up tangent open (classified absence, not regression). After follow-up lands: True, and last row run_id matches strategic-review-YYYYMMDD of that run date.
+  - check: No unauthorized drift on strategic_review.py (fence audit baseline)
+    command: Get-Item C:\Users\lkmot\.factory\scripts\strategic_review.py | Format-List Length,LastWriteTime
+    expect: Length 16054, LastWriteTime 2026-08-24 17:11:47, unless a newly authorized tangent patched it.
+verdict_on_last_run: PASS 2026-09-06
+=== END PROBE ===

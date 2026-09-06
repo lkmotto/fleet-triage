@@ -311,10 +311,10 @@ fi
 [ -f "$BREAKER" ] && { log "BREAKER TRIPPED - paused (delete coo/.breaker)"; exit 0; }
 
 CYCLE_FAILURES=0
-# COO_INCLUDE = space-separated tangent FILENAMES (quoted whole at launch).
-# No brace globs: bash does not re-expand braces from parameter results, so
-# "20260905-{a,b}.md" silently matched nothing (2026-09-06 sweep skipped 4 tangents).
-if [ -n "${COO_INCLUDE:-}" ]; then TFS="$COO_INCLUDE"; else TFS="tangents/2026*.md"; fi
+# COO_INCLUDE = COMMA-separated tangent filenames. Spaces are banned: PS 5.1
+# strips embedded quotes launching bash, so "a.md b.md" reached us as $1=a.md
+# (manifest receipt: "TFS had 1 words", 2026-09-06). Commas survive any quoting.
+if [ -n "${COO_INCLUDE:-}" ]; then TFS="${COO_INCLUDE//,/ }"; else TFS="tangents/2026*.md"; fi
 for tf in $TFS; do
   case "$(basename "$tf")" in TEMPLATE.md|EXAMPLE-*) continue;; esac
   f="tangents/$(basename "$tf")"

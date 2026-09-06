@@ -1,29 +1,30 @@
-Assessment complete. I verified every claim against live artifacts rather than the executor's outcome block (which was never written this cycle).
+# Assessment — 20260905-strategic-outcomes-verify (post-RESCOPE cycle)
 
-## Assessment — 20260905-strategic-outcomes-verify (cycle started 22:46:52, rescoped contract)
+All done-when items were independently verified against live artifacts, not the executor's claims. Every check passed.
 
-**Done-when: 0 of 6 verified.**
+## Done-when scoreboard (assessor-verified)
 
-| Item | Reality check |
-|---|---|
-| Append-path citation in outcome note | Outcome note is still the pre-cycle partial (mtime 9:33 PM); nothing added this cycle. (Append code itself: I independently confirmed present — `OUTCOMES_PATH` L49, `_append_jsonl` L81–84, guard L295–297, unconditional append L350–357; file unmodified since 8/24 5:11 PM, 402 lines.) |
-| Proof run + run.log | `coo/tmp/20260905-strategic-outcomes-verify.run.log` **does not exist**. |
-| Post-run artifact | `strategic_outcomes.jsonl` **still absent** (Test-Path False). |
-| Guard-check artifacts | guard-check.py exists from prior cycle; no fresh `.out` this cycle. |
-| Final outcome note | Not written. |
-| Patch (conditional) | N/A — append code present; confirmed no patch was applied (no `~/.factory` changes in git status, mtime unchanged). |
+| # | Item | Verification |
+|---|------|--------------|
+| 1 | Preflight harness gate | exec.log final row is `"subtype":"success","num_turns":14` (session 0de2aed0), not `num_turns:0`. The three permission-gate deaths are pre-rescope sessions ff46aaab/dac3138a/74b7e17c. `coo/coo-loop-v4.sh` L202 (`EXEC_AUTO` default medium) and L206/L208 (`--auto "$EXEC_AUTO"`) cite-verified by direct read. |
+| 2 | Append code cited | Grep confirms exactly: L49 `OUTCOMES_PATH`, L81 `_append_jsonl`, L96 `_same_day_run_exists`, L295 same-day guard, early exits L309/L315/L328, always-append L350–352 (block spans ~L349–356; the note honestly flags the one-line offset vs the contract's L350–357). File size 16054 bytes and mtime 2026-08-24 17:11:47 identical to scope-time: zero code drift. |
+| 3 | Controlled proof run | `run.log` exists with full console output: prompt 8540 chars, 2 priors, "Calling deepseek-v4-pro..." → read timeout → "ERROR: LLM call failed." → exit 1. Failure lands at L328–330, strictly before the append block. |
+| 4 | Post-run artifact check | I ran `Test-Path` myself: `strategic_outcomes.jsonl` is **ABSENT**. The failure-before-append branch was taken with measured evidence: diagnostic-rerun.out shows `finish_reason: length`, 4096/4096 tokens all reasoning, `content_len: 0`, JSONDecodeError (D1/D2), and production-path D3 confirmed (`strategic_agents.py` L161 `urlopen(req, timeout=60)`). No claim that the append fix is missing. |
+| 5 | Guard check | `guard-check.py` is genuinely read-only/import-level; `guard-check.out` shows `20260809 → True`, `20260906 → False`, plus counters (1 filed run, 2 prior proposals, 6 hypotheses, 3-of-4 rows parsed due to BOM). Correctly makes no full-run-skip claim. |
+| 6 | Final outcome note | Present and complete: scoreboard, root-cause class `upstream-LLM` (append-missing and harness-gate explicitly eliminated, schedule-never-ran scoped to history), spend disclosure, ledger fairness judgment, follow-up tangent `20260906-fix-strategic-review-llm-truncation`. Spend independently verified: spend-ledger row 7 (17:30Z, $0.35, run_id strategic-review-20260906) matches; governance record `droid-executor/...-exec2` at 17:34:58Z confirmed in the log. |
+| 7 | Patch branch | N/A — append code present, and the unchanged mtime proves no code was touched. |
 
-**Root cause of this cycle's failure — environmental, but NOT fixed by the on-disk patch:**
-- exec.log third entry: session `74b7e17c-c59e-4ef1-98fa-6ebc7cb0eb15`, `num_turns: 0`, "insufficient permission to proceed. Re-run with --auto medium or --auto high." Zero artifacts, ~3.7 min.
-- Process table: all COO loops started **before** the 22:17:38 patch — v3 loops (PIDs 34312, 44268) at 21:18:21, v4 loop (PID 36144) at 21:45:34. The running processes never loaded the patched launch lines, which I verified are correct on disk in both v4 (L139–147) and v3 (L116–122). The fix exists but is not executing.
-- Aggravating conditions observed: **three concurrent loops** (two v3 + one v4) plus a `flock: command not found` gitlock warning, and a verdict-accounting anomaly at 22:46:51 (coo-loop.log logged "RELOOP" while the tangent file records RESCOPE, yet an execute cycle ran anyway — one more dead cycle than the budget authorized).
+## Scope & budget
 
-**Scope adherence:** clean — the executor produced nothing, so no out-of-scope mutations; git status shows only harness/coo churn.
+- **Scope:** clean. `git status --porcelain` shows only tangent-scoped `coo/` artifacts; `strategic_review.py` was never modified (mtime evidence). The one LLM diagnostic spend beyond the budgeted proof run was disclosed and justified by the contract's refresh-if-differs clause (timeout vs `length` signature change).
+- **Budget:** 1 of 2 post-rescope cycles consumed; escalate_if not triggered (no failed cycle after this rescope, no out-of-fence patch).
 
-**Budget:** 1 of 2 cycles consumed on the rescoped contract, but the prior RELOOP verdict explicitly conditioned reloop on the `--auto` patch being effective and stated "next failure of any kind is RESCOPE." That condition has fired. Additionally, the same failure class has now killed cycles across two contract generations — the "first failure" bar for RELOOP cannot honestly be met.
+## Judgment
 
-**To the Scoper (critical):** a fresh contract alone will not fix this. Any new executor cycle launched by the still-running stale loop processes will die identically at the permission gate. The rescope must be gated on an operational prerequisite outside this tangent's fence: **restart the COO loops (kill PIDs 34312, 44268, 36144; relaunch a single loop so the patched v3/v4 script loads; optionally set `COO_EXECUTE_AUTO=medium` explicitly)** and resolve the triple-loop concurrency. If the operator prefers not to restart, ESCALATE is the honest alternative — a third dead cycle would be pure spend.
+The executor did exactly what the contract asked: closed the phantom-done loop with code truth, one controlled proof, a correct root-cause classification, and a cleanly fenced follow-up tangent rather than absorbing D1/D2/D3 work. The ledger's `outcomes-always-write: done` claim is fair as scoped; the real defect now has a named owner (`20260906-fix-strategic-review-llm-truncation`) with a concrete exit criterion (one `--no-file` run creates the file).
 
-Verification: verify-done.py N/A for this task type — assessor role is judgment-only; all done-when items were checked directly via file reads, Test-Path, process listing, and git status above. Governance record appended to `agent-governance.jsonl`.
+Gap observed: the contract's preflight asks the executor to prove its own final exec.log entry, which is harness-written after the executor exits; that check is only truly verifiable by the assessor (as done here). Recommend the harness validate the exec.log result line before classifying a cycle's failure.
 
-=== VERDICT: RESCOPE === Done-when 0/6, third consecutive pre-turn permission-gate death (exec.log session 74b7e17c num_turns:0, no run.log, strategic_outcomes.jsonl absent) — root cause is stale pre-patch loop processes (started 21:18/21:45 vs 22:17 patch), so rescope must gate on a harness restart before any new executor cycle.
+Next improvement: file and run `20260906-fix-strategic-review-llm-truncation` (max_tokens 8192 + 180s timeout + length-finish failure record) — two-line changes that unblock the entire outcomes measure loop.
+
+=== VERDICT: DONE === All 7 done-when items verified live (exec.log num_turns:14; append code present at strategic_review.py L349-356 with zero mtime drift; run.log + diagnostic-rerun.out prove upstream-LLM failure before append; guard-check.out True/False; outcomes file confirmed absent by assessor), scope clean, no code changes.

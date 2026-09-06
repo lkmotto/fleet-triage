@@ -606,3 +606,43 @@ bash: /c/Users/lkmot/factory-context/code/fleet-triage/coo/gen-board.sh: No such
 To https://github.com/lkmotto/fleet-triage.git
    add6cb6..913ea40  feature/coo-loop -> feature/coo-loop
 [2026-09-06T11:25:27-05:00] ===== sweep end =====
+[2026-09-06T12:22:06-05:00] SWEEP item=20260905-strategic-outcomes-verify.md status=queued action=advance
+[2026-09-06T12:22:06-05:00] SCOPE claim 20260905-strategic-outcomes-verify
+[feature/coo-loop 2cf87c4] coo: 20260905-strategic-outcomes-verify claim-scope
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+[2026-09-06T12:25:37-05:00] CONTRACT 20260905-strategic-outcomes-verify scoped+approved
+[feature/coo-loop dc29880] coo: 20260905-strategic-outcomes-verify scoped
+ 2 files changed, 62 insertions(+), 168 deletions(-)
+bash: /c/Users/lkmot/factory-context/code/fleet-triage/coo/gen-board.sh: No such file or directory
+[2026-09-06T12:25:37-05:00] WARN board gen failed
+[2026-09-06T12:25:37-05:00] EXECUTE claim 20260905-strategic-outcomes-verify (continuity_sid=none reloop=1)
+[feature/coo-loop dea436d] coo: 20260905-strategic-outcomes-verify claim-execute
+ 2 files changed, 3 insertions(+), 1 deletion(-)
+[2026-09-06T12:35:43-05:00] SESSION 20260905-strategic-outcomes-verify -> ff46aaab-9dd0-467d-b96f-330f65098ebb
+[2026-09-06T12:35:43-05:00] EXECUTOR exited 0 20260905-strategic-outcomes-verify
+[feature/coo-loop 6cc7918] coo: 20260905-strategic-outcomes-verify executed
+ 2 files changed, 10 insertions(+), 2 deletions(-)
+bash: /c/Users/lkmot/factory-context/code/fleet-triage/coo/gen-board.sh: No such file or directory
+[2026-09-06T12:35:43-05:00] WARN board gen failed
+[2026-09-06T12:35:43-05:00] ASSESS 20260905-strategic-outcomes-verify
+[2026-09-06T12:41:30-05:00] VERDICT 20260905-strategic-outcomes-verify DONE -> validating
+[feature/coo-loop 1e085f2] coo: 20260905-strategic-outcomes-verify assessed
+ 3 files changed, 7 insertions(+), 30 deletions(-)
+bash: /c/Users/lkmot/factory-context/code/fleet-triage/coo/gen-board.sh: No such file or directory
+[2026-09-06T12:41:30-05:00] WARN board gen failed
+[2026-09-06T12:41:30-05:00] VALIDATE 20260905-strategic-outcomes-verify
+[2026-09-06T12:48:43-05:00] VALIDATION 20260905-strategic-outcomes-verify PASS -> done
+[feature/coo-loop c586ccb] coo: 20260905-strategic-outcomes-verify validated
+ 4 files changed, 33 insertions(+), 1 deletion(-)
+ create mode 100644 coo/live/20260905-strategic-outcomes-verify.validate.live.log
+ create mode 100644 coo/probes/20260905-strategic-outcomes-verify.probe.md
+bash: /c/Users/lkmot/factory-context/code/fleet-triage/coo/gen-board.sh: No such file or directory
+[2026-09-06T12:48:44-05:00] WARN board gen failed
+bash: /c/Users/lkmot/factory-context/code/fleet-triage/coo/gen-board.sh: No such file or directory
+[2026-09-06T12:48:44-05:00] WARN board gen failed
+[2026-09-06T12:48:44-05:00] SWEEP MANIFEST: processed items above; TFS had 1 words
+bash: /c/Users/lkmot/factory-context/code/fleet-triage/coo/gen-board.sh: No such file or directory
+[2026-09-06T12:48:44-05:00] WARN board gen failed
+To https://github.com/lkmotto/fleet-triage.git
+   91316dc..c586ccb  feature/coo-loop -> feature/coo-loop
+[2026-09-06T12:48:46-05:00] ===== sweep end =====
