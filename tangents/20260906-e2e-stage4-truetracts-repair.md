@@ -1,6 +1,6 @@
 ---
 id: 20260906-e2e-stage4-truetracts-repair
-status: rescope
+status: queued
 assessor_session: 38fe54ae-600f-4ffe-beef-a24312a796e0 assess
 priority: high
 budget_cycles: 6
