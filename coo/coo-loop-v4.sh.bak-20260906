@@ -1,20 +1,8 @@
 #!/usr/bin/env bash
 # ============================================================
-# coo-loop.sh v3 -- per-tangent chained pipeline (zero stage latency)
-# ============================================================
-# Each active tangent advances through ALL its next stages immediately:
-#   queued -> SCOPE -> [approval gate] -> EXECUTE -> ASSESS -> VALIDATE -> done
-# Stage exit IS the trigger for the next stage. No batch phases.
-#
-# coo-loop.sh (this file, on cron/Task Scheduler) is only the INBOX SWEEPER:
-# picks up newly dictated stubs, rescopes, and advances anything found
-# mid-pipeline. Empty sweep = milliseconds, no LLM session.
-#
-# COO_LIVE=1   tee every session's output to coo/live/<id>.<stage>.live.log
-#              (tail with: Get-Content coo\live\<id>.scope.live.log -Wait)
-# COO_APPROVAL=merge|blanket
-# COO_PUSH=0|1
-# COO_MODE=once|loop
+# coo-loop-v4.sh -- per-tangent chained pipeline
+#   v4 = v3 + git serialization (flock) + metrics.jsonl + status.html board
+# Run via run-one.sh <tangent-glob>; cron/Task Scheduler sweeps the inbox only.
 # ============================================================
 set -u -o pipefail
 REPO_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
@@ -28,12 +16,44 @@ BREAKER="$REPO_ROOT/coo/.breaker"
 LOG="$REPO_ROOT/coo/coo-loop.log"
 FAILS_FILE="$REPO_ROOT/coo/.consec_fails"
 LIVE_DIR="$REPO_ROOT/coo/live"
+GITLOCK="$REPO_ROOT/coo/.git.lock"
 mkdir -p coo/tmp "$LIVE_DIR"
 
 log() { echo "[$(date -Iseconds)] $*" >> "$LOG"; }
-push() { if [ "$COO_PUSH" = "1" ]; then git push >> "$LOG" 2>&1 || log "WARN push failed"; fi; }
+# git operations serialized across parallel instances (index.lock contention killed an executor)
+commit_f() {
+  (
+    flock -w 60 9 || log "WARN gitlock timeout in commit"
+    git add "$f" >/dev/null 2>&1
+    git add coo/probes coo/live coo/metrics.jsonl >/dev/null 2>&1
+    git commit -m "coo: $(basename "$f" .md) $1" >> "$LOG" 2>&1 || true
+  ) 9>> "$GITLOCK"
+}
+push() {
+  if [ "$COO_PUSH" = "1" ]; then
+    (
+      flock -w 120 9 || log "WARN gitlock timeout in push"
+      git push >> "$LOG" 2>&1 || log "WARN push failed"
+    ) 9>> "$GITLOCK"
+  fi
+}
+
+# observability: self-contained HTML board, refresh every 15s
+write_status() {
+  {
+    echo "<html><head><meta http-equiv='refresh' content='15'><title>COO Board</title><style>body{font-family:consolas;background:#111;color:#ddd;padding:16px}table{border-collapse:collapse}td,th{border:1px solid #444;padding:4px 10px}.done{color:#6f6}.running{color:#ff6}.scoping,.assess,.validating{color:#6cf}.parked,.rescope{color:#f66}</style></head><body>"
+    echo "<h3>COO Pipeline Board &mdash; $(date -Iseconds)</h3><table><tr><th>tangent</th><th>status</th></tr>"
+    for tf in tangents/2026*.md; do [ -f "$tf" ] || continue
+      n=$(basename "$tf" .md); s=$(grep -m1 '^status:' "$tf" | cut -d' ' -f2 | tr -d '\r')
+      echo "<tr><td>$n</td><td class='$s'>$s</td></tr>"
+    done
+    echo "</table><h4>recent loop events</h4><pre style='font-size:11px'>"
+    tail -20 "$LOG" 2>/dev/null | sed "s/</\&lt;/g"
+    echo "</pre></body></html>"
+  } > "$LIVE_DIR/status.html" 2>/dev/null
+}
+
 status_of() { grep -m1 '^status:' "$f" | cut -d' ' -f2 | tr -d '\r'; }
-commit_f() { git add "$f" >/dev/null 2>&1; git add coo/probes coo/live >/dev/null 2>&1; git commit -m "coo: $(basename "$f" .md) $1" >> "$LOG" 2>&1 || true; }
 
 # run_droid <live-suffix> <droid args...>  -- tees output when COO_LIVE=1; hard stage timeout
 run_droid() {
@@ -61,8 +81,18 @@ $(cat "$f")"
 
 STRICT RE-REQUEST: Your previous attempt performed WORK instead of returning a contract. You are the SCOPER. Return ONLY the === CONTRACT === block per the format above. Do not perform any work, write any files, or run any state-changing commands. Put everything you learned in the contract's Context section — the Executor will re-verify it."
   fi
-  if run_droid scope exec --use-spec -o text --auto high "$PROMPT" > coo/tmp/"$id".scoped.txt 2>> "$LOG"; then
-    if grep -q '=== UNSCOPABLE:' coo/tmp/"$id".scoped.txt; then
+  if [ -n "${COO_FAST_MODEL:-}" ]; then
+    run_droid scope exec --use-spec -o text --auto high -m "$COO_FAST_MODEL" "$PROMPT" > coo/tmp/"$id".scoped.txt 2>> "$LOG"
+  else
+    run_droid scope exec --use-spec -o text --auto high "$PROMPT" > coo/tmp/"$id".scoped.txt 2>> "$LOG"
+  fi
+  local scope_rc=0
+  [ ! -s "coo/tmp/$id.scoped.txt" ] && scope_rc=1
+  if [ "$scope_rc" -ne 0 ]; then
+    sed -i 's/^status:.*/status: parked/' "$f"
+    echo "- scoper session failed, parked" >> "$f"
+    log "SCOPER FAILED $id"; commit_f "parked-scoperfail"
+  elif grep -q '=== UNSCOPABLE:' coo/tmp/"$id".scoped.txt 2>/dev/null; then
       sed -i 's/^status:.*/status: parked/' "$f"
       echo "- parked by scoper: $(grep -m1 '=== UNSCOPABLE:' coo/tmp/"$id".scoped.txt)" >> "$f"
       log "UNSCOPABLE $id"; commit_f "parked-unscopable"
@@ -95,11 +125,6 @@ STRICT RE-REQUEST: Your previous attempt performed WORK instead of returning a c
         log "NO CONTRACT x2 $id"; commit_f "parked-nocontract"
       fi
     fi
-  else
-    sed -i 's/^status:.*/status: parked/' "$f"
-    echo "- scoper session failed, parked" >> "$f"
-    log "SCOPER FAILED $id"; commit_f "parked-scoperfail"
-  fi
 }
 
 # ---- stage: EXECUTE (with session continuity on RELOOP) ------
@@ -111,19 +136,15 @@ do_execute() {
   sed -i 's/^status:.*/status: running/' "$f"
   echo "run_started: $(date -Iseconds)" >> "$f"; commit_f "claim-execute"
   local rc=0
-  # executor needs explicit --auto or it exits num_turns:0 at the permission gate
-  # (2026-09-06: two FM23 verify cycles died on "insufficient permission")
-  local EXEC_AUTO="${COO_EXECUTE_AUTO:-medium}"
   if [ -n "$sid" ] && [ "${relooped:-0}" -gt 0 ]; then
     # RELOOP: resume the SAME executor session with assessor feedback
-    { echo "RELOOP continuation for this tangent. Assessor said RELOOP; address the feedback, stay inside the contract, then append an updated Outcome block."; echo ""; echo "=== ASSessor FEEDBACK ==="; grep -A2 '## Assessor verdict' "$f"; } > coo/tmp/"$id".cont.md
-    run_droid execute exec -o json --auto "$EXEC_AUTO" -s "$sid" -f coo/tmp/"$id".cont.md >> coo/tmp/"$id".exec.log 2>&1 || rc=$?
+    { echo "RELOOP continuation for this tangent. Assessor said RELOOP; address the feedback, stay inside the contract, then append an updated Outcome block."; echo ""; echo "=== ASSESSOR FEEDBACK ==="; grep -A2 '## Assessor verdict' "$f"; } > coo/tmp/"$id".cont.md
+    run_droid execute exec -o json -s "$sid" -f coo/tmp/"$id".cont.md >> coo/tmp/"$id".exec.log 2>&1 || rc=$?
   else
-    run_droid execute exec -o json --auto "$EXEC_AUTO" -f "$f" >> coo/tmp/"$id".exec.log 2>&1 || rc=$?
+    run_droid execute exec -o json -f "$f" >> coo/tmp/"$id".exec.log 2>&1 || rc=$?
   fi
   # persist session id for future continuity
-  local newsid; newsid=$(grep -o '"session_id"[[:space:]]*:[[:space:]]*"[^"]*"' coo/tmp/"$id".exec.log 2>/dev/null | head -1 | sed 's/.*:\s*"//;s/"$//')
-  [ -z "$newsid" ] && newsid=$(grep -o '"sessionId"[[:space:]]*:[[:space:]]*"[^"]*"' coo/tmp/"$id".exec.log 2>/dev/null | head -1 | sed 's/.*:\s*"//;s/"$//')
+  local newsid; newsid=$(grep -o '"sessionId"[[:space:]]*:[[:space:]]*"[^"]*"' coo/tmp/"$id".exec.log 2>/dev/null | head -1 | sed 's/.*:\s*"//;s/"$//')
   if [ -n "$newsid" ]; then
     sed -i '/^executor_session:/d' "$f"
     sed -i "0,/^status:/s//status:/\nexecutor_session: $newsid/" "$f"
@@ -141,7 +162,13 @@ do_assess() {
 
 === CONTRACT WITH OUTCOME ===
 $(cat "$f")"
-  if run_droid assess exec -o text --auto medium "$PROMPT" > coo/tmp/"$id".verdict.txt 2>> "$LOG"; then
+  local scope_rc2=0
+  if [ -n "${COO_FAST_MODEL:-}" ]; then
+    run_droid assess exec -o text --auto medium -m "$COO_FAST_MODEL" "$PROMPT" > coo/tmp/"$id".verdict.txt 2>> "$LOG" || scope_rc2=$?
+  else
+    run_droid assess exec -o text --auto medium "$PROMPT" > coo/tmp/"$id".verdict.txt 2>> "$LOG" || scope_rc2=$?
+  fi
+  if [ "$scope_rc2" -eq 0 ]; then
     local V; V=$(grep -m1 '=== VERDICT:' coo/tmp/"$id".verdict.txt || echo "=== VERDICT: RESCOPE === no verdict line")
     echo "" >> "$f"; echo "## Assessor verdict" >> "$f"; echo "$V" >> "$f"
     case "$V" in
@@ -163,7 +190,13 @@ do_validate() {
 
 === COMPLETED TANGENT WITH OUTCOME AND VERDICT ===
 $(cat "$f")"
-  if run_droid validate exec -o text --auto medium "$PROMPT" > coo/tmp/"$id".validation.txt 2>> "$LOG"; then
+  local scope_rc3=0
+  if [ -n "${COO_FAST_MODEL:-}" ]; then
+    run_droid validate exec -o text --auto medium -m "$COO_FAST_MODEL" "$PROMPT" > coo/tmp/"$id".validation.txt 2>> "$LOG" || scope_rc3=$?
+  else
+    run_droid validate exec -o text --auto medium "$PROMPT" > coo/tmp/"$id".validation.txt 2>> "$LOG" || scope_rc3=$?
+  fi
+  if [ "$scope_rc3" -eq 0 ]; then
     local VL; VL=$(grep -m1 '=== VALIDATION:' coo/tmp/"$id".validation.txt || echo "=== VALIDATION: FAIL === no validation line")
     awk '/=== PROBE ===/{flag=1}/=== END PROBE ===/{flag=0}flag' \
       coo/tmp/"$id".validation.txt > "coo/probes/$id.probe.md"
@@ -179,6 +212,7 @@ $(cat "$f")"
 }
 
 # ---- advance one tangent through as many stages as possible --
+metric() { echo "{\"id\":\"$(basename "$f" .md)\",\"stage\":\"$1\",\"secs\":$2,\"ts\":\"$(date -Iseconds)\"}" >> coo/metrics.jsonl; }
 advance() {
   f="$1"
   local guard=0
@@ -186,15 +220,16 @@ advance() {
     guard=$((guard+1))
     local st; st=$(status_of)
     case "$st" in
-      queued)     do_scope ;;
-      scoped)     [ "$COO_APPROVAL" = "blanket" ] && { sed -i 's/^status:.*/status: approved/' "$f"; commit_f "blanket-approved"; } || return 0 ;;
-      approved)   do_execute ;;
-      assess)     do_assess ;;
-      validating) do_validate ;;
+      queued)     local T0=$SECONDS; do_scope;     metric scope "$((SECONDS-T0))" ;;
+      scoped)     [ "$COO_APPROVAL" = "blanket" ] && { sed -i 's/^status:.*/status: approved/' "$f"; commit_f "blanket-approved"; } || { write_status; return 0; } ;;
+      approved)   local T1=$SECONDS; do_execute;   metric execute "$((SECONDS-T1))" ;;
+      assess)     local T2=$SECONDS; do_assess;    metric assess "$((SECONDS-T2))" ;;
+      validating) local T3=$SECONDS; do_validate;  metric validate "$((SECONDS-T3))" ;;
       rescope)    sed -i 's/^status:.*/status: queued/' "$f"; commit_f "returned-to-scoping" ;;
-      done|parked|running|scoping) return 0 ;;
-      *)          return 0 ;;
+      done|parked|running|scoping) write_status; return 0 ;;
+      *)          write_status; return 0 ;;
     esac
+    write_status
   done
 }
 
@@ -226,6 +261,7 @@ else
   echo 0 > "$FAILS_FILE"
 fi
 
+write_status
 push
 log "===== sweep end ====="
 [ "$COO_MODE" = "loop" ] && sleep "${COO_CYCLE_SECONDS:-900}" && exec "$0"

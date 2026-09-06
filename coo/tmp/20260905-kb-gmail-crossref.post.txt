@@ -1,0 +1,40 @@
+﻿=== POST-CHANGE 2026-09-06T02:54:20Z ===
+### kb-query.py capability "gmail"
+ACTION                              PRIMARY PATH                                                           LAT      CATEGORY
+----------------------------------------------------------------------------------------------------------------------------------
+Send email                          Resend REST API (RESEND_API_KEY, Doppler auth-api/prd)                 ~1s      communication
+Gmail read/search (BOTH inboxes)    Composio proxy via smithery composio connection: tools.execute.proxy   ~2s      communication
+### kb-query.py credential "gmail"
+WHAT                           DOPPLER PROJECT      CONFIG     KEY NAME
+--------------------------------------------------------------------------------
+Composio API (OAuth custody: Gmail x2, Sheets, Docs, LinkedIn) auth-api             prd        COMPOSIO_API_KEY
+### kb-query.py credential "composio"
+WHAT                           DOPPLER PROJECT      CONFIG     KEY NAME
+--------------------------------------------------------------------------------
+Composio API (OAuth custody: Gmail x2, Sheets, Docs, LinkedIn) auth-api             prd        COMPOSIO_API_KEY
+### kb-query.py all "gmail"
+=== Capabilities ===
+
+ACTION                              PRIMARY PATH                                                           LAT      CATEGORY
+----------------------------------------------------------------------------------------------------------------------------------
+Send email                          Resend REST API (RESEND_API_KEY, Doppler auth-api/prd)                 ~1s      communication
+Gmail read/search (BOTH inboxes)    Composio proxy via smithery composio connection: tools.execute.proxy   ~2s      communication
+
+=== Services ===
+
+No services matching 'gmail'
+
+=== Credentials ===
+
+WHAT                           DOPPLER PROJECT      CONFIG     KEY NAME
+--------------------------------------------------------------------------------
+Composio API (OAuth custody: Gmail x2, Sheets, Docs, LinkedIn) auth-api             prd        COMPOSIO_API_KEY
+### fence check: kb-query.py capability "email"
+ACTION                              PRIMARY PATH                                                           LAT      CATEGORY
+----------------------------------------------------------------------------------------------------------------------------------
+Send email                          Resend REST API (RESEND_API_KEY, Doppler auth-api/prd)                 ~1s      communication
+Find SFR/institutional prospects    Tomba domain_search department:executive -> mine score 90+ -> skip e   ~5s/company sales
+### fence check: kb-query.py credential "resend"
+WHAT                           DOPPLER PROJECT      CONFIG     KEY NAME
+--------------------------------------------------------------------------------
+Resend API                     auth-api             prd        RESEND_API_KEY

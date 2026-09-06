@@ -191,3 +191,315 @@ To https://github.com/lkmotto/fleet-triage.git
  3 files changed, 2 insertions(+), 1 deletion(-)
  create mode 100644 coo/live/20260905-strategic-outcomes-verify.assess.live.log
 [2026-09-05T21:45:05-05:00] ASSESS 20260905-ntreis-fm23
+[2026-09-05T21:45:35-05:00] ASSESS 20260905-strategic-outcomes-verify
+[2026-09-05T21:45:35-05:00] SCOPE claim 20260905-spark-csv-export
+[2026-09-05T21:45:35-05:00] SCOPE claim 20260905-sdr-9800-recovery
+[2026-09-05T21:45:35-05:00] SCOPE claim 20260905-scout-consumer-wiring
+[2026-09-05T21:45:35-05:00] SCOPE claim 20260905-kb-gmail-crossref
+/c/Users/lkmot/factory-context/code/fleet-triage/coo/coo-loop-v4.sh: line 26: flock: command not found
+/c/Users/lkmot/factory-context/code/fleet-triage/coo/coo-loop-v4.sh: line 26: flock: command not found
+/c/Users/lkmot/factory-context/code/fleet-triage/coo/coo-loop-v4.sh: line 26: flock: command not found
+[2026-09-05T21:45:35-05:00] WARN gitlock timeout in commit
+[2026-09-05T21:45:35-05:00] WARN gitlock timeout in commit
+/c/Users/lkmot/factory-context/code/fleet-triage/coo/coo-loop-v4.sh: line 26: flock: command not found
+[2026-09-05T21:45:36-05:00] WARN gitlock timeout in commit
+[2026-09-05T21:45:36-05:00] WARN gitlock timeout in commit
+[feature/coo-loop 3c6549b] coo: 20260905-spark-csv-export claim-scope
+ 4 files changed, 4 insertions(+), 4 deletions(-)
+ (use "git restore <file>..." to discard changes in working directory)
+	modified:   coo/coo-loop.log
+
+Untracked files:
+  (use "git add <file>..." to include in what will be committed)
+	coo/.git.lock
+
+no changes added to commit (use "git add" and/or "git commit -aOn branch feature/coo-loop
+Changes not staged for commit:
+  (use "git add <file>..." to update what will be committed)
+  (use "git restore <file>..." to discard changes in working directory)
+	modified:   coo/coo-loop.log
+
+Untracked files:
+  (use "git add <file>..." to include in what will be committed)
+	coo/.git.lock
+
+no changes added to commit (use "git add" and/or "git commit -a")
+[2026-09-05T21:52:49-05:00] CONTRACT 20260905-spark-csv-export scoped+approved
+/c/Users/lkmot/factory-context/code/fleet-triage/coo/coo-loop-v4.sh: line 26: flock: command not found
+[2026-09-05T21:52:49-05:00] WARN gitlock timeout in commit
+[feature/coo-loop 713f15e] coo: 20260905-spark-csv-export scoped
+ 1 file changed, 53 insertions(+), 9 deletions(-)
+[2026-09-05T21:52:51-05:00] EXECUTE claim 20260905-spark-csv-export (continuity_sid=none reloop=0)
+/c/Users/lkmot/factory-context/code/fleet-triage/coo/coo-loop-v4.sh: line 26: flock: command not found
+[2026-09-05T21:52:51-05:00] WARN gitlock timeout in commit
+[feature/coo-loop 137b334] coo: 20260905-spark-csv-export claim-execute
+ 7 files changed, 100 insertions(+), 21 deletions(-)
+ create mode 100644 coo/live/20260905-kb-gmail-crossref.scope.live.log
+ create mode 100644 coo/live/20260905-scout-consumer-wiring.scope.live.log
+ create mode 100644 coo/live/20260905-sdr-9800-recovery.scope.live.log
+ create mode 100644 coo/live/20260905-spark-csv-export.scope.live.log
+ create mode 100644 coo/metrics.jsonl
+[2026-09-05T21:54:20-05:00] ASSESSOR FAILED 20260905-ms01-scripts-inventory (retry next sweep)
+[feature/coo-loop c3ccc5d] coo: 20260905-ms01-scripts-inventory assessfail
+ 2 files changed, 32 insertions(+)
+ create mode 100644 coo/live/20260905-spark-csv-export.execute.live.log
+[2026-09-05T21:54:20-05:00] ASSESS 20260905-ms01-scripts-inventory
+[2026-09-05T21:55:46-05:00] EXECUTOR exited nonzero 20260905-spark-csv-export
+/c/Users/lkmot/factory-context/code/fleet-triage/coo/coo-loop-v4.sh: line 26: flock: command not found
+[2026-09-05T21:55:47-05:00] WARN gitlock timeout in commit
+[feature/coo-loop ad8ffe7] coo: 20260905-spark-csv-export executed
+ 3 files changed, 2 insertions(+), 33 deletions(-)
+[2026-09-05T21:55:48-05:00] ASSESS 20260905-spark-csv-export
+[2026-09-05T21:56:07-05:00] ASSESSOR FAILED 20260905-strategic-outcomes-verify (retry next sweep)
+[feature/coo-loop 27f75d2] coo: 20260905-strategic-outcomes-verify assessfail
+ 3 files changed, 59 insertions(+), 21 deletions(-)
+ create mode 100644 coo/live/20260905-spark-csv-export.assess.live.log
+[2026-09-05T21:56:08-05:00] ASSESS 20260905-strategic-outcomes-verify
+[2026-09-05T21:58:54-05:00] ASSESSOR FAILED 20260905-ms01-scripts-inventory (retry next sweep)
+[feature/coo-loop 355199f] coo: 20260905-ms01-scripts-inventory assessfail
+ 16 files changed, 1089 insertions(+), 60 deletions(-)
+ create mode 100644 coo/live/20260905-campaign-105629-review.view.html
+ create mode 100644 coo/live/20260905-glenhaven-harvest-verify.view.html
+ create mode 100644 coo/live/20260905-gmail-intake-repair.view.html
+ create mode 100644 coo/live/20260905-kb-gmail-crossref.view.html
+ create mode 100644 coo/live/20260905-ms01-scripts-inventory.view.html
+ create mode 100644 coo/live/20260905-ntreis-fm23.view.html
+ create mode 100644 coo/live/20260905-scout-consumer-wiring.view.html
+ create mode 100644 coo/live/20260905-sdr-9800-recovery.view.html
+ create mode 100644 coo/live/20260905-spark-csv-export.view.html
+ create mode 100644 coo/live/20260905-strategic-outcomes-verify.view.html
+ create mode 100644 coo/live/20260905-tangents-ledger-hygiene.view.html
+ create mode 100644 coo/live/20260906-sales-outreach-ledger-hygiene.view.html
+ create mode 100644 coo/live/metrics-view.html
+[2026-09-05T21:58:54-05:00] ASSESS 20260905-ms01-scripts-inventory
+[2026-09-05T21:59:17-05:00] NO CONTRACT 20260905-kb-gmail-crossref - strict scoper reloop (1 of 1)
+/c/Users/lkmot/factory-context/code/fleet-triage/coo/coo-loop-v4.sh: line 26: flock: command not found
+[2026-09-05T21:59:17-05:00] WARN gitlock timeout in commit
+[feature/coo-loop aa1f868] coo: 20260905-kb-gmail-crossref scope-reloop
+ 4 files changed, 57 insertions(+), 19 deletions(-)
+[2026-09-05T21:59:19-05:00] SCOPE claim 20260905-kb-gmail-crossref
+/c/Users/lkmot/factory-context/code/fleet-triage/coo/coo-loop-v4.sh: line 26: flock: command not found
+[2026-09-05T21:59:19-05:00] WARN gitlock timeout in commit
+[feature/coo-loop cef732a] coo: 20260905-kb-gmail-crossref claim-scope
+ 3 files changed, 37 insertions(+), 36 deletions(-)
+[2026-09-05T21:59:29-05:00] VERDICT 20260905-ntreis-fm23 RESCOPE
+[feature/coo-loop 7fb949c] coo: 20260905-ntreis-fm23 assessed
+ 3 files changed, 29 insertions(+), 30 deletions(-)
+[feature/coo-loop c012ad6] coo: 20260905-ntreis-fm23 returned-to-scoping
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+[2026-09-05T21:59:30-05:00] SCOPE claim 20260905-ntreis-fm23
+[feature/coo-loop 06bf6d8] coo: 20260905-ntreis-fm23 claim-scope
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+[2026-09-05T22:00:27-05:00] ASSESSOR FAILED 20260905-strategic-outcomes-verify (retry next sweep)
+/c/Users/lkmot/factory-context/code/fleet-triage/coo/coo-loop-v4.sh: line 26: flock: command not found
+[2026-09-05T22:00:27-05:00] WARN gitlock timeout in commit
+[feature/coo-loop cc44f08] coo: 20260905-strategic-outcomes-verify assessfail
+ 2 files changed, 38 insertions(+), 49 deletions(-)
+[2026-09-05T22:00:29-05:00] ASSESS 20260905-strategic-outcomes-verify
+[2026-09-05T22:01:40-05:00] ASSESSOR FAILED 20260905-spark-csv-export (retry next sweep)
+/c/Users/lkmot/factory-context/code/fleet-triage/coo/coo-loop-v4.sh: line 26: flock: command not found
+[2026-09-05T22:01:40-05:00] WARN gitlock timeout in commit
+[feature/coo-loop f08f1e8] coo: 20260905-spark-csv-export assessfail
+ 4 files changed, 49 insertions(+), 59 deletions(-)
+[2026-09-05T22:01:42-05:00] ASSESS 20260905-spark-csv-export
+[2026-09-05T22:02:28-05:00] CONTRACT 20260905-kb-gmail-crossref scoped+approved
+/c/Users/lkmot/factory-context/code/fleet-triage/coo/coo-loop-v4.sh: line 26: flock: command not found
+[2026-09-05T22:02:28-05:00] WARN gitlock timeout in commit
+[feature/coo-loop 618f30c] coo: 20260905-kb-gmail-crossref scoped
+ 5 files changed, 154 insertions(+), 69 deletions(-)
+[2026-09-05T22:02:30-05:00] EXECUTE claim 20260905-kb-gmail-crossref (continuity_sid=none reloop=0)
+/c/Users/lkmot/factory-context/code/fleet-triage/coo/coo-loop-v4.sh: line 26: flock: command not found
+[2026-09-05T22:02:30-05:00] WARN gitlock timeout in commit
+[feature/coo-loop 2934a5b] coo: 20260905-kb-gmail-crossref claim-execute
+ 3 files changed, 11 insertions(+), 9 deletions(-)
+[2026-09-05T22:02:40-05:00] UNSCOPABLE 20260905-sdr-9800-recovery
+/c/Users/lkmot/factory-context/code/fleet-triage/coo/coo-loop-v4.sh: line 26: flock: command not found
+[2026-09-05T22:02:40-05:00] WARN gitlock timeout in commit
+[feature/coo-loop 980fd0d] coo: 20260905-sdr-9800-recovery parked-unscopable
+ 3 files changed, 18 insertions(+), 1 deletion(-)
+ create mode 100644 coo/live/20260905-kb-gmail-crossref.execute.live.log
+/c/Users/lkmot/factory-context/code/fleet-triage/coo/coo-loop-v4.sh: line 35: flock: command not found
+[2026-09-05T22:02:44-05:00] WARN gitlock timeout in push
+To https://github.com/lkmotto/fleet-triage.git
+   9e88ef3..980fd0d  feature/coo-loop -> feature/coo-loop
+[2026-09-05T22:02:46-05:00] ===== sweep end =====
+[2026-09-05T22:05:18-05:00] EXECUTOR exited nonzero 20260905-kb-gmail-crossref
+/c/Users/lkmot/factory-context/code/fleet-triage/coo/coo-loop-v4.sh: line 26: flock: command not found
+[2026-09-05T22:05:19-05:00] WARN gitlock timeout in commit
+[feature/coo-loop ebe3019] coo: 20260905-kb-gmail-crossref executed
+ 4 files changed, 17 insertions(+), 15 deletions(-)
+[2026-09-05T22:05:20-05:00] ASSESS 20260905-kb-gmail-crossref
+[2026-09-05T22:05:37-05:00] SCOPER FAILED 20260905-scout-consumer-wiring
+/c/Users/lkmot/factory-context/code/fleet-triage/coo/coo-loop-v4.sh: line 26: flock: command not found
+[2026-09-05T22:05:37-05:00] WARN gitlock timeout in commit
+[feature/coo-loop 5dfa174] coo: 20260905-scout-consumer-wiring parked-scoperfail
+ 4 files changed, 15 insertions(+), 13 deletions(-)
+ create mode 100644 coo/live/20260905-kb-gmail-crossref.assess.live.log
+/c/Users/lkmot/factory-context/code/fleet-triage/coo/coo-loop-v4.sh: line 35: flock: command not found
+[2026-09-05T22:05:41-05:00] WARN gitlock timeout in push
+To https://github.com/lkmotto/fleet-triage.git
+   980fd0d..5dfa174  feature/coo-loop -> feature/coo-loop
+[2026-09-05T22:05:43-05:00] ===== sweep end =====
+[2026-09-05T22:07:32-05:00] ASSESSOR FAILED 20260905-strategic-outcomes-verify (retry next sweep)
+[feature/coo-loop eda7216] coo: 20260905-strategic-outcomes-verify assessfail
+ 2 files changed, 39 insertions(+), 9 deletions(-)
+[2026-09-05T22:07:32-05:00] ASSESS 20260905-strategic-outcomes-verify
+[2026-09-05T22:11:55-05:00] VERDICT 20260905-spark-csv-export RELOOP
+/c/Users/lkmot/factory-context/code/fleet-triage/coo/coo-loop-v4.sh: line 26: flock: command not found
+[2026-09-05T22:11:55-05:00] WARN gitlock timeout in commit
+[feature/coo-loop ae6c330] coo: 20260905-spark-csv-export assessed
+ 4 files changed, 33 insertions(+), 31 deletions(-)
+[2026-09-05T22:11:56-05:00] EXECUTE claim 20260905-spark-csv-export (continuity_sid=none reloop=1)
+/c/Users/lkmot/factory-context/code/fleet-triage/coo/coo-loop-v4.sh: line 26: flock: command not found
+[2026-09-05T22:11:57-05:00] WARN gitlock timeout in commit
+[feature/coo-loop 43575dc] coo: 20260905-spark-csv-export claim-execute
+ 3 files changed, 19 insertions(+), 17 deletions(-)
+[2026-09-05T22:12:07-05:00] ASSESSOR FAILED 20260905-ms01-scripts-inventory (retry next sweep)
+[feature/coo-loop 9d81b4e] coo: 20260905-ms01-scripts-inventory assessfail
+ 3 files changed, 28 insertions(+), 1 deletion(-)
+[2026-09-05T22:12:07-05:00] ASSESS 20260905-ms01-scripts-inventory
+[2026-09-05T22:15:44-05:00] VERDICT 20260905-kb-gmail-crossref DONE -> validating
+/c/Users/lkmot/factory-context/code/fleet-triage/coo/coo-loop-v4.sh: line 26: flock: command not found
+[2026-09-05T22:15:44-05:00] WARN gitlock timeout in commit
+[feature/coo-loop 578d54f] coo: 20260905-kb-gmail-crossref assessed
+ 3 files changed, 43 insertions(+), 19 deletions(-)
+[2026-09-05T22:15:46-05:00] VALIDATE 20260905-kb-gmail-crossref
+[2026-09-05T22:15:51-05:00] EXECUTOR exited nonzero 20260905-spark-csv-export
+/c/Users/lkmot/factory-context/code/fleet-triage/coo/coo-loop-v4.sh: line 26: flock: command not found
+[2026-09-05T22:15:51-05:00] WARN gitlock timeout in commit
+[feature/coo-loop 8e8a683] coo: 20260905-spark-csv-export executed
+ 5 files changed, 20 insertions(+), 18 deletions(-)
+ create mode 100644 coo/live/20260905-kb-gmail-crossref.validate.live.log
+[2026-09-05T22:15:53-05:00] ASSESS 20260905-spark-csv-export
+[2026-09-05T22:17:57-05:00] ASSESSOR FAILED 20260905-strategic-outcomes-verify (retry next sweep)
+[feature/coo-loop 14f8854] coo: 20260905-strategic-outcomes-verify assessfail
+ 3 files changed, 49 insertions(+), 37 deletions(-)
+[2026-09-05T22:17:58-05:00] ASSESS 20260905-strategic-outcomes-verify
+[2026-09-05T22:18:15-05:00] ASSESSOR FAILED 20260905-strategic-outcomes-verify (retry next sweep)
+/c/Users/lkmot/factory-context/code/fleet-triage/coo/coo-loop-v4.sh: line 26: flock: command not found
+[2026-09-05T22:18:15-05:00] WARN gitlock timeout in commit
+[feature/coo-loop 866bc48] coo: 20260905-strategic-outcomes-verify assessfail
+ 2 files changed, 27 insertions(+), 28 deletions(-)
+[2026-09-05T22:18:17-05:00] ASSESS 20260905-strategic-outcomes-verify
+[2026-09-05T22:19:32-05:00] SCOPER FAILED 20260905-ntreis-fm23
+[feature/coo-loop 79d91c7] coo: 20260905-ntreis-fm23 parked-scoperfail
+ 3 files changed, 13 insertions(+), 50 deletions(-)
+/c/Users/lkmot/factory-context/code/fleet-triage/coo/coo-loop-v3.sh: line 216: syntax error near unexpected token `('
+/c/Users/lkmot/factory-context/code/fleet-triage/coo/coo-loop-v3.sh: line 216: `[ -f "$BREAKER" ] && { log "BREAKER TRIPPED - paused (delete coo/.breaker)"; exit 0; }'
+[2026-09-05T22:28:06-05:00] VERDICT 20260905-ms01-scripts-inventory RELOOP
+[feature/coo-loop fe4694d] coo: 20260905-ms01-scripts-inventory assessed
+ 4 files changed, 119 insertions(+), 1 deletion(-)
+ create mode 100644 coo/probes/20260905-kb-gmail-crossref.probe.md
+[2026-09-05T22:28:06-05:00] WARN gitlock timeout in commit
+[feature/coo-loop e29c1bd] coo: 20260905-kb-gmail-crossref validated
+ 3 files changed, 5 insertions(+), 2 deletions(-)
+[feature/coo-loop b1966b9] coo: 20260905-ms01-scripts-inventory claim-execute
+ 2 files changed, 2 insertions(+), 36 deletions(-)
+/c/Users/lkmot/factory-context/code/fleet-triage/coo/coo-loop-v4.sh: line 255: syntax error near unexpected token `('
+/c/Users/lkmot/factory-context/code/fleet-triage/coo/coo-loop-v4.sh: line 255: `[ -f "$BREAKER" ] && { log "BREAKER TRIPPED - paused (delete coo/.breaker)"; exit 0; }'
+[2026-09-05T22:30:02-05:00] VERDICT 20260905-strategic-outcomes-verify RELOOP
+[feature/coo-loop 9cc001d] coo: 20260905-strategic-outcomes-verify assessed
+ 4 files changed, 84 insertions(+), 2 deletions(-)
+[2026-09-05T22:30:03-05:00] EXECUTE claim 20260905-strategic-outcomes-verify (continuity_sid=none reloop=1)
+[feature/coo-loop c8879e3] coo: 20260905-strategic-outcomes-verify claim-execute
+ 1 file changed, 2 insertions(+), 1 deletion(-)
+[2026-09-05T22:31:35-05:00] ASSESSOR FAILED 20260905-spark-csv-export (retry next sweep)
+/c/Users/lkmot/factory-context/code/fleet-triage/coo/coo-loop-v4.sh: line 26: flock: command not found
+[2026-09-05T22:31:35-05:00] WARN gitlock timeout in commit
+[feature/coo-loop b51fdee] coo: 20260905-spark-csv-export assessfail
+ 3 files changed, 32 insertions(+), 1 deletion(-)
+[2026-09-05T22:31:37-05:00] ASSESS 20260905-spark-csv-export
+[2026-09-05T22:32:39-05:00] ASSESSOR FAILED 20260905-strategic-outcomes-verify (retry next sweep)
+/c/Users/lkmot/factory-context/code/fleet-triage/coo/coo-loop-v4.sh: line 26: flock: command not found
+[2026-09-05T22:32:39-05:00] WARN gitlock timeout in commit
+[feature/coo-loop d0759a2] coo: 20260905-strategic-outcomes-verify assessfail
+ 4 files changed, 39 insertions(+), 79 deletions(-)
+/c/Users/lkmot/factory-context/code/fleet-triage/coo/coo-loop-v4.sh: line 255: syntax error near unexpected token `('
+/c/Users/lkmot/factory-context/code/fleet-triage/coo/coo-loop-v4.sh: line 255: `[ -f "$BREAKER" ] && { log "BREAKER TRIPPED - paused (delete coo/.breaker)"; exit 0; }'
+[2026-09-05T22:36:15-05:00] EXECUTOR exited nonzero 20260905-strategic-outcomes-verify
+[feature/coo-loop 39ff1aa] coo: 20260905-strategic-outcomes-verify executed
+ 3 files changed, 9 insertions(+), 8 deletions(-)
+[2026-09-05T22:36:15-05:00] ASSESS 20260905-strategic-outcomes-verify
+[2026-09-05T22:39:28-05:00] ASSESSOR FAILED 20260905-spark-csv-export (retry next sweep)
+/c/Users/lkmot/factory-context/code/fleet-triage/coo/coo-loop-v4.sh: line 26: flock: command not found
+[2026-09-05T22:39:28-05:00] WARN gitlock timeout in commit
+[feature/coo-loop 7980abf] coo: 20260905-spark-csv-export assessfail
+ 3 files changed, 33 insertions(+), 35 deletions(-)
+[2026-09-05T22:39:30-05:00] ASSESS 20260905-spark-csv-export
+[2026-09-05T22:46:51-05:00] VERDICT 20260905-strategic-outcomes-verify RELOOP
+[feature/coo-loop dba25b4] coo: 20260905-strategic-outcomes-verify assessed
+ 4 files changed, 60 insertions(+), 46 deletions(-)
+[2026-09-05T22:46:52-05:00] EXECUTE claim 20260905-strategic-outcomes-verify (continuity_sid=none reloop=2)
+[feature/coo-loop 73a5ed4] coo: 20260905-strategic-outcomes-verify claim-execute
+ 1 file changed, 2 insertions(+), 1 deletion(-)
+[2026-09-05T22:48:08-05:00] EXECUTOR exited nonzero 20260905-ms01-scripts-inventory
+[feature/coo-loop 49f16fc] coo: 20260905-ms01-scripts-inventory executed
+ 2 files changed, 1 insertion(+), 2 deletions(-)
+[2026-09-05T22:48:08-05:00] ASSESS 20260905-ms01-scripts-inventory
+[2026-09-05T22:49:22-05:00] ASSESSOR FAILED 20260905-spark-csv-export (retry next sweep)
+/c/Users/lkmot/factory-context/code/fleet-triage/coo/coo-loop-v4.sh: line 26: flock: command not found
+[2026-09-05T22:49:22-05:00] WARN gitlock timeout in commit
+[feature/coo-loop 5073584] coo: 20260905-spark-csv-export assessfail
+ 4 files changed, 26 insertions(+), 28 deletions(-)
+[2026-09-05T22:49:24-05:00] ASSESS 20260905-spark-csv-export
+[2026-09-05T22:51:08-05:00] EXECUTOR exited nonzero 20260905-strategic-outcomes-verify
+[feature/coo-loop 6299727] coo: 20260905-strategic-outcomes-verify executed
+ 4 files changed, 21 insertions(+), 37 deletions(-)
+[2026-09-05T22:51:09-05:00] ASSESS 20260905-strategic-outcomes-verify
+[2026-09-05T22:55:26-05:00] VERDICT 20260905-ms01-scripts-inventory RESCOPE
+[feature/coo-loop aed315a] coo: 20260905-ms01-scripts-inventory assessed
+ 3 files changed, 24 insertions(+), 44 deletions(-)
+[feature/coo-loop b51579d] coo: 20260905-ms01-scripts-inventory returned-to-scoping
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+[2026-09-05T22:55:27-05:00] SCOPE claim 20260905-ms01-scripts-inventory
+[feature/coo-loop 1e2be6a] coo: 20260905-ms01-scripts-inventory claim-scope
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+[2026-09-05T22:59:43-05:00] CONTRACT 20260905-ms01-scripts-inventory scoped+approved
+[feature/coo-loop 0273f0f] coo: 20260905-ms01-scripts-inventory scoped
+ 2 files changed, 97 insertions(+), 131 deletions(-)
+[2026-09-05T22:59:43-05:00] EXECUTE claim 20260905-ms01-scripts-inventory (continuity_sid=none reloop=0)
+[feature/coo-loop 5abf1d8] coo: 20260905-ms01-scripts-inventory claim-execute
+ 1 file changed, 2 insertions(+), 1 deletion(-)
+[2026-09-05T23:04:10-05:00] VERDICT 20260905-strategic-outcomes-verify RESCOPE
+[feature/coo-loop f43ad7c] coo: 20260905-strategic-outcomes-verify assessed
+ 2 files changed, 33 insertions(+), 1 deletion(-)
+[feature/coo-loop 7142e61] coo: 20260905-strategic-outcomes-verify returned-to-scoping
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+/c/Users/lkmot/factory-context/code/fleet-triage/coo/coo-loop-v3.sh: line 216: syntax error near unexpected token `('
+/c/Users/lkmot/factory-context/code/fleet-triage/coo/coo-loop-v3.sh: line 216: `[ -f "$BREAKER" ] && { log "BREAKER TRIPPED - paused (delete coo/.breaker)"; exit 0; }'
+[2026-09-05T23:04:26-05:00] EXECUTOR exited nonzero 20260905-ms01-scripts-inventory
+[feature/coo-loop bf4dd3f] coo: 20260905-ms01-scripts-inventory executed
+ 2 files changed, 2 insertions(+), 1 deletion(-)
+/c/Users/lkmot/factory-context/code/fleet-triage/coo/coo-loop-v3.sh: line 216: syntax error near unexpected token `('
+/c/Users/lkmot/factory-context/code/fleet-triage/coo/coo-loop-v3.sh: line 216: `[ -f "$BREAKER" ] && { log "BREAKER TRIPPED - paused (delete coo/.breaker)"; exit 0; }'
+[2026-09-05T23:09:08-05:00] VERDICT 20260905-spark-csv-export RESCOPE
+/c/Users/lkmot/factory-context/code/fleet-triage/coo/coo-loop-v4.sh: line 26: flock: command not found
+[2026-09-05T23:09:08-05:00] WARN gitlock timeout in commit
+[feature/coo-loop 4a79687] coo: 20260905-spark-csv-export assessed
+ 3 files changed, 36 insertions(+), 1 deletion(-)
+/c/Users/lkmot/factory-context/code/fleet-triage/coo/coo-loop-v4.sh: line 26: flock: command not found
+[2026-09-05T23:09:09-05:00] WARN gitlock timeout in commit
+[feature/coo-loop 30707c1] coo: 20260905-spark-csv-export returned-to-scoping
+ 3 files changed, 23 insertions(+), 22 deletions(-)
+[2026-09-05T23:09:11-05:00] SCOPE claim 20260905-spark-csv-export
+/c/Users/lkmot/factory-context/code/fleet-triage/coo/coo-loop-v4.sh: line 26: flock: command not found
+[2026-09-05T23:09:11-05:00] WARN gitlock timeout in commit
+[feature/coo-loop d875a55] coo: 20260905-spark-csv-export claim-scope
+ 2 files changed, 7 insertions(+), 7 deletions(-)
+[2026-09-05T23:17:25-05:00] CONTRACT 20260905-spark-csv-export scoped+approved
+/c/Users/lkmot/factory-context/code/fleet-triage/coo/coo-loop-v4.sh: line 26: flock: command not found
+[2026-09-05T23:17:25-05:00] WARN gitlock timeout in commit
+[feature/coo-loop bd8a034] coo: 20260905-spark-csv-export scoped
+ 2 files changed, 74 insertions(+), 90 deletions(-)
+[2026-09-05T23:17:27-05:00] EXECUTE claim 20260905-spark-csv-export (continuity_sid=none reloop=0)
+/c/Users/lkmot/factory-context/code/fleet-triage/coo/coo-loop-v4.sh: line 26: flock: command not found
+[2026-09-05T23:17:27-05:00] WARN gitlock timeout in commit
+[feature/coo-loop b790c9e] coo: 20260905-spark-csv-export claim-execute
+ 3 files changed, 15 insertions(+), 13 deletions(-)
+[2026-09-05T23:20:09-05:00] EXECUTOR exited nonzero 20260905-spark-csv-export
+/c/Users/lkmot/factory-context/code/fleet-triage/coo/coo-loop-v4.sh: line 26: flock: command not found
+[2026-09-05T23:20:09-05:00] WARN gitlock timeout in commit
+[feature/coo-loop e73b259] coo: 20260905-spark-csv-export executed
+ 2 files changed, 2 insertions(+), 2 deletions(-)
+/c/Users/lkmot/factory-context/code/fleet-triage/coo/coo-loop-v4.sh: line 255: syntax error near unexpected token `('
+/c/Users/lkmot/factory-context/code/fleet-triage/coo/coo-loop-v4.sh: line 255: `[ -f "$BREAKER" ] && { log "BREAKER TRIPPED - paused (delete coo/.breaker)"; exit 0; }'

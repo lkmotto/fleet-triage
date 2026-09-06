@@ -1,0 +1,18 @@
+Assessment complete for tangent `20260905-ntreis-fm23`, cycle 2 of 6.
+
+**What I verified directly (not from the executor's claims):**
+- **Done-when 0/3.** `workfiles/by_address/308_big_sky_circle_northlake_tx_76226/comps/` is empty; `metadata/` contains only the 2026-08-19 blocked artifact; zero new files anywhere in the pipeline workfiles since 2026-09-05. No `tangents.json`/`project-ledger.json` write-back occurred.
+- **Run 2 never executed a turn.** `num_turns: 0`, exited after 388.8s with "insufficient permission to proceed. Re-run with --auto medium or --auto high" (sessions `5634a6ec` cycle 1, `514c7e4b` cycle 2 — identical signatures).
+- **Root cause is the harness, not the contract.** `coo-loop-v3.sh`/`v4.sh` launch the executor with no `--auto` flag while scope/assess/validate all pass `--auto medium|high`. A reloop or a re-scoped contract cannot fix a launch-flag defect — the next execute attempt fails deterministically.
+- **Escalate_if (`2 failed cycles`) is MET.** Two failures, same environmental root cause, one reloop already consumed.
+- **Scope adherence: clean** (executor mutated nothing; pipeline dirty tree matches the contract's documented pre-existing state). **Contract re-verified viable** for later re-run: `FM23_CONTEXT_IMPLIED` / `#Fm23_Ctrl19_Radius` present in the adapter and stage-3; both fallback targets' comps dirs still empty.
+
+Per the verdict rules, a second failure forces RESCOPE (fresh scoping with my evidence attached). I've appended a cycle-2 evidence block to the tangent file recommending the operator park the tangent until the executor launch gains `--auto medium|high` (plus a noted harness bug: RELOOP continuity greps `"sessionId"` while droid JSON emits `"session_id"`, so `executor_session:` is never persisted). Governance record emitted.
+
+Verification: N/A for this task type — assessment is judgment over artifacts; every done-when claim was independently checked on disk rather than trusted.
+
+Next improvement: add the `--auto` flag to the executor invocations in coo-loop-v3.sh/v4.sh; it is the single change that unblocks this tangent and every future execute stage.
+
+Gap observed: the loop's RELOOP session-continuity mechanism has never worked as designed (`session_id` vs `sessionId` mismatch), so both reloops launched fresh sessions while the contract records implied continuity.
+
+=== VERDICT: RESCOPE === Done-when 0/3 with zero artifacts (308 Big Sky comps/ empty, only 8/19 blocked artifact in metadata/); second consecutive num_turns:0 permission-gate failure is harness-caused (execute launched without --auto in coo-loop-v3/v4.sh), and escalate_if "2 failed cycles" is met — evidence block appended to tangents/20260905-ntreis-fm23.md for the Scoper.

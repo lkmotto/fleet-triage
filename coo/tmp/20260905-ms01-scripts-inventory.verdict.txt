@@ -1,0 +1,20 @@
+Verification is complete. Here is my assessment for cycle 2.
+
+## Assessor findings — cycle 2 (2026-09-05T22:49, post-reloop)
+
+**Done-when: 1 of 4 items met.**
+
+1. **Outcome file — FAIL.** `coo\outcomes\ms01-scripts-inventory.md` does not exist (directory listing of `coo\outcomes\` shows only unrelated artifacts; repo-wide glob for `*ms01-scripts-inventory*` returns only harness files: tangent md, `coo/tmp/{body,exec.log,verdict.txt,scoped.txt}`, `coo/live/*`).
+2. **Completeness block — FAIL.** No file exists to contain it.
+3. **Executor Outcome block — FAIL.** Tangent file ends at the cycle-1 verdict (130 lines total); the only post-verdict change is the `run_started:` line the loop itself appended at claim time (verified in commit `b1966b9` diff), not an executor Outcome block.
+4. **Mutation guard — PASS.** Independent recount: 65 scripts (46 `.ps1` + 19 `.sh`) + 7 PNGs under `C:\Users\lkmot\factory-context\code\`, newest script mtime 2026-07-30 20:17:55 (era pattern intact). `git status --porcelain` contains zero `ms01-*` entries; `git log --since 2026-09-05 21:00 -- code/ms01*` is empty. escalate_if mutation trigger NOT met.
+
+**What happened in the reloop cycle.** The cycle-1 root cause (missing `--auto` on executor launch) **is fixed**: both `coo-loop-v3.sh` (lines 114–122, `EXEC_AUTO=${COO_EXECUTE_AUTO:-medium}`) and `coo-loop-v4.sh` (lines 139–147) now pass `--auto medium`, and the `session_id` grep is corrected (v3:125, v4:150). The reloop executor was claimed at 22:28:07 (commit `b1966b9`) and ran for **exactly 20 minutes 1 second** before the loop logged "EXECUTOR exited nonzero" at 22:48:08, matching `run_droid`'s hard stage timeout (`COO_STAGE_TIMEOUT:-1200` = 1200s) to the second. It was killed mid-run: `execute.live.log` is 0 bytes, `tmp\...\exec.log` still holds only the cycle-1 permission-gate JSON (mtime 21:29:17), and no session id was persisted. Zero inventory work survived.
+
+**Root cause of cycle 2** is a new environmental/harness failure, not a plan error: a 65-script batch-read, classify, and write task does not fit the 1200s execute-stage timeout. The contract itself remains sound (all scope-time pointers re-verified last cycle; nothing changed on disk since).
+
+**Verdict rule application.** RELOOP requires first-failure-of-contract; the single reloop was already spent on cycle 1. The rules are explicit that a SECOND failure of any kind — "an environmental failure after a reloop counts" — mandates RESCOPE. Two of 3 budget cycles are consumed; the fresh contract should carry this same done-when (do not rewrite the goal) and should direct the loop to allocate a longer execute-stage budget for it.
+
+**To operator (lkmot):** raise `COO_STAGE_TIMEOUT` (e.g. 3600s) for execute stages of inventory-class tangents, or set it per-tangent; keep `--auto medium`. The same 1200s cap likely contributed to the concurrent `strategic-outcomes-verify` and `spark-csv-export` assess failures visible in `coo-loop.log`.
+
+=== VERDICT: RESCOPE === Contract sound but second environmental harness failure: reloop executor ran exactly the 1200s stage timeout (claim commit b1966b9 22:28:07, "EXECUTOR exited nonzero" 22:48:08, 0-byte execute.live.log) producing no artifacts; done-when 1/4 with mutation guard clean (65 scripts recounted, zero ms01-* in git status/log), so fresh contract with same done-when plus a longer execute-stage budget.

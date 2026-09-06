@@ -60,10 +60,14 @@ run_droid() {
   local suffix="$1"; shift
   local id; id=$(basename "$f" .md)
   local to="${COO_STAGE_TIMEOUT:-1200}"
+  # Native Factory UI surfacing: every pipeline session gets tags + a log
+  # group, so the app's session list groups them (search tag "coo" or
+  # tangent:<id> — the "folder in Factory UI", no custom UI required).
+  local TAGS=(--tag coo --tag "tangent:$id" --tag "stage:$suffix" --log-group-id "coo/$id")
   if [ "$COO_LIVE" = "1" ]; then
-    timeout "$to" droid "$@" 2>&1 | tee "$LIVE_DIR/$id.$suffix.live.log"
+    timeout "$to" droid "${TAGS[@]}" "$@" 2>&1 | tee "$LIVE_DIR/$id.$suffix.live.log"
   else
-    timeout "$to" droid "$@"
+    timeout "$to" droid "${TAGS[@]}" "$@"
   fi
 }
 
@@ -136,15 +140,19 @@ do_execute() {
   sed -i 's/^status:.*/status: running/' "$f"
   echo "run_started: $(date -Iseconds)" >> "$f"; commit_f "claim-execute"
   local rc=0
+  # executor needs explicit --auto or it exits num_turns:0 at the permission gate
+  # (2026-09-06: two FM23 verify cycles died on "insufficient permission")
+  local EXEC_AUTO="${COO_EXECUTE_AUTO:-medium}"
   if [ -n "$sid" ] && [ "${relooped:-0}" -gt 0 ]; then
     # RELOOP: resume the SAME executor session with assessor feedback
     { echo "RELOOP continuation for this tangent. Assessor said RELOOP; address the feedback, stay inside the contract, then append an updated Outcome block."; echo ""; echo "=== ASSESSOR FEEDBACK ==="; grep -A2 '## Assessor verdict' "$f"; } > coo/tmp/"$id".cont.md
-    run_droid execute exec -o json -s "$sid" -f coo/tmp/"$id".cont.md >> coo/tmp/"$id".exec.log 2>&1 || rc=$?
+    run_droid execute exec -o json --auto "$EXEC_AUTO" -s "$sid" -f coo/tmp/"$id".cont.md >> coo/tmp/"$id".exec.log 2>&1 || rc=$?
   else
-    run_droid execute exec -o json -f "$f" >> coo/tmp/"$id".exec.log 2>&1 || rc=$?
+    run_droid execute exec -o json --auto "$EXEC_AUTO" -f "$f" >> coo/tmp/"$id".exec.log 2>&1 || rc=$?
   fi
   # persist session id for future continuity
-  local newsid; newsid=$(grep -o '"sessionId"[[:space:]]*:[[:space:]]*"[^"]*"' coo/tmp/"$id".exec.log 2>/dev/null | head -1 | sed 's/.*:\s*"//;s/"$//')
+  local newsid; newsid=$(grep -o '"session_id"[[:space:]]*:[[:space:]]*"[^"]*"' coo/tmp/"$id".exec.log 2>/dev/null | head -1 | sed 's/.*:\s*"//;s/"$//')
+  [ -z "$newsid" ] && newsid=$(grep -o '"sessionId"[[:space:]]*:[[:space:]]*"[^"]*"' coo/tmp/"$id".exec.log 2>/dev/null | head -1 | sed 's/.*:\s*"//;s/"$//')
   if [ -n "$newsid" ]; then
     sed -i '/^executor_session:/d' "$f"
     sed -i "0,/^status:/s//status:/\nexecutor_session: $newsid/" "$f"

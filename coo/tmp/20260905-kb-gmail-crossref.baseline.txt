@@ -1,0 +1,41 @@
+﻿=== BASELINE 2026-09-06T02:52:03Z ===
+### kb-query.py capability "gmail"
+ACTION                              PRIMARY PATH                                                           LAT      CATEGORY
+----------------------------------------------------------------------------------------------------------------------------------
+Send email                          Resend REST API (RESEND_API_KEY, Doppler auth-api/prd)                 ~1s      communication
+Gmail read/search (BOTH inboxes)    Composio proxy via smithery composio connection: tools.execute.proxy   ~2s      communication
+### kb-query.py credential "gmail"
+No credentials matching 'gmail'
+### kb-query.py credential "composio"
+WHAT                           DOPPLER PROJECT      CONFIG     KEY NAME
+--------------------------------------------------------------------------------
+Composio API (OAuth custody)   auth-api             prd        COMPOSIO_API_KEY
+### kb-query.py all "gmail"
+=== Capabilities ===
+
+ACTION                              PRIMARY PATH                                                           LAT      CATEGORY
+----------------------------------------------------------------------------------------------------------------------------------
+Send email                          Resend REST API (RESEND_API_KEY, Doppler auth-api/prd)                 ~1s      communication
+Gmail read/search (BOTH inboxes)    Composio proxy via smithery composio connection: tools.execute.proxy   ~2s      communication
+
+=== Services ===
+
+No services matching 'gmail'
+
+=== Credentials ===
+
+No credentials matching 'gmail'
+### raw kb_credentials rows
+('SSH key (ms01)', 'auth-ssh', 'prd', 'MS01_SSH_PRIVATE_KEY')
+('SSH key (Legion)', 'auth-ssh', 'prd', 'LEGION_SSH_PRIVATE_KEY')
+('GitHub PAT', 'auth-sso', 'prd', 'GITHUB_PAT')
+('Bitwarden master', 'auth-api', 'prd', 'BITWARDEN_MASTER_PASS')
+('Perplexity API', 'auth-api', 'prd', 'PERPLEXITY_API_KEY')
+('Tavily API', 'auth-api', 'prd', 'TAVILY_API_KEY')
+('Factory API', 'auth-sso', 'prd', 'FACTORY_API_KEY')
+('Anthropic API', 'auth-api', 'prd', 'ANTHROPIC_API_KEY')
+('Prospeo API', 'auth-api', 'prd', 'PROSPEO_API')
+('Apollo API', 'auth-api', 'prd', 'APOLLO_API_KEY')
+('Composio API (OAuth custody)', 'auth-api', 'prd', 'COMPOSIO_API_KEY')
+('Resend API', 'auth-api', 'prd', 'RESEND_API_KEY')
+('USPTO Patent/Open Data Portal API', 'auth-api', 'prd', 'USPTO_API')

@@ -2,16 +2,16 @@
 id: 20260905-ms01-scripts-inventory
 status: scoped
 priority: low
-budget_cycles: 3
-escalate_if: 1 failed cycle OR any non-inventory mutation of code/ ms01-* files
-origin: project-ledger proposed step (infrastructure:ms01-scripts-inventory)
+budget_cycles: 2
+escalate_if: 1 failed cycle OR any non-inventory mutation of code/ ms01-* files OR execute stage hits wall timeout with zero inventory rows written
+origin: project-ledger proposed step (infrastructure:ms01-scripts-inventory); RESCOPE after cycle2 1200s timeout (b1966b9→49f16fc)
 scoped_by: coo-scoper
 scoped_at: 2026-09-05
 ---
 # Inventory ms01-* scripts; map to workflows or mark archive-candidate
 
 ## Why
-Infrastructure tier noise reduction. Flat `C:\Users\lkmot\factory-context\code\` holds **65** `ms01-*.{ps1,sh}` scripts (plus 7 screenshot PNGs) from the July 2026 Docker-Desktop→WSL docker-ce recovery and Hyper-V/ISO experiments. ms01 is now native Proxmox (decision 2026-08-09); live ops knowledge lives in `workflows.json` Proxmox templates + postmortems. Every session still pays listing/context tax for this sprawl. This inventory is the reversible classification feed for a later operator-approved cull (Minimalist Operations). No revenue path is unblocked by the inventory itself; it reduces infra cognitive load and de-risks accidental reuse of dead Hyper-V paths.
+Infrastructure tier noise reduction. Flat `C:\Users\lkmot\factory-context\code\` holds **65** `ms01-*.{ps1,sh}` scripts (plus 7 screenshot PNGs) from the July 2026 Docker-Desktop→WSL docker-ce recovery and Hyper-V/ISO experiments. ms01 is now native Proxmox (decision 2026-08-09); live ops knowledge lives in workflows/postmortems. This inventory is the reversible classification feed for a later operator-approved cull (Minimalist Operations). No revenue path is unblocked by the inventory itself; it reduces infra cognitive load and de-risks accidental reuse of dead Hyper-V paths.
 
 ## Done when
 - [ ] File exists: `C:\Users\lkmot\factory-context\code\fleet-triage\coo\outcomes\ms01-scripts-inventory.md` containing:
@@ -21,10 +21,10 @@ Infrastructure tier noise reduction. Flat `C:\Users\lkmot\factory-context\code\`
   - Explicit non-script note for the 7 `ms01-*.png` (evidence artifacts, not scripts; "ignore-as-script", no keep/archive verdict required)
   - Summary counts: total scripts, keep, archive-candidate, unknown, and counts by era
   - "Recommended follow-on tangents" section listing cull packages (names only; no deletion)
-- [ ] Same outcome file includes a **Completeness check** block proving coverage, e.g. output of:
-  `(Get-ChildItem 'C:\Users\lkmot\factory-context\code' -File | ? Name -match '^ms01.*\.(ps1|sh)$').Count`
-  equals rows in the inventory (or documents any intentional exclusions with reason)
-- [ ] Per executor addendum, append to `tangents/20260905-ms01-scripts-inventory.md` an Outcome block (status: success/partial/failed, artifacts list, 2-4 line summary) whose summary counts match the inventory md: `keep=N archive-candidate=N unknown=N total=65` (or actual recount)
+  - **Completeness check** block proving coverage, e.g. output of
+    `(Get-ChildItem 'C:\Users\lkmot\factory-context\code' -File | ? Name -match '^ms01.*\.(ps1|sh)$').Count`
+    equals inventory row count (or documents intentional exclusions with reason)
+- [ ] Append to `tangents/20260905-ms01-scripts-inventory.md` an Outcome block (status: success/partial/failed, artifacts list, 2-4 line summary) whose summary counts match the inventory md: `keep=N archive-candidate=N unknown=N total=<recount>`
 - [ ] Mutation guard proven: git status/diff shows **no** moves/renames/deletes/edits of any `ms01-*` file under `code\` (inventory-only). Acceptable writes: the new outcomes markdown + tangent Outcome block (+ COO live/tmp logs)
 
 ## Out of scope
@@ -32,63 +32,54 @@ Infrastructure tier noise reduction. Flat `C:\Users\lkmot\factory-context\code\`
 - Any SSH/login or change on ms01 (192.168.1.120): no service restarts, package installs, Proxmox API calls, Docker commands, scheduled-task edits
 - Rewriting scripts to match Proxmox; "keep" means "still potentially referenced / document-worthy," not "run it"
 - Editing `workflows.json` (may **recommend** workflow ids only)
+- Editing `coo-loop-v3.sh` / `coo-loop-v4.sh` or other harness files to change timeouts (document required env only; operator/loop sets `COO_STAGE_TIMEOUT`)
 - Classifying non-flat-dir trees as primary inventory set (`code\ms01-ider\` tools are context for mapping only; optional appendix at most)
 - PNG/binary cleanup
-- Resolving the open infra blocker `offhost-backup` (single-disk risk); inventory may flag `ms01-backup.sh` as keep-or-unknown but must not implement storage changes
-- Hard fences (never cross; end at a recommendation instead): production deploys, DNS/network changes, data deletion, mass email, and any action requiring explicit operator approval under safety rules
+- Resolving the open infra blocker `offhost-backup`; may flag `ms01-backup.sh` keep/unknown but must not implement storage changes
+- Hard fences: production deploys, DNS/network changes, data deletion, mass email, and any action requiring explicit operator approval under safety rules
 
 ## Context (verified during scoping)
-**Machine:** scoped from Legion (`hostname` check via session context; all paths local to Legion, no ms01 access needed).
+**Machine:** Legion local paths only.
 
-**Ledger source**
-- `C:\Users\lkmot\.factory\knowledge\project-ledger.json` → project `infrastructure` (tier: infra, status: active)
+**Failure history (must not repeat without new angle)**
+- Cycle 1: launch without `--auto` → fixed (`EXEC_AUTO` default medium in coo-loop v3/v4).
+- Cycle 2: hard stage timeout 1200s; `coo/live/20260905-ms01-scripts-inventory.execute.live.log` 0 bytes; `coo/tmp/...exec.log` still only cycle-1 permission JSON; no inventory rows. Reloop already used → this RESCOPE.
+- **Different this time:** (1) `--auto medium` present; (2) contract requires execute-stage budget `COO_STAGE_TIMEOUT>=2400` (prefer 3600) before bulk work; (3) approach is batch-first (one listing cmd + one bulk header extract + one write) to minimize turns so work completes inside one execute stage.
+
+**Ledger**
+- `~\.factory\knowledge\project-ledger.json` project `infrastructure` (tier infra, active)
 - Step `infrastructure:ms01-scripts-inventory`: status `proposed`, autonomy `queue`, reversible true
-- Ledger verify clause: "Each ms01-* script tagged keep/archive; archive list produced for operator review."
-- Ledger evidence pointers: `code/ 50+ ms01-* scripts`, `workflows.json 3 Proxmox entries` (verified below)
-- Related blocker `ms01-scripts-sprawl` since 2026-07-30; adjacent blocker `offhost-backup` since 2026-07-15 (out of scope)
+- Blockers: `ms01-scripts-sprawl` (since 2026-07-30), `offhost-backup` (OOS)
 
-**Precedent check**
-- `tangents.json` (74 completed, 0 pending): **no** prior ms01-scripts-inventory or script-sprawl attempt. First pass; scorable.
-- `ledger-outcomes.jsonl`: step appears only inside finish-deepen top-move payloads, never completed.
-- Full-session search: no prior inventory artifact.
-- COO state: `coo/live/20260905-ms01-scripts-inventory.scope.live.log` empty at scope time; this is the first scope attempt (no retry marker).
+**Filesystem (recount 2026-09-05 rescope)**
+- 65 scripts: 46 `.ps1` (mtime cluster 2026-07-30), 19 `.sh` (2026-07-15); 7 `ms01-*.png`
+- Outcome path missing; pattern confirmed by existing `coo/outcomes/20260905-*-*.md`
+- Sample keep-likely: `ms01-backup.sh`, `ms01-container-guard.sh`, `ms01-install-ops.sh`, `ms01-validate-ops.sh`
+- Sample archive-likely: Hyper-V/ISO/WinPE/`*-v2/-v3` family (`ms01-rebuild*.ps1`, `ms01-start.ps1`, `ms01-schedule-setup.ps1`, bootwim/iso builders, etc.)
 
-**Filesystem ground truth (`C:\Users\lkmot\factory-context\code\`, counted 2026-09-05)**
-- 72 `ms01*` files: **46 `.ps1` + 19 `.sh` = 65 scripts**; **7 `.png`** (KVM/IDER evidence screenshots)
-- Script mtimes cluster into two eras: **2026-07-15** (`.sh`: docker-WSL recovery/ops) and **2026-07-30** (`.ps1`: Hyper-V daemon-base/ISO/WinPE experiments). Nothing newer in the flat dir.
-- Still-meaningful ops scripts (headers read): `ms01-backup.sh` (nightly docker volume backup → `/mnt/c/ms01-backups`, 7-day retain), `ms01-container-guard.sh` (Telegram page on container count < 12, debounced), `ms01-install-ops.sh` (installs units into WSL), `ms01-validate-ops.sh` (one-shot Telegram + backup validation)
-- Clearly historical Hyper-V/setup scripts: `ms01-rebuild.ps1`, `ms01-rebuild-v3.ps1`, `ms01-start.ps1`, `ms01-schedule-setup.ps1` (vmconnect auto-clicker), `ms01-autounattend.ps1`, ISO/bootwim family, many `*-v2/-v3` duplicates
-- Related but not primary set: `code\ms01-ider\` (direct-sol.js, persistent-ider.js, start/stop-persistent-ider.ps1, recycler_report.json)
-- Postmortems: `~\.factory\knowledge\postmortems\ms01-proxmox-install-20260809.json`, `ms01-guest-platform-20260809.json`, `ms01-linux-browser-runner-20260809.json`
+**Workflows / decisions (map targets)**
+- Prefer exact ids from `~\.factory\knowledge\workflows.json` when purpose overlaps; else `mapped_workflow: none`
+- Decisions: 2026-07-15 docker-ce WSL recovery + backup/guard; 2026-08-09 Proxmox VE 9 supersedes Hyper-V/ISO chain; Tailscale removed 2026-08
+- Postmortems (notes only, not workflow ids): `~\.factory\knowledge\postmortems\ms01-proxmox-install-20260809.json`, `ms01-guest-platform-20260809.json`, `ms01-linux-browser-runner-20260809.json`
+- Related dir (optional appendix only): `code\ms01-ider\`
 
-**Workflows to map against** (`~\.factory\knowledge\workflows.json`; ledger's "3 Proxmox entries")
-1. `workflow-headless-proxmox-rescue-bootstrap` (evidence: `code\ms01-ider\recycler_report.json`, verified 2026-08-09)
-2. `workflow-proxmox-linux-first-guest-platform` (verified 2026-08-09)
-3. `workflow-linux-browser-runner-canary` (VM 100 Docker runner, verified 2026-08-09)
-- Note: the 2026-07-15 backup/guard/install-ops scripts predate these Proxmox templates; their authority comes from decisions.jsonl instead. Map to `none` + strong keep evidence, or optionally propose a new workflow id (recommendation only).
-
-**Decisions shaping verdicts** (`~\.factory\knowledge\decisions.jsonl`)
-- 2026-07-15: Docker Desktop → headless docker-ce in WSL2 (ms01admin), mirrored networking, boot keepalive; nightly backups + 5-min container guard added
-- 2026-07-15: Legion offsite pull added critical-bundle step to `ms01-backup.sh`
-- 2026-08-09: Proxmox VE 9 installed via debootstrap rescue path (supersedes entire Hyper-V daemon-base / WinPE / ISO chain, decisions 2026-08-09 + `ms01-native-linux-migration-plan.md`)
-- 2026-08: Tailscale removed (LAN + RustDesk) — any script assuming Tailscale paths is stale
-
-**KB services on ms01 (untouched):** Grafana :3000, OTEL :4318, n8n :5678, AMT/KVM :16993, Neo4j+Sourcebot, motto-mail-ops. n8n/windmill already deprecation-flagged; their cull is not this tangent.
-
-**Outcome path convention:** COO outcomes live in `fleet-triage\coo\outcomes\` (existing campaign/gmail artifacts confirm pattern).
+**Never execute any ms01-* script.** Read only. Redact tokens from purpose lines (e.g. Telegram env refs).
 
 ## Approach sketch
-1. Recount scripts with one PowerShell inventory command (Name, Length, LastWriteTime, Extension); freeze that list as the completeness baseline.
-2. Batch-read first ~20-40 lines of each script (or grep for headers: `#`, `SYNOPSIS`, `Start-VM`, `docker`, `proxmox`, `qm `, `Telegram`, `backup`) to derive one-line purpose. Never execute scripts.
-3. Classify `era`: `docker-wsl-recovery` (docker/WSL/volumes/backup/guard), `hyperv-iso` (Hyper-V, VHDX, WinPE, autounattend, vmconnect, ISO builders), `proxmox-adjacent` (clear PVE/AMT IDER tie-in, still documentation-useful), else `unknown`.
-4. Map `mapped_workflow`: exact workflows.json template ids where purpose overlaps; else `none`. Optionally note postmortem paths in notes (postmortem id ≠ workflow id).
-5. Verdict heuristic (conservative): `keep` = cited by decisions/workflows/postmortems, or uniquely documents live-adjacent ops (backup/guard/install-ops), or sole readable record of a recovered procedure. `archive-candidate` = superseded Hyper-V/ISO one-offs, `*-v2/-v3` duplicates, dead experiment clickers (expected majority). `unknown` = purpose not safely determinable from static read; prefer unknown over false keep.
-6. Write `coo/outcomes/ms01-scripts-inventory.md`: summary counts first, then full per-script listing, then recommended follow-on cull tangent titles only (e.g. "operator-approved archive of hyperv-iso ms01-*.ps1 scripts").
-7. Run the completeness count check; verify git status shows no `ms01-*` mutations outside the new markdown.
-8. Append the executor Outcome block to the tangent file; stop. No cull, no remote validation, no workflow edits.
+1. **Preflight budget:** Confirm execute stage can run ≥2400s (`$env:COO_STAGE_TIMEOUT` or parent). If still effectively 1200 and cannot be raised from this session, write partial Outcome noting harness budget blocker and stop (do not half-classify 65 files across doomed stage). Prefer operator/loop export `COO_STAGE_TIMEOUT=3600` before claim.
+2. **One freeze list:** single PowerShell inventory of Name, FullName, Length, LastWriteTime, Extension for `^ms01.*\.(ps1|sh)$`; record count as completeness baseline. Separately list 7 PNGs for the non-script note.
+3. **Bulk purpose extract (not 65 tool turns):** one command that dumps first ~30 lines (or SYNOPSIS/header comments) of every script into a single temp text under `coo/tmp/` (allowed write), then classify offline from that blob. Never run the scripts.
+4. **Classify fast:**
+   - `era`: docker-wsl-recovery | hyperv-iso | proxmox-adjacent | unknown
+   - `mapped_workflow`: workflows.json id or `none`
+   - `verdict`: conservative — `keep` if cited by decisions/postmortems or uniquely documents live-adjacent ops (backup/guard/install/validate); `archive-candidate` for superseded Hyper-V/ISO one-offs and `*-v2/-v3` duplicates (expected majority); `unknown` if static read is insufficient (prefer unknown over false keep)
+5. **Write once:** `coo/outcomes/ms01-scripts-inventory.md` with summary counts first, full per-script table/sections, PNG note, recommended follow-on cull tangent titles only, Completeness check block.
+6. **Prove guards:** completeness count matches rows; `git status` shows no `ms01-*` mutations under `code\` (outside inventory md / tangent Outcome).
+7. **Append Outcome block** to this tangent file with matching keep/archive-candidate/unknown/total counts; stop.
 
 ## Risk / notes for executor
-- Low risk: read-only sweep + one new markdown + tangent Outcome block.
-- Redact any embedded tokens from purpose lines (`ms01_validate-ops.sh` references TELEGRAM_BOT_TOKEN from env; `ms01_recon_pipeline.sh` mounts backup disks read-only — read the file only, never run it).
-- If execute-time count ≠ 65, document the drift and inventory the actual set; do not fail solely on the scope-time number.
+- Low risk if inventory-only. Highest residual risk is stage timeout — batch I/O and single-file write.
+- If recount ≠ 65, inventory the actual set and state the drift; do not fail solely on scope-time number.
+- Do not spend turns "improving" scripts or opening ms01 SSH.
+- Acceptable artifacts only: `coo/outcomes/ms01-scripts-inventory.md`, tangent Outcome block, optional `coo/tmp/*` scratch for bulk headers.
 

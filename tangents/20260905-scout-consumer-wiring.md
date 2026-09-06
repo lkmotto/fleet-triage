@@ -1,6 +1,6 @@
----
+﻿---
 id: 20260905-scout-consumer-wiring
-status: parked
+status: queued
 priority: medium
 budget_cycles: 3
 escalate_if: 1 failed cycle
@@ -10,7 +10,7 @@ origin: project-ledger proposed step (memory-knowledge:scout-consumer)
 # Wire scout.candidate events into ledger blockers refresh
 
 ## Why
-scout.candidate events die in the orphan event stream — opportunities never surface
+scout.candidate events die in the orphan event stream â€” opportunities never surface
 as ledger blockers. Closing this makes the strategic layer's signal actually consumable.
 
 ## Done when

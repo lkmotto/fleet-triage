@@ -1,0 +1,39 @@
+All verification is complete. Here is the assessment.
+
+## Assessor verdict — `20260905-kb-gmail-crossref`
+
+### Done-when verification (all checked against live reality, not executor claims)
+
+| # | Item | Result | Evidence |
+|---|------|--------|----------|
+| 1 | `credential "gmail"` → Composio custody row | **PASS** | Live re-run this session: `Composio API (OAuth custody: Gmail x2, Sheets, Docs, LinkedIn)` / `auth-api` / `prd` / `COMPOSIO_API_KEY` |
+| 2 | `capability "gmail"` → Composio proxy path intact | **PASS** | Live re-run: `Gmail read/search (BOTH inboxes)` → `Composio proxy via smithery composio connection: tools.execute.proxy` (not Resend) |
+| 3 | Fences unchanged | **PASS** | `capability "email"` still Resend send path (+Tomba sales row, same as baseline transcript); `credential "resend"` → `RESEND_API_KEY` only |
+| 4 | Proof artifact present/current | **PASS** | `coo/outcomes/20260905-kb-gmail-crossref-proof.md` (2026-09-06): baseline+post transcripts, exact SQL, backup path, sha256 |
+| 5 | Backup exists, exactly one intentional row change, no secret values | **PASS** | Backup `memory.db.bak-20260906T025300Z` exists (14,643,200 bytes); my sha256 recompute matches the proof's `993E64C3…EAF` exactly |
+
+### DB-level proof (stronger than transcript matching)
+I diffed the backup against the live `memory.db` across all five `kb_*` tables, read-only:
+- `kb_credentials`: exactly one row differs — old label `Composio API (OAuth custody)` → new label `Composio API (OAuth custody: Gmail x2, Sheets, Docs, LinkedIn)`; `doppler_project`/`doppler_config`/`key_name` unchanged. Secret values were never in this table.
+- `kb_capabilities` (20 rows), `kb_services` (15), `kb_deprecations` (16), `kb_error_patterns` (10): **byte-identical** to backup.
+
+The USPTO row that appeared "extra" vs my first baseline read was a truncation artifact on my side — line 41 of the baseline transcript confirms it pre-dated the change. No out-of-scope inserts.
+
+### Scope adherence
+- `kb-query.py` untouched (mtime 2026-08-07, pre-dates the tangent). Code fence held.
+- This tangent's committed footprint (`ebe3019`) is 4 harness bookkeeping files only. Working-tree changes belong to sibling tangents sharing the repo and the COO loop itself; nothing from this tangent crossed the fence.
+- No credential values, Doppler rotation, mailbox work, or `kb_services` reorg (correctly left as an out-of-scope observation in the proof).
+
+### Budget and escalation
+- budget_cycles: 2. The actual KB work completed pre-contract during the scoping window; the formal executor run (22:02:30) aborted at `num_turns: 0` on a harness permission gate ("Re-run with --auto medium") — environmental, first failure, and performed zero mutations. The contract's own Approach sketch step 2 prescribes exactly the verify-and-close path taken when live queries already pass.
+- `escalate_if`: **not met** — live gmail credential query resolves; no secret values or non-`kb_credentials` tables touched.
+
+### Notes
+- `verify-done.py --task-type config` fails on this target for inapplicable reasons (it tries to read the binary SQLite file as UTF-8 and looks for a docker service). Substantive verification was performed directly instead; do not count this as a verification failure of the tangent.
+- Assessor check scripts left under `coo/tmp/assess-20260905-kb-gmail-crossref-*.py` for audit trail; all read-only.
+- Governance record emitted to `agent-governance.jsonl`.
+
+Gap observed: the executor harness permission gate can kill a run before turn 0 and leave no outcome block, while the real work happened outside the formal execute cycle — cycle accounting for continuity runs is ambiguous in the current loop.
+Next improvement: add a pre-flight permission check (or `--auto medium` default) to the COO executor launch so execute cycles don't burn their wall-clock quota on harness gates.
+
+=== VERDICT: DONE === Done-when fully met and independently verified — live queries pass, DB diff proves exactly one label-only kb_credentials change vs hash-matched backup, all fences intact (coo/outcomes/20260905-kb-gmail-crossref-proof.md)

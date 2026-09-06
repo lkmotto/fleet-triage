@@ -1,0 +1,16 @@
+All work is complete and verified. Summary of what was done:
+
+**Verdict:** The `:9800` recovery tangent is unscopable. Grounding showed the stub's premise ("needs Docker deploy") is stale: `motto-sales-engine` kill-list K1 (2026-09-01) retired the `motto-sdr-agent` stack in favor of the engine, the GitHub repo is archived (2026-08-19), the workspace copy was archived 2026-09-01, and ms01 (192.168.1.120) is offline for hardware repair (ping/SSH/:9800/:9300/:5678 all unreachable). No prior recovery attempts exist; the precedent is the kill trail itself, so no new angle.
+
+**Implemented per approved plan:**
+- Spawned replacement tangent `tangents/20260906-sales-outreach-ledger-hygiene.md` (committed `a7b9dcc` on `feature/coo-loop`, no push; the loop owns pushes): closes ledger step `sales-outreach:sdr-9800` and registry `sales_emails` as retired per K1, with JSON-parse and diff checks as done-when.
+- Appended decision record to `~/.factory/knowledge/decisions.jsonl` (verified: 51 lines parse).
+- Appended governance record to `agent-governance.jsonl` (verified: 470 lines parse).
+- UNSCOPABLE evidence with paths written to `coo/tmp/20260905-sdr-9800-recovery.scoped.txt`; the live COO loop will park `20260905-sdr-9800-recovery` with that reason on its next read.
+- Verification: `verify-done.py` research check passed (2/2). No file edits to engine or ms01; nothing sent; nothing deployed.
+
+Gap observed: kill-list K1's stack retirement never flowed back into `project-ledger.json`/`workstream-registry.json`, so the COO dispatch layer kept treating a retired stack as recoverable.
+
+Next improvement: auto-sync kill-list executions into project-ledger/workstream-registry as part of the reconciliation feature, so retired-surface blockers close at kill time instead of surfacing as stubs.
+
+=== UNSCOPABLE: :9800 recovery contradicts motto-sales-engine kill-list K1 (2026-09-01) archive disposition — stack superseded by motto-sales-engine (GitHub repo archived 2026-08-19) and ms01 (192.168.1.120) is offline for repair; no new recovery angle ===
