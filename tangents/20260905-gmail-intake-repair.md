@@ -1,6 +1,6 @@
 ---
 id: 20260905-gmail-intake-repair
-status: draft
+status: queued
 priority: high
 budget_cycles: 4
 escalate_if: 2 failed cycles
